@@ -1,0 +1,38 @@
+# Не коммитим переменные окружения и ключи
+.env
+.env.*
+
+# Кеши и временные файлы Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Виртуальные окружения
+.venv/
+venv/
+
+# Системные файлы IDE
+.vscode/
+.idea/
+*.swp
+
+# Docker артефакты
+*.log
+*.pid
+*.db
+*.sock
+
+# Тома и build-файлы
+/data/
+logs/
+build/
+dist/
+*.egg-info/
+
+# Pytest и coverage
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/

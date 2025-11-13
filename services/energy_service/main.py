@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from typing import Optional
+from routers import energy as energy_router
 
 from database import get_db, engine, ensure_schema
 from models import Base, EnergyRecord
@@ -46,6 +47,8 @@ async def health():
 async def ready():
     return {"status": "ready"}
 
+# Подключаем energy роутер
+app.include_router(energy_router.router)
 
 @app.get("/", include_in_schema=False)
 async def root():

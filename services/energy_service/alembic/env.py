@@ -1,19 +1,31 @@
-#env.py
 import os
+import sys
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool, text
 from alembic import context
 
-# --- Импортируем наши объекты ---
-from database import Base, ENERGY_SCHEMA, ensure_schema
-from models import *  # noqa: F403, импорт моделей чтобы Alembic видел metadata
-from config import settings
 
-# --- Alembic Config объект ---
+# ============================================================
+#  Добавляем путь до корня микросервиса (/app), чтобы работали импорты
+# ============================================================
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # -> /app
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
+# ============================================================
+#  Импортируем внутренние модули сервиса
+# ============================================================
+from database import Base, ENERGY_SCHEMA  # noqa
+from models import *  # noqa: F403
+from config import settings  # noqa
+
+# ============================================================
+#  Конфигурация Alembic
+# ============================================================
 config = context.config
 
-# Если URL не прописан в alembic.ini — подставляем из окружения
+# Берём URL из окружения или из settings
 db_url = os.getenv("DATABASE_URL", settings.DATABASE_URL)
 if db_url:
     config.set_main_option("sqlalchemy.url", db_url)
@@ -22,11 +34,13 @@ if db_url:
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Указываем метаданные моделей (нужно для autogenerate)
+# Метаданные моделей
 target_metadata = Base.metadata
 
 
-# --- Миграции offline ---
+# ============================================================
+#  Offline-режим (генерация SQL без реального подключения)
+# ============================================================
 def run_migrations_offline() -> None:
     """Запуск миграций без подключения к БД (генерация SQL)."""
     url = config.get_main_option("sqlalchemy.url")
@@ -44,9 +58,11 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-# --- Миграции online ---
+# ============================================================
+#  Online-режим (обычная работа с подключением)
+# ============================================================
 def run_migrations_online() -> None:
-    """Запуск миграций с подключением к БД."""
+    """Запуск миграций с подключением к реальной базе данных."""
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
@@ -54,7 +70,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        # Убеждаемся, что схема существует
+        # Создаём схему, если не существует
         connection.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{ENERGY_SCHEMA}"'))
 
         context.configure(
@@ -69,7 +85,9 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
-# --- Точка входа ---
+# ============================================================
+#  Точка входа
+# ============================================================
 if context.is_offline_mode():
     run_migrations_offline()
 else:

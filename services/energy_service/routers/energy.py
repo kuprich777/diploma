@@ -4,12 +4,32 @@ from database import get_db
 from models import EnergyRecord
 from schemas import EnergyStatus, Outage
 from utils.logging import setup_logging
+from config import settings
 
 logger = setup_logging()
 
 # Создаём роутер для эндпойнтов микросервиса
 router = APIRouter(prefix="/api/v1/energy", tags=["energy"])
 
+@router.post("/init", tags=["energy"])
+async def init_energy_state(db: Session = Depends(get_db)):
+    """Инициализирует базовую запись состояния энергосистемы."""
+    record = db.query(EnergyRecord).order_by(EnergyRecord.id.desc()).first()
+    if record:
+        return {"message": "Already initialized"}
+
+    new_record = EnergyRecord(
+        production=settings.DEFAULT_PRODUCTION,
+        consumption=settings.DEFAULT_CONSUMPTION,
+        is_operational=True,
+    )
+    db.add(new_record)
+    db.commit()
+    return {
+        "message": "Initialized",
+        "production": new_record.production,
+        "consumption": new_record.consumption,
+    }
 
 # --- Основные эндпойнты ---
 @router.get("/status", response_model=EnergyStatus)

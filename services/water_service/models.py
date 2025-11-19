@@ -1,12 +1,30 @@
-# water_service/models.py
-from sqlalchemy import Column, Integer, String, Float, Boolean
-from .database import Base
+from sqlalchemy import String, Float, Integer, Boolean
+from sqlalchemy.orm import Mapped, mapped_column
+
+from database import Base, WATER_SCHEMA
+
 
 class WaterStatus(Base):
-    __tablename__ = "water_status"
+    """
+    Снимок состояния водного сектора.
+    Хранит текущее производство, потребление воды и флаги доступности.
+    """
+    __tablename__ = "status"
+    __table_args__ = {"schema": WATER_SCHEMA}
 
-    id = Column(Integer, primary_key=True, index=True)
-    water_level = Column(Float, nullable=False)  # Уровень воды
-    operational = Column(Boolean, default=True)  # Работоспособность системы
-    energy_dependent = Column(Boolean, default=True)  # Зависимость от энергетики
-    reason = Column(String, nullable=True)  # Причина сбоя, если есть
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+
+    # Производство воды (скважины, станции очистки)
+    supply: Mapped[float] = mapped_column(Float, nullable=False)
+
+    # Потребление воды (жилищно-коммунальные нужды, промышленность)
+    demand: Mapped[float] = mapped_column(Float, nullable=False)
+
+    # Флаг работоспособности сектора
+    operational: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Флаг зависимости от energy_service (водные станции требуют энергию)
+    energy_dependent: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Причина деградации или аварии, если есть
+    reason: Mapped[str | None] = mapped_column(String(255), nullable=True)

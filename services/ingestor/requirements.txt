@@ -6,6 +6,5 @@ pydantic
 pydantic-settings
 alembic
 prometheus-fastapi-instrumentator
-httpx
 loguru
 python-dotenv

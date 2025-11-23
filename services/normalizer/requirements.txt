@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy>=2.0
+psycopg2-binary
+pydantic
+pydantic-settings
+alembic
+prometheus-fastapi-instrumentator
+httpx
+loguru
+python-dotenv

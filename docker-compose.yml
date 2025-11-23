@@ -1,13 +1,4 @@
-# Полный стенд  проекта:
-# - PostgreSQL
-# - energy_service
-# - water_service
-# - transport_service
-# - ingestor
-# - normalizer
-# - risk_engine
-# - scenario_simulator
-# - reporting
+# Полный стенд проекта DIPLOMA
 
 services:
   # ==========================
@@ -21,7 +12,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-diploma}
     ports:
-      - "5433:5432"  # наружу на 5433, внутри сети на 5432
+      - "5433:5432"   # наружу на 5433
     volumes:
       - dbdata:/var/lib/postgresql/data
     healthcheck:
@@ -38,7 +29,7 @@ services:
     build: ./services/energy_service
     container_name: energy_service
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
@@ -55,8 +46,8 @@ services:
     build: ./services/water_service
     container_name: water_service
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
-      ENERGY_SERVICE_URL: ${ENERGY_SERVICE_URL:-http://energy_service:8000}
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
+      ENERGY_SERVICE_URL: http://energy_service:8000/api/v1/energy
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
@@ -75,9 +66,9 @@ services:
     build: ./services/transport_service
     container_name: transport_service
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
-      ENERGY_SERVICE_URL: ${ENERGY_SERVICE_URL:-http://energy_service:8000}
-      WATER_SERVICE_URL: ${WATER_SERVICE_URL:-http://water_service:8000}
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
+      ENERGY_SERVICE_URL: http://energy_service:8000/api/v1/energy
+      WATER_SERVICE_URL: http://water_service:8000/api/v1/water
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
@@ -98,7 +89,7 @@ services:
     build: ./services/ingestor
     container_name: ingestor
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
@@ -113,7 +104,8 @@ services:
     build: ./services/normalizer
     container_name: normalizer
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
+      INGESTOR_URL: http://ingestor:8000/api/v1/ingestor
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
@@ -130,10 +122,10 @@ services:
     build: ./services/risk_engine
     container_name: risk_engine
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
-      ENERGY_SERVICE_URL: ${ENERGY_SERVICE_URL:-http://energy_service:8000}
-      WATER_SERVICE_URL: ${WATER_SERVICE_URL:-http://water_service:8000}
-      TRANSPORT_SERVICE_URL: ${TRANSPORT_SERVICE_URL:-http://transport_service:8000}
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
+      ENERGY_SERVICE_URL: http://energy_service:8000/api/v1/energy/status
+      WATER_SERVICE_URL: http://water_service:8000/api/v1/water/status
+      TRANSPORT_SERVICE_URL: http://transport_service:8000/api/v1/transport/status
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
@@ -147,9 +139,8 @@ services:
         condition: service_started
       normalizer:
         condition: service_started
-    # Если захочешь смотреть Swagger risk_engine — можно открыть порт:
-    # ports:
-    #   - "8004:8000"
+    ports:
+      - "8004:8000"
     restart: unless-stopped
 
   # ==========================
@@ -159,8 +150,33 @@ services:
     build: ./services/scenario_simulator
     container_name: scenario_simulator
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
-      RISK_ENGINE_URL: ${RISK_ENGINE_URL:-http://risk_engine:8000}
+      RISK_ENGINE_URL: http://risk_engine:8000/api/v1/risk
+      ENERGY_SERVICE_URL: http://energy_service:8000
+      WATER_SERVICE_URL: http://water_service:8000
+      TRANSPORT_SERVICE_URL: http://transport_service:8000
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENV: ${ENV:-dev}
+    depends_on:
+      risk_engine:
+        condition: service_started
+    ports:
+      - "8005:8000"
+    restart: unless-stopped
+
+  # ==========================
+  # REPORTING
+  # ==========================
+  reporting:
+    build: ./services/reporting
+    container_name: reporting
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
+      RISK_ENGINE_URL: http://risk_engine:8000/api/v1/risk
+      NORMALIZER_URL: http://normalizer:8000/api/v1/normalizer
+      ENERGY_SERVICE_URL: http://energy_service:8000/api/v1/energy
+      WATER_SERVICE_URL: http://water_service:8000/api/v1/water
+      TRANSPORT_SERVICE_URL: http://transport_service:8000/api/v1/transport
+      SIMULATOR_URL: http://scenario_simulator:8000/api/v1/simulator
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
@@ -168,30 +184,14 @@ services:
         condition: service_healthy
       risk_engine:
         condition: service_started
-    restart: unless-stopped
-
-  # ==========================
-  # REPORTING / API ДЛЯ ВИЗУАЛИЗАЦИИ
-  # ==========================
-  reporting:
-    build: ./services/reporting
-    container_name: reporting
-    environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
-      RISK_ENGINE_URL: ${RISK_ENGINE_URL:-http://risk_engine:8000}
-      SCENARIO_SIMULATOR_URL: ${SCENARIO_SIMULATOR_URL:-http://scenario_simulator:8000}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ENV: ${ENV:-dev}
-    depends_on:
-      db:
-        condition: service_healthy
-      risk_engine:
+      normalizer:
         condition: service_started
       scenario_simulator:
         condition: service_started
     ports:
       - "8010:8000"
     restart: unless-stopped
+
 
 volumes:
   dbdata:

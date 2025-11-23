@@ -1,4 +1,4 @@
-# services/ingestor/database.py
+# services/reporting/database.py
 
 import os
 from sqlalchemy import create_engine, text
@@ -10,8 +10,8 @@ DATABASE_URL = os.getenv(
     "postgresql://postgres:postgres@db:5432/diploma",
 )
 
-# Схема для сырых данных ingestor
-INGESTOR_SCHEMA = "ingestor"   # <-- ВАЖНО: эта константа теперь есть
+# Отдельная схема для репортинга
+REPORTING_SCHEMA = "reporting"
 
 # Движок SQLAlchemy
 engine = create_engine(
@@ -29,14 +29,16 @@ SessionLocal = sessionmaker(
 
 
 class Base(DeclarativeBase):
-    """Базовый класс моделей SQLAlchemy для ingestor."""
+    """Базовый класс моделей SQLAlchemy для reporting."""
     pass
 
 
 def ensure_schema() -> None:
-    """Создаёт схему ingestor, если она ещё не существует."""
+    """Создаёт схему reporting, если она ещё не существует."""
     with engine.begin() as conn:
-        conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{INGESTOR_SCHEMA}"'))
+        conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{REPORTING_SCHEMA}"'))
+        # при желании можно выставить search_path:
+        # conn.execute(text(f'SET search_path TO "{REPORTING_SCHEMA}", public'))
 
 
 def get_db():

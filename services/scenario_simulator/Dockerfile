@@ -15,8 +15,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
-ENV SERVICE_NAME=ingestor_service
+ENV SERVICE_NAME=scenario_simulator
 ENV PORT=8000
 
-CMD python -m alembic upgrade head && \
-    uvicorn main:app --host 0.0.0.0 --port ${PORT}
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT}

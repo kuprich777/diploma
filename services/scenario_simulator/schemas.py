@@ -1,20 +1,26 @@
-from datetime import datetime
 from pydantic import BaseModel, Field
-from typing import Any, Dict
 
 
-class RawEventIn(BaseModel):
-    """DTO для приёма сырого события от внешних источников или других сервисов."""
-    source: str = Field(description="Идентификатор источника данных (service, file, etc.)")
-    payload: Dict[str, Any] = Field(description="Произвольный JSON-пейлоад")
+class OutageScenario(BaseModel):
+    sector: str = Field(description="energy | water | transport")
+    duration: int = Field(default=10, description="Длительность сбоя в минутах")
 
 
-class RawEventOut(BaseModel):
-    """DTO для отдачи сохранённого события наружу (например, для отладки/репортинга)."""
-    id: int
-    source: str
-    payload: Dict[str, Any]
-    created_at: datetime
+class ScenarioResult(BaseModel):
+    before: float
+    after: float
+    delta: float
+    sector: str
 
-    class Config:
-        from_attributes = True  # Pydantic v2: аналог orm_mode=True
+
+class MonteCarloRequest(BaseModel):
+    sector: str
+    duration: int = 10
+    runs: int = 20
+
+
+class MonteCarloResult(BaseModel):
+    average_delta: float
+    min_delta: float
+    max_delta: float
+    samples: int

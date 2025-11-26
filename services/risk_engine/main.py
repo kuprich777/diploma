@@ -1,36 +1,55 @@
-from datetime import datetime
+# services/risk_engine/main.py
 
-from sqlalchemy import Integer, Float, DateTime, JSON
-from sqlalchemy.orm import Mapped, mapped_column
+from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
-from database import Base, RISK_SCHEMA
+from utils.logging import setup_logging
+from database import engine, ensure_schema
+from models import Base
+from config import settings
+from routers import risk as risk_router
 
 
-class RiskSnapshot(Base):
+# --- Логирование ---
+logger = setup_logging()
+
+# --- Приложение FastAPI ---
+app = FastAPI(
+    title=settings.SERVICE_NAME,
+    version=settings.VERSION,
+    description="Risk Engine — микросервис для расчёта рисков по секторам и интегрального риска",
+)
+
+# --- Метрики Prometheus ---
+Instrumentator().instrument(app).expose(app, include_in_schema=False)
+
+
+# --- События приложения ---
+@app.on_event("startup")
+def startup_event():
     """
-    Снимок оценок рисков по секторам инфраструктуры и интегрального риска.
-    Используется для хранения истории, анализа динамики и сценарного моделирования.
+    Создаёт схему и таблицы risk при запуске сервиса.
     """
-    __tablename__ = "risk_snapshots"
-    __table_args__ = {"schema": RISK_SCHEMA}
+    ensure_schema()
+    Base.metadata.create_all(bind=engine)
+    logger.info("⚙️ risk_engine started and schema ensured.")
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
-    # Временная метка расчёта
-    calculated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        index=True,
-    )
+# --- Health & readiness ---
+@app.get("/health", tags=["system"])
+async def health():
+    return {"status": "ok", "service": "risk_engine"}
 
-    # Оценки рисков по секторам (0..1 или 0..100 — выбираешь в исследовании)
-    energy_risk: Mapped[float] = mapped_column(Float, nullable=False)
-    water_risk: Mapped[float] = mapped_column(Float, nullable=False)
-    transport_risk: Mapped[float] = mapped_column(Float, nullable=False)
 
-    # Интегральный риск (с учётом весов ENERGY_WEIGHT, WATER_WEIGHT, TRANSPORT_WEIGHT)
-    total_risk: Mapped[float] = mapped_column(Float, nullable=False)
+@app.get("/ready", tags=["system"])
+async def ready():
+    return {"status": "ready"}
 
-    # Дополнительные данные — параметры расчёта, конфигурация весов, исходные статусы
-    meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+@app.get("/", include_in_schema=False)
+async def root():
+    return {"message": "Risk Engine is operational"}
+
+
+# --- Подключение роутов доменной логики ---
+app.include_router(risk_router.router)

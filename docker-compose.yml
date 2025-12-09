@@ -150,7 +150,7 @@ services:
     build: ./services/scenario_simulator
     container_name: scenario_simulator
     environment:
-      RISK_ENGINE_URL: http://risk_engine:8000/api/v1/risk
+      RISK_ENGINE_URL: http://risk_engine:8000
       ENERGY_SERVICE_URL: http://energy_service:8000
       WATER_SERVICE_URL: http://water_service:8000
       TRANSPORT_SERVICE_URL: http://transport_service:8000
@@ -171,7 +171,7 @@ services:
     container_name: reporting
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
-      RISK_ENGINE_URL: http://risk_engine:8000/api/v1/risk
+      RISK_ENGINE_URL: http://risk_engine:8000
       NORMALIZER_URL: http://normalizer:8000/api/v1/normalizer
       ENERGY_SERVICE_URL: http://energy_service:8000/api/v1/energy
       WATER_SERVICE_URL: http://water_service:8000/api/v1/water

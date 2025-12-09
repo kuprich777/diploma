@@ -198,3 +198,35 @@ async def check_energy_dependency(db: Session = Depends(get_db)):
         "operational": record.operational,
         "reason": record.reason,
     }
+
+
+@router.post("/resolve_outage")
+async def resolve_outage(db: Session = Depends(get_db)):
+    """
+    Восстанавливает работу водного сектора после сбоя.
+    Создаёт новую запись с operational=True и сбрасывает reason.
+    """
+    record = (
+        db.query(WaterStatusModel)
+        .order_by(WaterStatusModel.id.desc())
+        .first()
+    )
+    if not record:
+        raise HTTPException(status_code=404, detail="No water status found")
+
+    new_record = WaterStatusModel(
+        supply=record.supply,
+        demand=record.demand,
+        operational=True,
+        energy_dependent=record.energy_dependent,
+        reason=None,
+    )
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+
+    logger.info("✅ Water outage resolved, sector is operational again.")
+    return {
+        "message": "Water outage resolved, water sector is operational",
+        "operational": new_record.operational,
+    }

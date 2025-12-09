@@ -2,6 +2,7 @@
 
 import asyncio
 from typing import Union
+from pydantic import BaseModel
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
@@ -17,6 +18,52 @@ from schemas import (
     RiskSnapshotOut,
 )
 from utils.logging import setup_logging
+
+# Простая матрица межотраслевых зависимостей
+# Ключи: источник риска → словарь (зависимый сектор → коэффициент влияния)
+DEPENDENCY_MATRIX = {
+    "energy": {"water": 0.6, "transport": 0.4},
+    "water": {"transport": 0.3},
+}
+
+
+def apply_dependencies(energy_risk: float, water_risk: float, transport_risk: float) -> dict[str, float]:
+    """\
+    Применяет простую модель кросс-отраслевых эффектов:
+    риск одного сектора частично переносится на другие по матрице DEPENDENCY_MATRIX.
+
+    Возвращает скорректированные секторальные риски.
+    """
+    sector_risk = {
+        "energy": float(energy_risk),
+        "water": float(water_risk),
+        "transport": float(transport_risk),
+    }
+
+    # Проходим по матрице и добавляем влияние источников на зависимые сектора
+    for src, deps in DEPENDENCY_MATRIX.items():
+        src_val = sector_risk.get(src, 0.0)
+        for dest, weight in deps.items():
+            if dest not in sector_risk:
+                continue
+            sector_risk[dest] += src_val * weight
+
+    # Нормируем секторальные риски в диапазон [0, 1],
+    # чтобы они соответствовали шкале моделей и ограничениям Pydantic.
+    for key in sector_risk:
+        if sector_risk[key] < 0.0:
+            sector_risk[key] = 0.0
+        elif sector_risk[key] > 1.0:
+            sector_risk[key] = 1.0
+
+    return sector_risk
+
+# Текущие веса отраслей для агрегирования риска (могут обновляться через API)
+WEIGHTS = {
+    "energy": settings.ENERGY_WEIGHT,
+    "water": settings.WATER_WEIGHT,
+    "transport": settings.TRANSPORT_WEIGHT,
+}
 
 logger = setup_logging()
 
@@ -76,35 +123,45 @@ async def calculate_risks(save: bool, db: Session | None) -> Union[AggregatedRis
         fetch_sector_operational(settings.TRANSPORT_SERVICE_URL, "transport"),
     )
 
-    # Простая модель риска:
-    #   сектор работает   -> риск = 0
-    #   сектор не работает -> риск = 1
     energy_risk = 0.0 if energy_ok else 1.0
     water_risk = 0.0 if water_ok else 1.0
     transport_risk = 0.0 if transport_ok else 1.0
 
-    # Интегральный риск как взвешенная сумма
-    w_e = settings.ENERGY_WEIGHT
-    w_w = settings.WATER_WEIGHT
-    w_t = settings.TRANSPORT_WEIGHT
+    # Применяем матрицу межотраслевых зависимостей
+    sector_risk = apply_dependencies(energy_risk, water_risk, transport_risk)
+    adj_energy_risk = sector_risk["energy"]
+    adj_water_risk = sector_risk["water"]
+    adj_transport_risk = sector_risk["transport"]
+
+    # Интегральный риск как взвешенная сумма уже скорректированных рисков
+    w_e = WEIGHTS["energy"]
+    w_w = WEIGHTS["water"]
+    w_t = WEIGHTS["transport"]
     w_sum = w_e + w_w + w_t if (w_e + w_w + w_t) > 0 else 1.0
 
-    total_risk = (energy_risk * w_e + water_risk * w_w + transport_risk * w_t) / w_sum
+    total_risk = (adj_energy_risk * w_e + adj_water_risk * w_w + adj_transport_risk * w_t) / w_sum
+
+    # Интегральный риск тоже ограничиваем диапазоном [0, 1],
+    # чтобы он не выходил за рамки шкалы и валидировался Pydantic-схемой.
+    if total_risk < 0.0:
+        total_risk = 0.0
+    elif total_risk > 1.0:
+        total_risk = 1.0
 
     logger.info(
         "📊 Calculated risks | energy=%.2f, water=%.2f, transport=%.2f, total=%.2f",
-        energy_risk,
-        water_risk,
-        transport_risk,
+        adj_energy_risk,
+        adj_water_risk,
+        adj_transport_risk,
         total_risk,
     )
 
     if not save:
         # Возвращаем просто текущий агрегированный риск, ничего не записывая
         return AggregatedRisk(
-            energy_risk=energy_risk,
-            water_risk=water_risk,
-            transport_risk=transport_risk,
+            energy_risk=adj_energy_risk,
+            water_risk=adj_water_risk,
+            transport_risk=adj_transport_risk,
             total_risk=total_risk,
         )
 
@@ -116,9 +173,9 @@ async def calculate_risks(save: bool, db: Session | None) -> Union[AggregatedRis
 
     # Сохраняем снапшот в БД
     snapshot = RiskSnapshot(
-        energy_risk=energy_risk,
-        water_risk=water_risk,
-        transport_risk=transport_risk,
+        energy_risk=adj_energy_risk,
+        water_risk=adj_water_risk,
+        transport_risk=adj_transport_risk,
         total_risk=total_risk,
         meta={
             "weights": {
@@ -131,6 +188,12 @@ async def calculate_risks(save: bool, db: Session | None) -> Union[AggregatedRis
                 "water": water_ok,
                 "transport": transport_ok,
             },
+            "raw_sector_risk": {
+                "energy": energy_risk,
+                "water": water_risk,
+                "transport": transport_risk,
+            },
+            "dependency_matrix": DEPENDENCY_MATRIX,
         },
     )
     db.add(snapshot)
@@ -142,6 +205,11 @@ async def calculate_risks(save: bool, db: Session | None) -> Union[AggregatedRis
 
 
 # ---------- Эндпойнты ----------
+
+class WeightUpdate(BaseModel):
+    energy: float | None = None
+    water: float | None = None
+    transport: float | None = None
 
 
 @router.get("/current", response_model=AggregatedRisk)
@@ -168,6 +236,29 @@ async def recalculate_risk(
     """
     result = await calculate_risks(save=body.save, db=db)
     return result
+
+@router.post("/update_weights")
+async def update_weights(payload: WeightUpdate):
+    """
+    Обновляет веса отраслей в интегральном риске.
+    Работает до перезапуска контейнера (in-memory).
+    Стартовые значения берутся из config.py / .env.
+    """
+    if not settings.ENABLE_DYNAMIC_WEIGHTS:
+        raise HTTPException(status_code=403, detail="Dynamic weights update is disabled by configuration")
+
+    if payload.energy is not None:
+        WEIGHTS["energy"] = payload.energy
+    if payload.water is not None:
+        WEIGHTS["water"] = payload.water
+    if payload.transport is not None:
+        WEIGHTS["transport"] = payload.transport
+
+    total = WEIGHTS["energy"] + WEIGHTS["water"] + WEIGHTS["transport"]
+    if total <= 0:
+        raise HTTPException(status_code=400, detail="Sum of weights must be > 0")
+
+    return {"weights": WEIGHTS, "sum": total}
 
 
 @router.get("/history", response_model=RiskHistory)

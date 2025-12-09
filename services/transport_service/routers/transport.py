@@ -13,14 +13,14 @@ logger = setup_logging()
 router = APIRouter(prefix="/api/v1/transport", tags=["transport"])
 
 
-# ---------- Вспомогательные функции ----------
+#   Вспомогательные функции 
 
 async def fetch_energy_operational() -> bool:
     """
     Запрашивает статус энергосервиса.
     Ожидает endpoint /api/v1/energy/status от energy_service.
     """
-    energy_status_url = settings.ENERGY_SERVICE_URL.rstrip("/") + "/api/v1/energy/status"
+    energy_status_url = settings.ENERGY_SERVICE_URL.rstrip("/") + "/status"
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(energy_status_url)
@@ -37,7 +37,6 @@ async def fetch_energy_operational() -> bool:
         return False
 
 
-# ---------- Эндпойнты ----------
 
 @router.post("/init")
 async def init_transport_state(db: Session = Depends(get_db)):
@@ -123,6 +122,41 @@ async def update_load(update: LoadUpdate, db: Session = Depends(get_db)):
     return {"message": "Transport load updated", "load": new_record.load}
 
 
+@router.post("/increase_load")
+async def increase_load(amount: float, db: Session = Depends(get_db)):
+    """
+    Увеличивает загруженность транспортной системы на указанное значение.
+    amount — величина, на которую нужно увеличить текущую загрузку.
+    """
+    record = (
+        db.query(TransportStatusModel)
+        .order_by(TransportStatusModel.id.desc())
+        .first()
+    )
+    if not record:
+        raise HTTPException(status_code=404, detail="No transport status found")
+
+    new_load = max(0.0, record.load + amount)
+
+    new_record = TransportStatusModel(
+        load=new_load,
+        operational=record.operational,
+        energy_dependent=record.energy_dependent,
+        reason=record.reason,
+    )
+
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+
+    logger.info(f"📈 Transport load increased by {amount}, new load={new_load}")
+    return {
+        "message": "Transport load increased",
+        "previous_load": record.load,
+        "new_load": new_load
+    }
+
+
 @router.post("/check_energy_dependency")
 async def check_energy_dependency(db: Session = Depends(get_db)):
     """
@@ -162,4 +196,34 @@ async def check_energy_dependency(db: Session = Depends(get_db)):
         "message": "Energy service is operational, no impact on transport",
         "operational": record.operational,
         "reason": record.reason,
+    }
+
+@router.post("/resolve_outage")
+async def resolve_outage(db: Session = Depends(get_db)):
+    """
+    Восстанавливает работу транспортного сектора после сбоя.
+    Создаёт новую запись с operational=True и сбрасывает reason.
+    """
+    record = (
+        db.query(TransportStatusModel)
+        .order_by(TransportStatusModel.id.desc())
+        .first()
+    )
+    if not record:
+        raise HTTPException(status_code=404, detail="No transport status found")
+
+    new_record = TransportStatusModel(
+        load=record.load,
+        operational=True,
+        energy_dependent=record.energy_dependent,
+        reason=None,
+    )
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+
+    logger.info("✅ Transport outage resolved, transport sector is operational again.")
+    return {
+        "message": "Transport outage resolved, transport sector is operational",
+        "operational": new_record.operational,
     }

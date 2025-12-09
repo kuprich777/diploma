@@ -40,6 +40,10 @@ class Settings(BaseSettings):
     WATER_WEIGHT: float = 0.3
     TRANSPORT_WEIGHT: float = 0.3
 
+    # --- Возможность динамически обновлять веса через API ---
+    # Эти параметры используются в /api/v1/risk/update_weights
+    ENABLE_DYNAMIC_WEIGHTS: bool = True
+
     # --- Настройки поведения ---
     REQUEST_TIMEOUT: float = 5.0     # таймаут запросов к сервисам
     RETRIES: int = 2                 # количество ретраев при ошибках

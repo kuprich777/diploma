@@ -1,14 +1,19 @@
-version: "3.9"
+# docker-compose.energy.yml
+# Мини-компоновка доменных сервисов: energy, water, transport + Postgres
 
 services:
+  # ==========================
+  # POSTGRES
+  # ==========================
   db:
     image: postgres:16
+    container_name: diploma-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-diploma}
     ports:
-      - "5433:5432"
+      - "5433:5432"  # Не конфликтует с локальным Postgres
     volumes:
       - dbdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,12 +23,17 @@ services:
       retries: 10
     restart: unless-stopped
 
+
+  # ==========================
+  # ENERGY SERVICE
+  # ==========================
   energy_service:
     build: ./services/energy_service
+    container_name: energy_service
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
-      ENV: ${ENV:-dev}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENV: ${ENV:-dev}
     depends_on:
       db:
         condition: service_healthy
@@ -31,5 +41,53 @@ services:
       - "8001:8000"
     restart: unless-stopped
 
+
+  # ==========================
+  # WATER SERVICE
+  # ==========================
+  water_service:
+    build: ./services/water_service
+    container_name: water_service
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
+      ENERGY_SERVICE_URL: ${ENERGY_SERVICE_URL:-http://energy_service:8000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENV: ${ENV:-dev}
+    depends_on:
+      db:
+        condition: service_healthy
+      energy_service:
+        condition: service_started
+    ports:
+      - "8002:8000"
+    restart: unless-stopped
+
+
+  # ==========================
+  # TRANSPORT SERVICE
+  # ==========================
+  transport_service:
+    build: ./services/transport_service
+    container_name: transport_service
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/diploma}
+      ENERGY_SERVICE_URL: ${ENERGY_SERVICE_URL:-http://energy_service:8000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENV: ${ENV:-dev}
+    depends_on:
+      db:
+        condition: service_healthy
+      energy_service:
+        condition: service_started
+      water_service:
+        condition: service_started
+    ports:
+      - "8003:8000"
+    restart: unless-stopped
+
+
+# ==========================
+# VOLUMES
+# ==========================
 volumes:
   dbdata:

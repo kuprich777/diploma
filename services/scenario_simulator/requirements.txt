@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+httpx
+loguru
+pydantic
+pydantic-settings
+prometheus-fastapi-instrumentator
+python-dotenv

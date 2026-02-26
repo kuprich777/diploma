@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -84,8 +84,17 @@ class RiskHistory(BaseModel):
 class RiskRecalcRequest(BaseModel):
     """
     Тело запроса для ручного пересчёта риска.
+
+    Поле `method` позволяет формально разделять два режима расчёта:
+      - quantitative: количественный оператор распространения риска (Ax)
+      - classical: rule-based распространение деградаций на бинарных индикаторах
+
     Можно добавить в будущем поля типа:
         - override weights
         - simulate outages
     """
-    save: bool
+    save: bool = Field(description="Сохранять ли результат в историю RiskSnapshot")
+    method: Literal["classical", "quantitative"] = Field(
+        default="quantitative",
+        description="Метод расчёта риска: classical | quantitative"
+    )

@@ -1,7 +1,8 @@
 # services/risk_engine/routers/risk.py
 
 import asyncio
-from typing import Union
+from typing import Union, Literal, Optional
+
 from pydantic import BaseModel
 
 import httpx
@@ -19,69 +20,154 @@ from schemas import (
 )
 from utils.logging import setup_logging
 
-# Простая матрица межотраслевых зависимостей
-# Ключи: источник риска → словарь (зависимый сектор → коэффициент влияния)
-DEPENDENCY_MATRIX = {
-    "energy": {"water": 0.6, "transport": 0.4},
-    "water": {"transport": 0.3},
+
+RiskMethod = Literal["classical", "quantitative"]
+
+# -------------------------------------------------------------------
+# Sector weights for the integral (aggregated) risk.
+# Source of truth on startup: settings (env/config). Can be updated at runtime
+# via POST /update_weights if ENABLE_DYNAMIC_WEIGHTS is enabled.
+# -------------------------------------------------------------------
+WEIGHTS: dict[str, float] = {
+    "energy": float(getattr(settings, "ENERGY_WEIGHT", 0.7)),
+    "water": float(getattr(settings, "WATER_WEIGHT", 0.2)),
+    "transport": float(getattr(settings, "TRANSPORT_WEIGHT", 0.1)),
 }
 
+# -------------------------------------------------------------------
+# Dependency matrix A (versioned, runtime-configurable)
+# Order of sectors: [energy, water, transport]
+# A[i][j] — влияние сектора j на сектор i
+# Источник правды по умолчанию: settings.DEPENDENCY_MATRIX (+ версия)
+# В runtime можно обновить через POST /dependency_matrix (если разрешено конфигурацией).
+# -------------------------------------------------------------------
+SECTORS_ORDER = ["energy", "water", "transport"]
 
-def apply_dependencies(energy_risk: float, water_risk: float, transport_risk: float) -> dict[str, float]:
-    """\
-    Применяет простую модель кросс-отраслевых эффектов:
-    риск одного сектора частично переносится на другие по матрице DEPENDENCY_MATRIX.
-
-    Возвращает скорректированные секторальные риски.
-    """
-    sector_risk = {
-        "energy": float(energy_risk),
-        "water": float(water_risk),
-        "transport": float(transport_risk),
-    }
-
-    # Проходим по матрице и добавляем влияние источников на зависимые сектора
-    for src, deps in DEPENDENCY_MATRIX.items():
-        src_val = sector_risk.get(src, 0.0)
-        for dest, weight in deps.items():
-            if dest not in sector_risk:
-                continue
-            sector_risk[dest] += src_val * weight
-
-    # Нормируем секторальные риски в диапазон [0, 1],
-    # чтобы они соответствовали шкале моделей и ограничениям Pydantic.
-    for key in sector_risk:
-        if sector_risk[key] < 0.0:
-            sector_risk[key] = 0.0
-        elif sector_risk[key] > 1.0:
-            sector_risk[key] = 1.0
-
-    return sector_risk
-
-# Текущие веса отраслей для агрегирования риска (могут обновляться через API)
-WEIGHTS = {
-    "energy": settings.ENERGY_WEIGHT,
-    "water": settings.WATER_WEIGHT,
-    "transport": settings.TRANSPORT_WEIGHT,
-}
+CURRENT_DEPENDENCY_MATRIX: list[list[float]] = getattr(settings, "DEPENDENCY_MATRIX", [
+    [0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0],
+])
+CURRENT_DEPENDENCY_MATRIX_VERSION: str = getattr(settings, "DEPENDENCY_MATRIX_VERSION", "v0")
 
 logger = setup_logging()
 
 router = APIRouter(prefix="/api/v1/risk", tags=["risk"])
 
 
+def _validate_matrix_3x3(matrix: list[list[float]]) -> None:
+    if len(matrix) != 3 or any(len(row) != 3 for row in matrix):
+        raise HTTPException(status_code=400, detail="dependency matrix must be 3x3")
+    for row in matrix:
+        for v in row:
+            if not isinstance(v, (int, float)):
+                raise HTTPException(status_code=400, detail="dependency matrix values must be numeric")
+            if v < 0.0 or v > 1.0:
+                raise HTTPException(status_code=400, detail="dependency matrix values must be in [0,1]")
+
+
+def _matrix_as_dict(matrix: list[list[float]]) -> dict[str, dict[str, float]]:
+    """Convenience representation for meta/debug: src -> {dest: weight}.
+
+    Note: in A[i][j], j is source, i is destination.
+    """
+    out: dict[str, dict[str, float]] = {s: {} for s in SECTORS_ORDER}
+    for i, dest in enumerate(SECTORS_ORDER):
+        for j, src in enumerate(SECTORS_ORDER):
+            w = float(matrix[i][j])
+            if w != 0.0 and src != dest:
+                out[src][dest] = w
+    return out
+
+
+def apply_dependencies_quantitative(energy_risk: float, water_risk: float, transport_risk: float) -> dict[str, float]:
+    """Количественный оператор: x' = clip(x + A x).
+
+    Здесь x = (energy, water, transport) в шкале [0,1].
+    A[i][j] — вклад риска j в риск i.
+    """
+    x = [float(energy_risk), float(water_risk), float(transport_risk)]
+    A = CURRENT_DEPENDENCY_MATRIX
+
+    # y = x + A x
+    y = [0.0, 0.0, 0.0]
+    for i in range(3):
+        ax = 0.0
+        for j in range(3):
+            ax += float(A[i][j]) * x[j]
+        y[i] = x[i] + ax
+
+    # clip to [0,1]
+    for i in range(3):
+        if y[i] < 0.0:
+            y[i] = 0.0
+        elif y[i] > 1.0:
+            y[i] = 1.0
+
+    return {
+        "energy": y[0],
+        "water": y[1],
+        "transport": y[2],
+    }
+
+
+def apply_dependencies_classical(
+    energy_risk: float,
+    water_risk: float,
+    transport_risk: float,
+    threshold: float = 0.5,
+) -> dict[str, float]:
+    """Классический rule-based подход.
+
+    1) Бинаризация рисков: y_i = I(x_i >= threshold).
+    2) Распространение деградаций по A с порогом связности:
+       y_i(t+1) = y_i(t) OR exists j: (y_j(t)=1 AND A[i][j] >= threshold)
+
+    Возвращает бинарные риски, приведённые к {0,1}.
+    """
+    y = [
+        1.0 if float(energy_risk) >= threshold else 0.0,
+        1.0 if float(water_risk) >= threshold else 0.0,
+        1.0 if float(transport_risk) >= threshold else 0.0,
+    ]
+
+    A = CURRENT_DEPENDENCY_MATRIX
+
+    # One-step propagation (достаточно для сценарного детектора каскада)
+    y_next = y.copy()
+    for i in range(3):
+        if y_next[i] >= 1.0:
+            continue
+        for j in range(3):
+            if y[j] >= 1.0 and float(A[i][j]) >= threshold:
+                y_next[i] = 1.0
+                break
+
+    return {
+        "energy": y_next[0],
+        "water": y_next[1],
+        "transport": y_next[2],
+    }
+
+
 # ---------- Вспомогательные функции ----------
 
 
-async def fetch_sector_operational(url: str, name: str) -> bool:
+async def fetch_sector_operational(url: str, name: str, scenario_id: Optional[str] = None, run_id: Optional[int] = None) -> bool:
     """
     Запрашивает статус сектора по его URL.
     Ожидаем, что сервис вернёт JSON с полем is_operational или operational.
     Если запрос не удался — считаем сектор неработоспособным (максимальный риск).
     """
     try:
+        params = {}
+        if scenario_id is not None:
+            params["scenario_id"] = scenario_id
+        if run_id is not None:
+            params["run_id"] = run_id
+
         async with httpx.AsyncClient(timeout=settings.REQUEST_TIMEOUT) as client:
-            resp = await client.get(url)
+            resp = await client.get(url, params=params)
         resp.raise_for_status()
         data = resp.json()
 
@@ -107,7 +193,13 @@ async def fetch_sector_operational(url: str, name: str) -> bool:
         return False
 
 
-async def calculate_risks(save: bool, db: Session | None) -> Union[AggregatedRisk, RiskSnapshotOut]:
+async def calculate_risks(
+    save: bool,
+    db: Session | None,
+    method: RiskMethod = "quantitative",
+    scenario_id: Optional[str] = None,
+    run_id: Optional[int] = None,
+) -> Union[AggregatedRisk, RiskSnapshotOut]:
     """
     Основная функция расчёта рисков:
       - опрашивает energy / water / transport,
@@ -116,11 +208,16 @@ async def calculate_risks(save: bool, db: Session | None) -> Union[AggregatedRis
       - опционально сохраняет снапшот в БД.
     """
 
+    # Normalize method defensively (in case of future callers passing raw strings)
+    method_norm = str(method).strip().lower()
+    if method_norm not in {"classical", "quantitative"}:
+        raise HTTPException(status_code=400, detail=f"Unknown method: {method}")
+
     # Параллельно опрашиваем три сектора
     energy_ok, water_ok, transport_ok = await asyncio.gather(
-        fetch_sector_operational(settings.ENERGY_SERVICE_URL, "energy"),
-        fetch_sector_operational(settings.WATER_SERVICE_URL, "water"),
-        fetch_sector_operational(settings.TRANSPORT_SERVICE_URL, "transport"),
+        fetch_sector_operational(settings.ENERGY_SERVICE_URL, "energy", scenario_id=scenario_id, run_id=run_id),
+        fetch_sector_operational(settings.WATER_SERVICE_URL, "water", scenario_id=scenario_id, run_id=run_id),
+        fetch_sector_operational(settings.TRANSPORT_SERVICE_URL, "transport", scenario_id=scenario_id, run_id=run_id),
     )
 
     energy_risk = 0.0 if energy_ok else 1.0
@@ -128,7 +225,10 @@ async def calculate_risks(save: bool, db: Session | None) -> Union[AggregatedRis
     transport_risk = 0.0 if transport_ok else 1.0
 
     # Применяем матрицу межотраслевых зависимостей
-    sector_risk = apply_dependencies(energy_risk, water_risk, transport_risk)
+    if method_norm == "classical":
+        sector_risk = apply_dependencies_classical(energy_risk, water_risk, transport_risk)
+    else:
+        sector_risk = apply_dependencies_quantitative(energy_risk, water_risk, transport_risk)
     adj_energy_risk = sector_risk["energy"]
     adj_water_risk = sector_risk["water"]
     adj_transport_risk = sector_risk["transport"]
@@ -193,7 +293,12 @@ async def calculate_risks(save: bool, db: Session | None) -> Union[AggregatedRis
                 "water": water_risk,
                 "transport": transport_risk,
             },
-            "dependency_matrix": DEPENDENCY_MATRIX,
+            "dependency_matrix_version": CURRENT_DEPENDENCY_MATRIX_VERSION,
+            "dependency_matrix": CURRENT_DEPENDENCY_MATRIX,
+            "dependency_matrix_dict": _matrix_as_dict(CURRENT_DEPENDENCY_MATRIX),
+            "method": method_norm,
+            "scenario_id": scenario_id,
+            "run_id": run_id,
         },
     )
     db.add(snapshot)
@@ -213,12 +318,16 @@ class WeightUpdate(BaseModel):
 
 
 @router.get("/current", response_model=AggregatedRisk)
-async def get_current_risk():
+async def get_current_risk(
+    method: RiskMethod = "quantitative",
+    scenario_id: Optional[str] = None,
+    run_id: Optional[int] = None,
+):
     """
     Возвращает текущую оценку интегрального риска без сохранения в БД.
     Используется для онлайн-оценки состояния инфраструктуры.
     """
-    result = await calculate_risks(save=False, db=None)
+    result = await calculate_risks(save=False, db=None, method=method, scenario_id=scenario_id, run_id=run_id)
     # Здесь result всегда AggregatedRisk
     return result  # type: ignore[return-value]
 
@@ -234,7 +343,7 @@ async def recalculate_risk(
       - Если save=False → просто возвращает AggregatedRisk.
       - Если save=True  → сохраняет и возвращает сохранённый RiskSnapshotOut.
     """
-    result = await calculate_risks(save=body.save, db=db)
+    result = await calculate_risks(save=body.save, db=db, method=body.method, scenario_id=body.scenario_id, run_id=body.run_id)
     return result
 
 @router.post("/update_weights")
@@ -259,6 +368,63 @@ async def update_weights(payload: WeightUpdate):
         raise HTTPException(status_code=400, detail="Sum of weights must be > 0")
 
     return {"weights": WEIGHTS, "sum": total}
+
+
+class DependencyMatrixUpdate(BaseModel):
+    matrix: list[list[float]]
+    version: str | None = None
+
+
+@router.get("/dependency_matrix")
+async def get_dependency_matrix():
+    """Возвращает текущую матрицу A и её версию (для воспроизводимости экспериментов)."""
+    return {
+        "sectors_order": SECTORS_ORDER,
+        "version": CURRENT_DEPENDENCY_MATRIX_VERSION,
+        "matrix": CURRENT_DEPENDENCY_MATRIX,
+    }
+
+
+@router.post("/dependency_matrix")
+async def update_dependency_matrix(payload: DependencyMatrixUpdate):
+    """Обновляет матрицу A (in-memory) и версию.
+
+    Используется для контролируемых экспериментов и анализа чувствительности.
+    """
+    if not getattr(settings, "ENABLE_DYNAMIC_MATRIX", False):
+        raise HTTPException(status_code=403, detail="Dynamic dependency matrix update is disabled by configuration")
+
+    _validate_matrix_3x3(payload.matrix)
+
+    global CURRENT_DEPENDENCY_MATRIX, CURRENT_DEPENDENCY_MATRIX_VERSION
+    CURRENT_DEPENDENCY_MATRIX = payload.matrix
+
+    # Если версия не передана, авто-инкрементируем vX.Y -> v(X+1).Y (простая политика)
+    if payload.version:
+        CURRENT_DEPENDENCY_MATRIX_VERSION = payload.version
+    else:
+        # best-effort auto bump
+        ver = CURRENT_DEPENDENCY_MATRIX_VERSION
+        try:
+            if ver.startswith("v"):
+                num = ver[1:]
+                major = int(num.split(".")[0])
+                rest = ".".join(num.split(".")[1:])
+                if rest:
+                    CURRENT_DEPENDENCY_MATRIX_VERSION = f"v{major + 1}.{rest}"
+                else:
+                    CURRENT_DEPENDENCY_MATRIX_VERSION = f"v{major + 1}"
+            else:
+                CURRENT_DEPENDENCY_MATRIX_VERSION = ver + "+1"
+        except Exception:
+            CURRENT_DEPENDENCY_MATRIX_VERSION = ver + "+1"
+
+    return {
+        "status": "updated",
+        "sectors_order": SECTORS_ORDER,
+        "version": CURRENT_DEPENDENCY_MATRIX_VERSION,
+        "matrix": CURRENT_DEPENDENCY_MATRIX,
+    }
 
 
 @router.get("/history", response_model=RiskHistory)

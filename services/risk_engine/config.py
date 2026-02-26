@@ -40,6 +40,25 @@ class Settings(BaseSettings):
     WATER_WEIGHT: float = 0.3
     TRANSPORT_WEIGHT: float = 0.3
 
+    # --- Матрица межотраслевых зависимостей A ---
+    # Базовая матрица (по умолчанию) используется как оператор A в количественной модели
+    # Структура: A[i][j] — влияние сектора j на сектор i
+    # Порядок секторов: [energy, water, transport]
+    DEPENDENCY_MATRIX: list[list[float]] = [
+        [0.0, 0.2, 0.3],   # energy зависит от water, transport
+        [0.4, 0.0, 0.2],   # water зависит от energy, transport
+        [0.5, 0.3, 0.0],   # transport зависит от energy, water
+    ]
+
+    # Версия матрицы (для воспроизводимости экспериментов)
+    DEPENDENCY_MATRIX_VERSION: str = os.getenv(
+        "DEPENDENCY_MATRIX_VERSION",
+        "v1.0"
+    )
+
+    # Разрешить ли динамическое обновление матрицы через API
+    ENABLE_DYNAMIC_MATRIX: bool = True
+
     # --- Возможность динамически обновлять веса через API ---
     # Эти параметры используются в /api/v1/risk/update_weights
     ENABLE_DYNAMIC_WEIGHTS: bool = True

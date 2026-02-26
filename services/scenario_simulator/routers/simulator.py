@@ -183,9 +183,9 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
             raise HTTPException(status_code=502, detail=f"{sector} service load_increase failed")
 
         if action in {"adjust_production", "adjust_consumption"}:
-            value = params.get("value")
-            if value is None:
-                raise HTTPException(status_code=400, detail="params.value is required for adjust_* actions")
+            amount = params.get("amount", params.get("value"))
+            if amount is None:
+                raise HTTPException(status_code=400, detail="params.amount is required for adjust_* actions")
             endpoint = "adjust_production" if action == "adjust_production" else "adjust_consumption"
             candidates = [
                 _build_url(base, f"/api/v1/{sector}/{endpoint}"),
@@ -193,10 +193,10 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
                 _build_url(base, f"/api/v1/{endpoint}"),
                 _build_url(base, f"/{endpoint}"),
             ]
-            # Many services accept the value as query param
+            # Domain services accept amount as a query parameter.
             for url in candidates:
                 try:
-                    resp = await client.post(url, params={**q, "value": value})
+                    resp = await client.post(url, params={**q, "amount": amount})
                     if resp.status_code < 400:
                         return resp.json()
                 except httpx.HTTPError:
@@ -272,15 +272,36 @@ async def run_scenario(
 
     # --- 4. Apply operator F(x, s): sequential execution of steps ---
     # Mathematically: x_T = F(x_0, s)
+    # For cascade indicators we track all t <= T, as in formulas I^(cl)(s,r), I^(q)(s,r).
     step_logs: list[dict] = []
+    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
+
+    non_initiator_threshold_classical = 1.0
+    delta_sector_threshold = 0.1
+
+    classical_cascade_seen = False
+    quantitative_max_delta = {s: 0.0 for s in non_initiators}
+
+    final_cl = base_cl
+    final_q = base_q
+
     for step in steps:
         out = await _apply_step(step, scenario_id, run_id)
         step_logs.append(out)
 
-    # --- 5. Read final state x_T for both operators ---
-    final_cl = await fetch_risk(scenario_id, run_id, method="classical")
-    final_q = await fetch_risk(scenario_id, run_id, method="quantitative")
+        # Evaluate state at each t (not only at t=T), consistent with methodology formulas.
+        final_cl = await fetch_risk(scenario_id, run_id, method="classical")
+        final_q = await fetch_risk(scenario_id, run_id, method="quantitative")
 
+        if any(float(final_cl.get(f"{s}_risk", 0.0)) >= non_initiator_threshold_classical for s in non_initiators):
+            classical_cascade_seen = True
+
+        for s in non_initiators:
+            delta_s = float(final_q.get(f"{s}_risk", 0.0)) - float(base_q.get(f"{s}_risk", 0.0))
+            if delta_s > quantitative_max_delta[s]:
+                quantitative_max_delta[s] = delta_s
+
+    # --- 5. Final state x_T for both operators ---
     final_total_cl = float(final_cl.get("total_risk", 0.0))
     final_total_q = float(final_q.get("total_risk", 0.0))
 
@@ -288,21 +309,11 @@ async def run_scenario(
     delta_q = final_total_q - base_total_q
 
     # --- Cascade indicators (methodology-aligned) ---
-    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
+    # I^(cl)(s,r) = 1 if exists non-initiator and exists t <= T with binary risk flag.
+    I_cl = 1 if classical_cascade_seen else 0
 
-    # Classical: cascade if any non-initiator is flagged (binary risk == 1) after scenario
-    non_initiator_threshold_classical = 1.0
-    I_cl = 1 if any(
-        float(final_cl.get(f"{s}_risk", 0.0)) >= non_initiator_threshold_classical
-        for s in non_initiators
-    ) else 0
-
-    # Quantitative: cascade if any non-initiator increased by at least δ
-    delta_sector_threshold = 0.1
-    I_q = 1 if any(
-        (float(final_q.get(f"{s}_risk", 0.0)) - float(base_q.get(f"{s}_risk", 0.0))) >= delta_sector_threshold
-        for s in non_initiators
-    ) else 0
+    # I^(q)(s,r) = 1 if exists non-initiator with max_{t<=T}(x_{i,t} - x_{i,0}) >= delta.
+    I_q = 1 if any(quantitative_max_delta[s] >= delta_sector_threshold for s in non_initiators) else 0
 
     # --- 6. Return both F_cl and F_q results with new fields ---
     return ScenarioRunResult(

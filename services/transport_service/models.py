@@ -13,6 +13,11 @@ class TransportStatus(Base):
     __table_args__ = {"schema": TRANSPORT_SCHEMA}
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+ 
+    # --- ключ эксперимента (изоляция сценариев и прогонов) ---
+    scenario_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    run_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+
     load: Mapped[float] = mapped_column(Float, nullable=False)               # загруженность
     operational: Mapped[bool] = mapped_column(Boolean, default=True)        # система доступна
     energy_dependent: Mapped[bool] = mapped_column(Boolean, default=True)   # зависит от EnergyService

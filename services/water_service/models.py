@@ -14,6 +14,10 @@ class WaterStatus(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
+    # --- ключ эксперимента (изоляция сценариев и прогонов) ---
+    scenario_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    run_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+
     # Производство воды (скважины, станции очистки)
     supply: Mapped[float] = mapped_column(Float, nullable=False)
 

@@ -172,10 +172,14 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
                 _build_url(base, f"/api/v1/{sector}/update_load"),
                 _build_url(base, f"/{sector}/update_load"),
             ]
-            payload = {"amount": amount}
             for url in candidates:
                 try:
-                    resp = await client.post(url, params=q, json=payload)
+                    if url.endswith("update_load"):
+                        # Fallback for services that only support absolute load update
+                        resp = await client.post(url, params=q, json={"load": amount})
+                    else:
+                        # Primary contract for load_increase: query param amount
+                        resp = await client.post(url, params={**q, "amount": amount})
                     if resp.status_code < 400:
                         return resp.json()
                 except httpx.HTTPError:

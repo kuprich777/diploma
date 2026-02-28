@@ -17,7 +17,16 @@ RUN apt-get update && apt-get install -y gcc libpq-dev && rm -rf /var/lib/apt/li
 
 # Устанавливаем зависимости
 COPY requirements.txt .
-RUN pip install --no-cache-dir --retries 10 --timeout 120 -r requirements.txt
+RUN set -eux; \
+    for attempt in 1 2 3; do \
+      pip install --no-cache-dir --retries 10 --timeout 120 -r requirements.txt && break; \
+      if [ "$attempt" -eq 3 ]; then \
+        echo "pip install failed after ${attempt} attempts"; \
+        exit 1; \
+      fi; \
+      echo "pip install failed on attempt ${attempt}, retrying..."; \
+      sleep 5; \
+    done
 
 # Копируем исходники сервиса
 COPY . .

@@ -154,6 +154,7 @@ services:
       ENERGY_SERVICE_URL: http://energy_service:8000
       WATER_SERVICE_URL: http://water_service:8000
       TRANSPORT_SERVICE_URL: http://transport_service:8000
+      REPORTING_SERVICE_URL: http://reporting:8000/api/v1/reporting
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
@@ -190,6 +191,8 @@ services:
         condition: service_started
     ports:
       - "8010:8000"
+    volumes:
+      - ./reporting:/app/reporting
     restart: unless-stopped
 
 

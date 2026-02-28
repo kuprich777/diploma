@@ -10,6 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=300 \
     PYTHONPATH=/app
 
 # Системные зависимости (для psycopg2 и т.п.)
@@ -18,8 +19,9 @@ RUN apt-get update && apt-get install -y gcc libpq-dev && rm -rf /var/lib/apt/li
 # Устанавливаем зависимости
 COPY requirements.txt .
 RUN set -eux; \
+    unset PIP_CONSTRAINT PIP_REQUIRE_HASHES; \
     for attempt in 1 2 3; do \
-      pip install --no-cache-dir --retries 10 --timeout 120 -r requirements.txt && break; \
+      pip install --no-cache-dir --prefer-binary --retries 10 --timeout 300 -r requirements.txt && break; \
       if [ "$attempt" -eq 3 ]; then \
         echo "pip install failed after ${attempt} attempts"; \
         exit 1; \

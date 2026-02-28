@@ -1,7 +1,20 @@
 # services/reporting/config.py
 
 import os
+from pathlib import Path
 from pydantic_settings import BaseSettings
+
+
+def _default_reports_dir() -> str:
+    """Возвращает безопасный путь для каталога отчётов.
+
+    В dev-окружении репозитория можно подняться до корня проекта и использовать
+    `<repo>/reporting`. В контейнере файл часто лежит как `/app/config.py`, где
+    `parents[2]` недоступен — тогда используем `/app/reporting`.
+    """
+    config_path = Path(__file__).resolve()
+    project_root = config_path.parents[2] if len(config_path.parents) > 2 else config_path.parent
+    return str(project_root / "reporting")
 
 
 class Settings(BaseSettings):
@@ -54,6 +67,12 @@ class Settings(BaseSettings):
     # --- Настройки запросов ---
     REQUEST_TIMEOUT: float = 5.0
     RETRIES: int = 2
+
+    # --- Файловое хранилище отчётов (в корне проекта /reporting) ---
+    REPORTS_DIR: str = os.getenv(
+        "REPORTS_DIR",
+        _default_reports_dir(),
+    )
 
     # --- Логирование ---
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

@@ -13,6 +13,3 @@ prometheus-fastapi-instrumentator
 httpx
 loguru
 python-dotenv
-
-numpy
-matplotlib

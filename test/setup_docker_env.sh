@@ -1,15 +1,16 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env sh
+set -eu
 
 # Script builds and starts the Diploma docker environment.
 #
 # Usage examples:
-#   bash test/setup_docker_env.sh
-#   bash test/setup_docker_env.sh --stack energy
-#   bash test/setup_docker_env.sh --stack full --no-cache
-#   bash test/setup_docker_env.sh --stack full --down
+#   sh test/setup_docker_env.sh
+#   sh test/setup_docker_env.sh --stack energy
+#   sh test/setup_docker_env.sh --stack full --no-cache
+#   sh test/setup_docker_env.sh --stack full --down
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+REPO_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 cd "$REPO_ROOT"
 
 STACK="full"
@@ -19,7 +20,7 @@ DO_DOWN=0
 
 usage() {
   cat <<'USAGE'
-Usage: bash test/setup_docker_env.sh [options]
+Usage: sh test/setup_docker_env.sh [options]
 
 Options:
   --stack <full|energy>   Which compose stack to run (default: full)
@@ -30,10 +31,15 @@ Options:
 USAGE
 }
 
-while [[ $# -gt 0 ]]; do
+while [ "$#" -gt 0 ]; do
   case "$1" in
     --stack)
-      STACK="${2:-}"
+      if [ "$#" -lt 2 ]; then
+        echo "Missing value for --stack"
+        usage
+        exit 1
+      fi
+      STACK="$2"
       shift 2
       ;;
     --no-cache)
@@ -61,9 +67,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 COMPOSE_FILE="docker-compose.yml"
-if [[ "$STACK" == "energy" ]]; then
+if [ "$STACK" = "energy" ]; then
   COMPOSE_FILE="docker-compose.energy.yml"
-elif [[ "$STACK" != "full" ]]; then
+elif [ "$STACK" != "full" ]; then
   echo "Unsupported stack: $STACK"
   echo "Allowed values: full, energy"
   exit 1
@@ -79,33 +85,31 @@ if ! docker compose version >/dev/null 2>&1; then
   exit 1
 fi
 
-COMPOSE_CMD=(docker compose -f "$COMPOSE_FILE")
-BUILD_ARGS=()
-if [[ "$NO_CACHE" -eq 1 ]]; then
-  BUILD_ARGS+=(--no-cache)
-fi
-
 echo "Using compose file: $COMPOSE_FILE"
 
-if [[ "$DO_DOWN" -eq 1 ]]; then
+if [ "$DO_DOWN" -eq 1 ]; then
   echo "[1/3] Stopping and removing existing stack..."
-  "${COMPOSE_CMD[@]}" down --remove-orphans
+  docker compose -f "$COMPOSE_FILE" down --remove-orphans
 fi
 
 echo "[2/3] Building images..."
-"${COMPOSE_CMD[@]}" build "${BUILD_ARGS[@]}"
+if [ "$NO_CACHE" -eq 1 ]; then
+  docker compose -f "$COMPOSE_FILE" build --no-cache
+else
+  docker compose -f "$COMPOSE_FILE" build
+fi
 
-if [[ "$ONLY_BUILD" -eq 1 ]]; then
+if [ "$ONLY_BUILD" -eq 1 ]; then
   echo "Build completed (build-only mode)."
   exit 0
 fi
 
 echo "[3/3] Starting environment..."
-"${COMPOSE_CMD[@]}" up -d --remove-orphans
+docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
 
 echo
 echo "Environment started. Current status:"
-"${COMPOSE_CMD[@]}" ps
+docker compose -f "$COMPOSE_FILE" ps
 
 echo
 echo "Tip: use 'docker compose -f $COMPOSE_FILE logs -f <service>' to inspect logs."

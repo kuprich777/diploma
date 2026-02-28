@@ -111,10 +111,10 @@ class MonteCarloRequest(BaseModel):
         description="Сектор, над которым проводится Monte-Carlo моделирование"
     )
     runs: int = Field(
-        default=20,
-        ge=1,
-        le=1000,
-        description="Количество прогонов Monte-Carlo"
+        default=100,
+        ge=100,
+        le=2000,
+        description="Количество прогонов Monte-Carlo (для статистической устойчивости K(N): минимум 100, рекомендовано 300+)"
     )
     duration_min: int = Field(
         default=5,

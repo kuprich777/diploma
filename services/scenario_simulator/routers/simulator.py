@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
-from datetime import datetime
+import time
 
 import httpx
 import random
@@ -209,6 +209,14 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
 
     raise HTTPException(status_code=400, detail=f"Unsupported action: {action}")
 
+
+def _generate_run_id() -> int:
+    """Generate unique run_id for ad-hoc/manual invocations.
+
+    Uses nanosecond clock + random suffix to avoid collisions between close requests.
+    """
+    return int(f"{time.time_ns()}{random.randint(100, 999)}")
+
 @router.get("/catalog", response_model=ScenarioCatalog)
 async def get_scenario_catalog() -> ScenarioCatalog:
     scenarios: list[CatalogScenario] = []
@@ -234,9 +242,9 @@ async def run_scenario(
 ) -> ScenarioRunResult:
     scenario_id = req.scenario_id
 
-    # If run_id is not provided, generate a reproducible-ish id for an interactive run
-    # (Monte-Carlo provides run_id explicitly).
-    run_id: int = int(req.run_id) if req.run_id is not None else int(datetime.utcnow().timestamp())
+    # Never reuse run_id across independent calls: for manual run_scenario
+    # generate a high-entropy identifier.
+    run_id: int = int(req.run_id) if req.run_id is not None else _generate_run_id()
 
     # --- 1. Resolve scenario steps (catalog S or explicit) ---
     if use_catalog and (not req.steps or len(req.steps) == 0):
@@ -265,7 +273,7 @@ async def run_scenario(
     # --- 2. Initialise state x_0 for all sectors if requested ---
     if req.init_all_sectors:
         for sector in ("energy", "water", "transport"):
-            await _init_sector_state(sector, scenario_id, run_id)
+            await _init_sector_state(sector, scenario_id, run_id, force=True)
 
     # --- 3. Read initial state x_0 for both methods ---
     base_cl = await fetch_risk(scenario_id, run_id, method="classical")
@@ -348,7 +356,7 @@ def _build_url(base: str, path: str) -> str:
     return f"{b}{p}"
 
 
-async def _init_sector_state(sector: str, scenario_id: str, run_id: int) -> None:
+async def _init_sector_state(sector: str, scenario_id: str, run_id: int, force: bool = False) -> None:
     base = _service_base_for_sector(sector)
     # try common prefixes
     candidates = [
@@ -357,7 +365,7 @@ async def _init_sector_state(sector: str, scenario_id: str, run_id: int) -> None
         _build_url(base, "/api/v1/init"),
         _build_url(base, "/init"),
     ]
-    params = {"scenario_id": scenario_id, "run_id": run_id}
+    params = {"scenario_id": scenario_id, "run_id": run_id, "force": str(force).lower()}
     async with httpx.AsyncClient(timeout=10.0) as client:
         last_exc = None
         for url in candidates:
@@ -450,6 +458,12 @@ async def run_monte_carlo(req: MonteCarloRequest):
     if req.duration_max < req.duration_min:
         raise HTTPException(status_code=400, detail="duration_max must be >= duration_min")
 
+    if req.runs < 100:
+        raise HTTPException(
+            status_code=400,
+            detail="For stable K(N) and quantile comparison use runs >= 100 (recommended 300+)",
+        )
+
     logger.info(
         f"🎲 Monte-Carlo start: scenario_id={req.scenario_id}, mode={req.mode}, sector={req.sector}, runs={req.runs}, "
         f"duration=[{req.duration_min}, {req.duration_max}]"
@@ -471,9 +485,9 @@ async def run_monte_carlo(req: MonteCarloRequest):
 
         # Real mode (only)
         # Initialize all sector states
-        await _init_sector_state("energy", req.scenario_id, run_id)
-        await _init_sector_state("water", req.scenario_id, run_id)
-        await _init_sector_state("transport", req.scenario_id, run_id)
+        await _init_sector_state("energy", req.scenario_id, run_id, force=True)
+        await _init_sector_state("water", req.scenario_id, run_id, force=True)
+        await _init_sector_state("transport", req.scenario_id, run_id, force=True)
 
         base_risk_cl = await fetch_risk(req.scenario_id, run_id, method="classical")
         base_risk_q = await fetch_risk(req.scenario_id, run_id, method="quantitative")

@@ -119,3 +119,46 @@ class SnapshotListResponse(BaseModel):
     """
     items: List[dict]
     count: int
+
+
+# ------------------------------------------------------------
+#  EXPERIMENT REGISTRY + FILE REPORTS
+# ------------------------------------------------------------
+
+class ExperimentRunIn(BaseModel):
+    scenario_id: str
+    run_id: int
+    run: int
+    before: float
+    after: float
+    delta: float
+    delta_R: Optional[float] = None
+    duration: Optional[int] = None
+    method_cl_total_before: Optional[float] = None
+    method_cl_total_after: Optional[float] = None
+    method_q_total_before: Optional[float] = None
+    method_q_total_after: Optional[float] = None
+    I_cl: Optional[int] = None
+    I_q: Optional[int] = None
+    initiator: Optional[str] = None
+
+
+class ExperimentRegisterIn(BaseModel):
+    scenario_id: str
+    n_runs: int
+    delta_threshold: float
+    matrix_A_version: Optional[str] = None
+    weights_version: Optional[str] = None
+    git_commit: Optional[str] = None
+    K_cl: Optional[float] = None
+    K_q: Optional[float] = None
+    Delta_percent: Optional[float] = None
+    distributions: Optional[Dict[str, Any]] = None
+    runs: List[ExperimentRunIn] = Field(default_factory=list)
+
+
+class ExperimentRegisterOut(BaseModel):
+    experiment_id: int
+    report_dir: str
+    csv_file: str
+    charts: List[str]

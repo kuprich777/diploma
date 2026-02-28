@@ -1,6 +1,7 @@
 # services/reporting/config.py
 
 import os
+from pathlib import Path
 from pydantic_settings import BaseSettings
 
 
@@ -54,6 +55,12 @@ class Settings(BaseSettings):
     # --- Настройки запросов ---
     REQUEST_TIMEOUT: float = 5.0
     RETRIES: int = 2
+
+    # --- Файловое хранилище отчётов (в корне проекта /reporting) ---
+    REPORTS_DIR: str = os.getenv(
+        "REPORTS_DIR",
+        str(Path(__file__).resolve().parents[2] / "reporting"),
+    )
 
     # --- Логирование ---
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

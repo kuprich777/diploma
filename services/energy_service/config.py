@@ -28,6 +28,13 @@ class Settings(BaseSettings):
     OUTAGE_DURATION_MIN: int = 5          # мин. длительность сбоя (мин)
     OUTAGE_DURATION_MAX: int = 60         # макс. длительность сбоя (мин)
 
+    # --- Параметры нормализации риска (используются в routers/energy.py) ---
+    MAX_OUTAGE_DURATION: int = 60
+    OUTAGE_BASE_RISK: float = 0.5
+    OUTAGE_DURATION_WEIGHT: float = 0.5
+    UTILIZATION_LOW: float = 0.7
+    UTILIZATION_HIGH: float = 1.0
+
     # --- Логирование ---
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 

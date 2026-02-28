@@ -402,7 +402,7 @@ async def _simulate_outage(sector: str, duration: int, scenario_id: str, run_id:
 
 
 # --- Experiment Registry helper ---
-async def _post_experiment_registry(payload: dict) -> None:
+async def _post_experiment_registry(payload: dict) -> dict:
     """Send experiment summary to reporting service (Experiment Registry).
 
     This must never break Monte-Carlo execution: failures are logged as warnings.
@@ -410,7 +410,7 @@ async def _post_experiment_registry(payload: dict) -> None:
     base = getattr(settings, "REPORTING_SERVICE_URL", None)
     if not base:
         logger.warning("⚠️ REPORTING_SERVICE_URL is not set; skipping experiment registry export")
-        return
+        return {"status": "skipped", "reason": "REPORTING_SERVICE_URL is not set"}
 
     url = base.rstrip("/") + "/experiments/register"
 
@@ -429,8 +429,21 @@ async def _post_experiment_registry(payload: dict) -> None:
             resp = await client.post(url, json=payload)
             if resp.status_code >= 400:
                 logger.warning(f"⚠️ Reporting registry rejected payload: {resp.status_code} {resp.text}")
+                return {
+                    "status": "failed",
+                    "reason": f"reporting returned {resp.status_code}",
+                }
+            data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+            logger.info(f"📁 Reporting export success: {data}")
+            return {
+                "status": "success",
+                "report_dir": data.get("report_dir"),
+                "csv_file": data.get("csv_file"),
+                "charts": data.get("charts"),
+            }
     except Exception as e:
         logger.warning(f"⚠️ Experiment registry export failed: {e}")
+        return {"status": "failed", "reason": str(e)}
 
 
 @router.post("/monte_carlo", response_model=MonteCarloResult)
@@ -627,7 +640,7 @@ async def run_monte_carlo(req: MonteCarloRequest):
         ],
     }
 
-    await _post_experiment_registry(payload)
+    export_result = await _post_experiment_registry(payload)
 
     return MonteCarloResult(
         scenario_id=req.scenario_id,
@@ -642,4 +655,6 @@ async def run_monte_carlo(req: MonteCarloRequest):
         K_q=K_q,
         Delta_percent=Delta_percent,
         runs_data=runs_data,
+        reporting_export_status=export_result.get("status"),
+        reporting_report_dir=export_result.get("report_dir"),
     )

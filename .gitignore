@@ -30,6 +30,9 @@ build/
 dist/
 *.egg-info/
 
+# Сгенерированные отчёты reporting (runtime artifacts)
+/reporting/
+
 # Pytest и coverage
 .coverage
 htmlcov/

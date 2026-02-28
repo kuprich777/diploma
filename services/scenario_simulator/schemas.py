@@ -192,6 +192,15 @@ class MonteCarloResult(BaseModel):
         description="Подробные результаты каждого прогона Monte-Carlo"
     )
 
+    reporting_export_status: Optional[str] = Field(
+        default=None,
+        description="Статус экспорта в reporting: success | failed | skipped",
+    )
+    reporting_report_dir: Optional[str] = Field(
+        default=None,
+        description="Путь к директории отчёта, если reporting подтвердил экспорт",
+    )
+
 
 # --- DTOs for scenario catalog exposure ---
 

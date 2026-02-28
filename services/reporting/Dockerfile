@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y gcc libpq-dev && rm -rf /var/lib/apt/li
 
 # Устанавливаем зависимости
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --no-cache-dir --retries 10 --timeout 120 -r requirements.txt
 
 # Копируем исходники сервиса
 COPY . .

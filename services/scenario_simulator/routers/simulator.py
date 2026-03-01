@@ -25,6 +25,9 @@ logger = setup_logging()
 settings = Settings()
 router = APIRouter(prefix="/api/v1/simulator", tags=["simulator"])
 
+# Baseline vectors x0 cached per experimental key (scenario_id, run_id).
+BASELINE_VECTORS: dict[tuple[str, int], dict[str, float]] = {}
+
 
 # --- Scenario catalog S (control variable of the experiment) ---
 # The catalog is fixed during a series of experiments to ensure comparability.
@@ -141,7 +144,16 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
                 try:
                     resp = await client.post(url, params=q, json=payload)
                     if resp.status_code < 400:
-                        return resp.json()
+                        result = resp.json()
+                        checks = await _trigger_dependency_checks_after_outage(
+                            source_sector=sector,
+                            scenario_id=scenario_id,
+                            run_id=run_id,
+                            step_index=step.step_index,
+                        )
+                        if checks:
+                            result["dependency_checks"] = checks
+                        return result
                 except httpx.HTTPError:
                     continue
             raise HTTPException(status_code=502, detail=f"{sector} service outage failed")
@@ -278,15 +290,31 @@ async def run_scenario(
     # --- 3. Read initial state x_0 for both methods ---
     base_cl = await fetch_risk(scenario_id, run_id, method="classical")
     base_q = await fetch_risk(scenario_id, run_id, method="quantitative")
+    base_vec_cl = _sector_risk_vector(base_cl)
+    base_vec_q = _sector_risk_vector(base_q)
+    BASELINE_VECTORS[(scenario_id, run_id)] = base_vec_q
 
     base_total_cl = float(base_cl.get("total_risk", 0.0))
     base_total_q = float(base_q.get("total_risk", 0.0))
+    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
 
     # --- 4. Apply operator F(x, s): sequential execution of steps ---
     # Mathematically: x_T = F(x_0, s)
     step_logs: list[dict] = []
+    theta_classical = float(req.theta_classical)
+    I_cl = 0
     for step in steps:
         out = await _apply_step(step, scenario_id, run_id)
+
+        # Methodological rule for classical mode:
+        # y_i,t = I(Δx_i,t >= θ), I_cl = 1 if ∃ t for any non-initiator i != i0.
+        step_cl = await fetch_risk(scenario_id, run_id, method="classical")
+        step_delta_cl = _vector_delta(_sector_risk_vector(step_cl), base_vec_cl)
+        step_I_cl = 1 if any(float(step_delta_cl.get(s, 0.0)) >= theta_classical for s in non_initiators) else 0
+        I_cl = 1 if (I_cl == 1 or step_I_cl == 1) else 0
+
+        out["step_I_cl"] = step_I_cl
+        out["step_delta_x_cl"] = step_delta_cl
         step_logs.append(out)
 
     # --- 5. Read final state x_T for both operators ---
@@ -295,26 +323,20 @@ async def run_scenario(
 
     final_total_cl = float(final_cl.get("total_risk", 0.0))
     final_total_q = float(final_q.get("total_risk", 0.0))
+    final_vec_cl = _sector_risk_vector(final_cl)
+    final_vec_q = _sector_risk_vector(final_q)
+    delta_vec_cl = _vector_delta(final_vec_cl, base_vec_cl)
+    delta_vec_q = _vector_delta(final_vec_q, base_vec_q)
 
     delta_cl = final_total_cl - base_total_cl
     delta_q = final_total_q - base_total_q
 
     # --- Cascade indicators (methodology-aligned) ---
-    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
-
-    # Classical: cascade if any non-initiator is flagged (binary risk == 1) after scenario
-    non_initiator_threshold_classical = 1.0
-    I_cl = 1 if any(
-        float(final_cl.get(f"{s}_risk", 0.0)) >= non_initiator_threshold_classical
-        for s in non_initiators
-    ) else 0
+    # Classical already aggregated as "exists t" over all steps.
 
     # Quantitative: cascade if any non-initiator increased by at least δ
     delta_sector_threshold = 0.1
-    I_q = 1 if any(
-        (float(final_q.get(f"{s}_risk", 0.0)) - float(base_q.get(f"{s}_risk", 0.0))) >= delta_sector_threshold
-        for s in non_initiators
-    ) else 0
+    I_q = 1 if any(float(delta_vec_q.get(s, 0.0)) >= delta_sector_threshold for s in non_initiators) else 0
 
     # --- 6. Return both F_cl and F_q results with new fields ---
     return ScenarioRunResult(
@@ -335,6 +357,9 @@ async def run_scenario(
         delta_q=delta_q,
         I_cl=I_cl,
         I_q=I_q,
+        baseline_x0=base_vec_q,
+        delta_x_q=delta_vec_q,
+        delta_x_cl=delta_vec_cl,
     )
 
 
@@ -354,6 +379,79 @@ def _build_url(base: str, path: str) -> str:
     b = base.rstrip("/")
     p = path if path.startswith("/") else f"/{path}"
     return f"{b}{p}"
+
+
+async def _trigger_dependency_checks_after_outage(
+    source_sector: str,
+    scenario_id: str,
+    run_id: int,
+    step_index: int,
+) -> list[dict]:
+    """After outage, run dependency-check for all sectors depending on source sector."""
+    dependency_map: dict[str, tuple[str, ...]] = {
+        "energy": ("water", "transport"),
+    }
+    dependents = dependency_map.get(source_sector, ())
+    if not dependents:
+        return []
+
+    params = {
+        "scenario_id": scenario_id,
+        "run_id": run_id,
+        "step_index": step_index,
+        "action": f"dependency_check_after_{source_sector}_outage",
+    }
+    results: list[dict] = []
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        for dependent_sector in dependents:
+            base = _service_base_for_sector(dependent_sector)
+            candidates = [
+                _build_url(base, f"/api/v1/{dependent_sector}/check_{source_sector}_dependency"),
+                _build_url(base, f"/{dependent_sector}/check_{source_sector}_dependency"),
+                _build_url(base, f"/api/v1/check_{source_sector}_dependency"),
+                _build_url(base, f"/check_{source_sector}_dependency"),
+            ]
+
+            called = False
+            for url in candidates:
+                try:
+                    resp = await client.post(url, params=params)
+                    if resp.status_code < 400:
+                        results.append({
+                            "sector": dependent_sector,
+                            "status": "ok",
+                            "result": resp.json(),
+                        })
+                        called = True
+                        break
+                except httpx.HTTPError:
+                    continue
+
+            if not called:
+                logger.warning(
+                    f"⚠️ Dependency check failed after outage: source={source_sector}, dependent={dependent_sector}, "
+                    f"scenario_id={scenario_id}, run_id={run_id}"
+                )
+                results.append({"sector": dependent_sector, "status": "failed"})
+
+    return results
+
+
+def _sector_risk_vector(risk_payload: dict) -> dict[str, float]:
+    return {
+        "energy": float(risk_payload.get("energy_risk", 0.0)),
+        "water": float(risk_payload.get("water_risk", 0.0)),
+        "transport": float(risk_payload.get("transport_risk", 0.0)),
+    }
+
+
+def _vector_delta(final_vec: dict[str, float], base_vec: dict[str, float]) -> dict[str, float]:
+    return {
+        "energy": float(final_vec.get("energy", 0.0)) - float(base_vec.get("energy", 0.0)),
+        "water": float(final_vec.get("water", 0.0)) - float(base_vec.get("water", 0.0)),
+        "transport": float(final_vec.get("transport", 0.0)) - float(base_vec.get("transport", 0.0)),
+    }
 
 
 async def _init_sector_state(sector: str, scenario_id: str, run_id: int, force: bool = False) -> None:
@@ -491,6 +589,9 @@ async def run_monte_carlo(req: MonteCarloRequest):
 
         base_risk_cl = await fetch_risk(req.scenario_id, run_id, method="classical")
         base_risk_q = await fetch_risk(req.scenario_id, run_id, method="quantitative")
+        base_vec_cl = _sector_risk_vector(base_risk_cl)
+        base_vec_q = _sector_risk_vector(base_risk_q)
+        BASELINE_VECTORS[(req.scenario_id, run_id)] = base_vec_q
 
         base_total = float(base_risk_q.get("total_risk", 0.0))
         base_total_cl = float(base_risk_cl.get("total_risk", 0.0))
@@ -524,23 +625,20 @@ async def run_monte_carlo(req: MonteCarloRequest):
 
         after_total = float(after_risk_q.get("total_risk", 0.0))
         after_total_cl = float(after_risk_cl.get("total_risk", 0.0))
+        after_vec_cl = _sector_risk_vector(after_risk_cl)
+        after_vec_q = _sector_risk_vector(after_risk_q)
+        delta_vec_cl = _vector_delta(after_vec_cl, base_vec_cl)
+        delta_vec_q = _vector_delta(after_vec_q, base_vec_q)
 
         # --- Cascade indicators ---
         initiator = req.sector
         non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
 
-        # Classical: cascade if any non-initiator has binary risk >= threshold (usually 1.0)
-        I_cl = 1 if any(
-            float(after_risk_cl.get(f"{s}_risk", 0.0)) >= req.non_initiator_threshold_classical
-            for s in non_initiators
-        ) else 0
+        # Classical by definition: y_i,t = I(Δx_i,t >= θ)
+        I_cl = 1 if any(float(delta_vec_cl.get(s, 0.0)) >= req.theta_classical for s in non_initiators) else 0
 
         # Quantitative: cascade if any non-initiator sector risk increased by at least δ
-        I_q = 1 if any(
-            (float(after_risk_q.get(f"{s}_risk", 0.0)) - float(base_risk_q.get(f"{s}_risk", 0.0)))
-            >= req.delta_sector_threshold
-            for s in non_initiators
-        ) else 0
+        I_q = 1 if any(float(delta_vec_q.get(s, 0.0)) >= req.delta_sector_threshold for s in non_initiators) else 0
 
         effective_delta = after_total - base_total
         after = after_total

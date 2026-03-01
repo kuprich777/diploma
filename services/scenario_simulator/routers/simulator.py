@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 import time
+import hashlib
+import json
 
 import httpx
 import random
@@ -253,6 +255,84 @@ def _generate_run_id() -> int:
     """
     return int(f"{time.time_ns()}{random.randint(100, 999)}")
 
+
+def _derive_seed(scenario_id: str, run_id: int, explicit_seed: int | None = None) -> int:
+    if explicit_seed is not None:
+        return int(explicit_seed)
+    digest = hashlib.sha256(f"{scenario_id}:{run_id}".encode("utf-8")).hexdigest()
+    return int(digest[:16], 16)
+
+
+def _cache_key_for_run(
+    *,
+    scenario_id: str,
+    method: str,
+    duration: int | None,
+    theta: float,
+    delta_threshold: float,
+    matrix_A_version: str | None,
+    weights_version: str | None,
+    run_id: int,
+    seed: int,
+) -> str:
+    return "|".join(
+        [
+            f"scenario={scenario_id}",
+            f"method={method}",
+            f"duration={duration if duration is not None else 'na'}",
+            f"theta={theta:.6f}",
+            f"delta_threshold={delta_threshold:.6f}",
+            f"A={matrix_A_version or 'na'}",
+            f"w={weights_version or 'na'}",
+            f"run_id={run_id}",
+            f"seed={seed}",
+        ]
+    )
+
+
+def _x0_hash(base_vec: dict[str, float]) -> str:
+    payload = json.dumps(base_vec, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _randomize_steps_for_run(
+    *,
+    steps: list[ScenarioStep],
+    rng: random.Random,
+    stochastic_scale: float,
+) -> tuple[list[ScenarioStep], dict[str, float]]:
+    if stochastic_scale <= 0.0:
+        return steps, {}
+
+    effective: dict[str, float] = {}
+    randomized_steps: list[ScenarioStep] = []
+    for step in steps:
+        params = dict(step.params or {})
+        if step.action in {"outage", "dependency_check"} and "source_duration" in params:
+            src = max(1.0, float(params.get("source_duration", 1.0)))
+            noise = rng.gauss(0.0, stochastic_scale)
+            params["source_duration"] = max(1, int(round(src * (1.0 + noise))))
+            effective[f"step_{step.step_index}_source_duration"] = float(params["source_duration"])
+        if step.action == "outage" and "duration" in params:
+            base_duration = max(1.0, float(params.get("duration", 1.0)))
+            noise = rng.gauss(0.0, stochastic_scale)
+            params["duration"] = max(1, int(round(base_duration * (1.0 + noise))))
+            effective[f"step_{step.step_index}_duration"] = float(params["duration"])
+        if step.action == "load_increase" and "amount" in params:
+            base_amount = max(0.0, float(params.get("amount", 0.0)))
+            noise = rng.gauss(0.0, stochastic_scale)
+            params["amount"] = max(0.0, base_amount * (1.0 + noise))
+            effective[f"step_{step.step_index}_amount"] = float(params["amount"])
+        randomized_steps.append(
+            ScenarioStep(
+                step_index=step.step_index,
+                sector=step.sector,
+                action=step.action,
+                params=params,
+            )
+        )
+    return randomized_steps, effective
+
 @router.get("/catalog", response_model=ScenarioCatalog)
 async def get_scenario_catalog() -> ScenarioCatalog:
     scenarios: list[CatalogScenario] = []
@@ -291,6 +371,13 @@ async def run_scenario(
         steps = req.steps
 
     steps = sorted(steps, key=lambda s: s.step_index)
+    seed = _derive_seed(scenario_id, run_id, req.seed)
+    rng = random.Random(seed)
+    steps, randomized_params = _randomize_steps_for_run(
+        steps=steps,
+        rng=rng,
+        stochastic_scale=float(req.stochastic_scale),
+    )
 
     # Initiator i0 is defined by the first step's sector
     if not steps:
@@ -314,9 +401,10 @@ async def run_scenario(
     # --- 3. Read initial state x_0 for both methods ---
     base_cl = await fetch_risk(scenario_id, run_id, method="classical")
     base_q = await fetch_risk(scenario_id, run_id, method="quantitative")
-    base_vec_cl = _sector_risk_vector(base_cl)
-    base_vec_q = _sector_risk_vector(base_q)
-    BASELINE_VECTORS[(scenario_id, run_id)] = base_vec_q
+    base_vec_cl = dict(_sector_risk_vector(base_cl))
+    base_vec_q = dict(_sector_risk_vector(base_q))
+    BASELINE_VECTORS[(scenario_id, run_id)] = dict(base_vec_q)
+    x0_hash = _x0_hash(base_vec_q)
 
     base_total_cl = float(base_cl.get("total_risk", 0.0))
     base_total_q = float(base_q.get("total_risk", 0.0))
@@ -362,10 +450,37 @@ async def run_scenario(
     delta_sector_threshold = 0.1
     I_q = 1 if any(float(delta_vec_q.get(s, 0.0)) >= delta_sector_threshold for s in non_initiators) else 0
 
+    cache_key = _cache_key_for_run(
+        scenario_id=scenario_id,
+        method="both",
+        duration=max((int(st.params.get("duration", 0)) for st in steps if "duration" in (st.params or {})), default=0),
+        theta=theta_classical,
+        delta_threshold=delta_sector_threshold,
+        matrix_A_version=matrix_A_version,
+        weights_version=weights_version,
+        run_id=run_id,
+        seed=seed,
+    )
+    logger.info(
+        "🧪 run diagnostics: scenario_id=%s run_id=%s seed=%s x0_hash=%s cache_key=%s cache_hit=%s randomized_params=%s",
+        scenario_id,
+        run_id,
+        seed,
+        x0_hash,
+        cache_key,
+        False,
+        randomized_params,
+    )
+
     # --- 6. Return both F_cl and F_q results with new fields ---
     return ScenarioRunResult(
         scenario_id=scenario_id,
         run_id=run_id,
+        seed=seed,
+        cache_key=cache_key,
+        cache_hit=False,
+        randomized_params=randomized_params or None,
+        x0_hash=x0_hash,
         initiator=initiator,
         matrix_A_version=matrix_A_version,
         weights_version=weights_version,
@@ -638,10 +753,12 @@ async def run_monte_carlo(req: MonteCarloRequest):
     for i in range(1, req.runs + 1):
         # методологически: r = start_run_id..start_run_id+runs-1
         run_id = int(req.start_run_id) + (i - 1)
-        duration = random.randint(req.duration_min, req.duration_max)
+        seed = _derive_seed(req.scenario_id, run_id, req.base_seed + i - 1 if req.base_seed is not None else None)
+        rng = random.Random(seed)
+        duration = rng.randint(req.duration_min, req.duration_max)
         dependency_multiplier = 1.0
         if float(getattr(req, "stochastic_scale", 0.0)) > 0.0:
-            noise = random.gauss(0.0, float(req.stochastic_scale))
+            noise = rng.gauss(0.0, float(req.stochastic_scale))
             dependency_multiplier = max(0.0, 1.0 + noise)
 
         steps = _build_mc_steps(req, duration, dependency_multiplier=dependency_multiplier)
@@ -649,10 +766,12 @@ async def run_monte_carlo(req: MonteCarloRequest):
             ScenarioRequest(
                 scenario_id=req.scenario_id,
                 run_id=run_id,
+                seed=seed,
                 method="both",
                 steps=steps,
                 init_all_sectors=True,
                 theta_classical=req.theta_classical,
+                stochastic_scale=req.stochastic_scale,
             ),
             use_catalog=False,
         )
@@ -689,6 +808,11 @@ async def run_monte_carlo(req: MonteCarloRequest):
             delta_vec_cl=delta_vec_cl,
             theta_classical=req.theta_classical,
             delta_sector_threshold=req.delta_sector_threshold,
+            seed=scenario_res.seed,
+            cache_key=scenario_res.cache_key,
+            cache_hit=scenario_res.cache_hit,
+            randomized_params=scenario_res.randomized_params,
+            x0_hash=scenario_res.x0_hash,
         )
 
         runs_data.append(

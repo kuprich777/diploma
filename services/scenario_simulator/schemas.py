@@ -48,6 +48,11 @@ class ScenarioRequest(BaseModel):
         ge=1,
         description="Номер прогона r. Если не указан, генерируется автоматически в контуре Monte-Carlo или run_scenario"
     )
+    seed: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Явный seed для стохастических компонентов прогона. Если не задан, детерминированно вычисляется из (scenario_id, run_id)."
+    )
     method: Optional[Literal["classical", "quantitative", "both"]] = Field(
         default="both",
         description="Метод расчёта риска: classical, quantitative или оба (для сравнительного эксперимента)"
@@ -82,6 +87,11 @@ class ScenarioRunResult(BaseModel):
     # --- идентификаторы экспериментальной единицы ---
     scenario_id: str = Field(description="Идентификатор сценария s ∈ S")
     run_id: int = Field(description="Номер прогона r")
+    seed: Optional[int] = Field(default=None, description="Фактический seed, использованный в данном прогоне")
+    cache_key: Optional[str] = Field(default=None, description="Диагностический ключ кэша результатов прогона")
+    cache_hit: Optional[bool] = Field(default=None, description="Признак попадания в кэш результатов прогона")
+    randomized_params: Optional[Dict[str, Any]] = Field(default=None, description="Фактические стохастические параметры, использованные в прогоне")
+    x0_hash: Optional[str] = Field(default=None, description="Хеш baseline-вектора x0 для диагностики переинициализации")
     initiator: Literal["energy", "water", "transport"] = Field(
         description="Инициирующий сектор i0 (источник сценарного воздействия)"
     )
@@ -146,6 +156,11 @@ class MonteCarloRequest(BaseModel):
         ge=1,
         description="Начальный номер прогона r0. В Monte-Carlo будут использованы run_id = r0..r0+runs-1"
     )
+    base_seed: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Базовый seed для серии Monte-Carlo. Если не задан, seed каждого прогона вычисляется из (scenario_id, run_id)."
+    )
     sector: Literal["energy", "water", "transport"] = Field(
         description="Сектор, над которым проводится Monte-Carlo моделирование"
     )
@@ -207,6 +222,11 @@ class MonteCarloRun(BaseModel):
     scenario_id: str = Field(description="Идентификатор сценария")
     run_id: int = Field(description="Номер прогона Monte-Carlo")
     run: int = Field(ge=1, description="Порядковый номер прогона внутри Monte-Carlo")
+    seed: Optional[int] = Field(default=None, description="Фактический seed прогона")
+    cache_key: Optional[str] = Field(default=None, description="Диагностический ключ кэша результатов прогона")
+    cache_hit: Optional[bool] = Field(default=None, description="Признак попадания в кэш результатов прогона")
+    randomized_params: Optional[Dict[str, Any]] = Field(default=None, description="Фактические стохастические параметры прогона")
+    x0_hash: Optional[str] = Field(default=None, description="Хеш baseline-вектора x0")
     before: float = Field(description="Интегральный риск до события")
     after: float = Field(description="Интегральный риск после события")
     delta: float = Field(description="Изменение риска Δ")

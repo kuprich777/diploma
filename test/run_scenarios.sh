@@ -41,6 +41,7 @@ BASE_RUN_ID="${BASE_RUN_ID:-$(date +%s)}"
 : "${MONTE_CARLO_START_RUN_ID:=$((BASE_RUN_ID + 1000))}"
 : "${MONTE_CARLO_MIN_DURATION:=5}"
 : "${MONTE_CARLO_MAX_DURATION:=30}"
+: "${MONTE_CARLO_STOCHASTIC_SCALE:=0.0}"
 : "${MONTE_CARLO_SECTOR:=energy}"
 : "${MONTE_CARLO_ACTION:=outage}"
 
@@ -117,10 +118,10 @@ request_json "energy simulate_outage (manual run)" -X POST \
   -d "{\"reason\":\"${OUTAGE_REASON}\",\"duration\":${OUTAGE_DURATION}}"
 
 request_json "water check_energy_dependency (manual run)" -X POST \
-  "${WATER_BASE}/check_energy_dependency?scenario_id=${SCENARIO_ID}&run_id=${MANUAL_RUN_ID}&step_index=2&action=dependency_check"
+  "${WATER_BASE}/check_energy_dependency?scenario_id=${SCENARIO_ID}&run_id=${MANUAL_RUN_ID}&step_index=2&action=dependency_check&source_duration=${OUTAGE_DURATION}"
 
 request_json "transport check_energy_dependency (manual run)" -X POST \
-  "${TRANSPORT_BASE}/check_energy_dependency?scenario_id=${SCENARIO_ID}&run_id=${MANUAL_RUN_ID}&step_index=2&action=dependency_check"
+  "${TRANSPORT_BASE}/check_energy_dependency?scenario_id=${SCENARIO_ID}&run_id=${MANUAL_RUN_ID}&step_index=3&action=dependency_check&source_duration=${OUTAGE_DURATION}"
 
 request_json "risk after manual outage" "${RISK_BASE}/current?scenario_id=${SCENARIO_ID}&run_id=${MANUAL_RUN_ID}&method=${RISK_METHOD}"
 MANUAL_AFTER="$(json_get "$LAST_RESPONSE" "total_risk")"
@@ -153,7 +154,7 @@ echo "NOTE: transport load scenario is intentionally an intra-sector control; wi
 # 3b) Custom cascade scenario on separate run_id (explicit dependency checks)
 request_json "run custom cascade scenario (isolated run_id)" -X POST "${SIM_BASE}/run_scenario?use_catalog=false" \
   -H 'Content-Type: application/json' \
-  -d "{\"scenario_id\":\"qa_custom_energy_cascade\",\"run_id\":${CUSTOM_CASCADE_RUN_ID},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"energy\",\"action\":\"outage\",\"params\":{\"duration\":${OUTAGE_DURATION},\"reason\":\"custom_cascade\"}},{\"step_index\":2,\"sector\":\"water\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\"}},{\"step_index\":3,\"sector\":\"transport\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\"}}]}"
+  -d "{\"scenario_id\":\"qa_custom_energy_cascade\",\"run_id\":${CUSTOM_CASCADE_RUN_ID},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"energy\",\"action\":\"outage\",\"params\":{\"duration\":${OUTAGE_DURATION},\"reason\":\"custom_cascade\"}},{\"step_index\":2,\"sector\":\"water\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\",\"source_duration\":${OUTAGE_DURATION}}},{\"step_index\":3,\"sector\":\"transport\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\",\"source_duration\":${OUTAGE_DURATION}}}]}"
 CUSTOM_CASCADE_I_CL="$(json_get "$LAST_RESPONSE" "I_cl")"
 CUSTOM_CASCADE_I_Q="$(json_get "$LAST_RESPONSE" "I_q")"
 echo "custom_cascade_indicators: I_cl=${CUSTOM_CASCADE_I_CL}, I_q=${CUSTOM_CASCADE_I_Q}, run_id=${CUSTOM_CASCADE_RUN_ID}"
@@ -176,7 +177,7 @@ echo "force_baseline=${FORCE_BASELINE}, init_all_before=${INIT_ALL_BEFORE}"
 # 5) Monte Carlo (N>=100) + duration impact stats
 request_json "monte_carlo" -X POST "${SIM_BASE}/monte_carlo" \
   -H 'Content-Type: application/json' \
-  -d "{\"scenario_id\":\"${SCENARIO_ID}\",\"sector\":\"${MONTE_CARLO_SECTOR}\",\"mode\":\"real\",\"runs\":${MONTE_CARLO_RUNS},\"start_run_id\":${MONTE_CARLO_START_RUN_ID},\"duration_min\":${MONTE_CARLO_MIN_DURATION},\"duration_max\":${MONTE_CARLO_MAX_DURATION},\"initiator_action\":\"${MONTE_CARLO_ACTION}\"}"
+  -d "{\"scenario_id\":\"${SCENARIO_ID}\",\"sector\":\"${MONTE_CARLO_SECTOR}\",\"mode\":\"real\",\"runs\":${MONTE_CARLO_RUNS},\"start_run_id\":${MONTE_CARLO_START_RUN_ID},\"duration_min\":${MONTE_CARLO_MIN_DURATION},\"duration_max\":${MONTE_CARLO_MAX_DURATION},\"initiator_action\":\"${MONTE_CARLO_ACTION}\",\"stochastic_scale\":${MONTE_CARLO_STOCHASTIC_SCALE}}"
 
 JSON_MC="$LAST_RESPONSE" python - <<'PY'
 import json
@@ -209,6 +210,35 @@ means = {k: (fmean(v) if v else None) for k, v in bins.items()}
 print(f"MC diagnostics: corr(duration, ΔR)={corr:.6f}")
 print("MC bin means ΔR:", means)
 PY
+
+# 5b) MC parity check with run_scenario for S1 at duration=30 (deterministic)
+PARITY_RUN_ID="$((MONTE_CARLO_START_RUN_ID + MONTE_CARLO_RUNS + 1))"
+MC_PARITY_START_RUN_ID="$((MONTE_CARLO_START_RUN_ID + MONTE_CARLO_RUNS + 1000))"
+
+request_json "run_scenario parity baseline (S1, duration=30)" -X POST "${SIM_BASE}/run_scenario?use_catalog=true" \
+  -H 'Content-Type: application/json' \
+  -d "{\"scenario_id\":\"S1_energy_outage\",\"run_id\":${PARITY_RUN_ID},\"init_all_sectors\":true}"
+PARITY_I_CL="$(json_get "$LAST_RESPONSE" "I_cl")"
+PARITY_I_Q="$(json_get "$LAST_RESPONSE" "I_q")"
+PARITY_AFTER="$(json_get "$LAST_RESPONSE" "after")"
+
+request_json "mc parity deterministic (duration=30)" -X POST "${SIM_BASE}/monte_carlo" \
+  -H 'Content-Type: application/json' \
+  -d "{\"scenario_id\":\"S1_energy_outage\",\"sector\":\"energy\",\"mode\":\"real\",\"runs\":100,\"start_run_id\":${MC_PARITY_START_RUN_ID},\"duration_min\":30,\"duration_max\":30,\"initiator_action\":\"outage\",\"stochastic_scale\":0.0}"
+MC_PARITY_AFTER="$(json_get "$LAST_RESPONSE" "runs_data.0.after")"
+MC_PARITY_I_CL="$(json_get "$LAST_RESPONSE" "runs_data.0.I_cl")"
+MC_PARITY_I_Q="$(json_get "$LAST_RESPONSE" "runs_data.0.I_q")"
+
+assert_close "$PARITY_AFTER" "$MC_PARITY_AFTER" "1e-9"
+if [[ "$PARITY_I_CL" != "1" || "$PARITY_I_Q" != "1" ]]; then
+  echo "run_scenario parity baseline failed: expected I_cl=1 and I_q=1, got I_cl=${PARITY_I_CL}, I_q=${PARITY_I_Q}"
+  exit 1
+fi
+if [[ "$MC_PARITY_I_CL" != "1" || "$MC_PARITY_I_Q" != "1" ]]; then
+  echo "Monte-Carlo parity failed: expected I_cl=1 and I_q=1, got I_cl=${MC_PARITY_I_CL}, I_q=${MC_PARITY_I_Q}"
+  exit 1
+fi
+echo "parity_ok: run_scenario_after=${PARITY_AFTER}, mc_after=${MC_PARITY_AFTER}, I_cl=${MC_PARITY_I_CL}, I_q=${MC_PARITY_I_Q}"
 
 # 6) Negative checks
 request_json "negative: unknown scenario" -X POST "${SIM_BASE}/run_scenario?use_catalog=true" \

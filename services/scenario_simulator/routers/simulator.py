@@ -421,6 +421,13 @@ def _sector_risk_vector(risk_payload: dict) -> dict[str, float]:
     }
 
 
+def outage_impact_from_duration(duration: int, max_duration: int) -> float:
+    """Monotonic outage impact in [0,1] without centering."""
+    if max_duration <= 0:
+        return 0.0
+    return max(0.0, min(1.0, float(duration) / float(max_duration)))
+
+
 def _vector_delta(final_vec: dict[str, float], base_vec: dict[str, float]) -> dict[str, float]:
     return {
         "energy": float(final_vec.get("energy", 0.0)) - float(base_vec.get("energy", 0.0)),
@@ -452,6 +459,60 @@ def compute_duration_delta_correlation(durations: list[int], deltas: list[float]
         return float(statistics.correlation(durations, deltas))
     except Exception:
         return None
+
+
+def _build_mc_steps(req: MonteCarloRequest, duration: int, dependency_multiplier: float = 1.0) -> list[ScenarioStep]:
+    """Build MC steps so each run is executed by the same scenario executor as run_scenario."""
+    initiator_action = getattr(req, "initiator_action", "outage")
+
+    if initiator_action == "outage":
+        outage_duration = max(1, int(round(duration * dependency_multiplier)))
+        if req.sector == "energy":
+            return [
+                ScenarioStep(
+                    step_index=1,
+                    sector="energy",
+                    action="outage",
+                    params={"duration": outage_duration, "reason": "mc_outage"},
+                ),
+                ScenarioStep(
+                    step_index=2,
+                    sector="water",
+                    action="dependency_check",
+                    params={"source_sector": "energy", "source_duration": outage_duration},
+                ),
+                ScenarioStep(
+                    step_index=3,
+                    sector="transport",
+                    action="dependency_check",
+                    params={"source_sector": "energy", "source_duration": outage_duration},
+                ),
+            ]
+
+        return [
+            ScenarioStep(
+                step_index=1,
+                sector=req.sector,
+                action="outage",
+                params={"duration": outage_duration, "reason": "mc_outage"},
+            ),
+        ]
+
+    if initiator_action == "load_increase":
+        amount = float(getattr(req, "load_amount", 0.25))
+        noisy_amount = max(0.0, amount * dependency_multiplier)
+        return [
+            ScenarioStep(
+                step_index=1,
+                sector=req.sector,
+                action="load_increase",
+                params={"amount": noisy_amount},
+            ),
+        ]
+
+    raise HTTPException(status_code=400, detail=f"Unknown initiator_action: {initiator_action}")
+
+
 async def _init_sector_state(sector: str, scenario_id: str, run_id: int, force: bool = False) -> None:
     base = _service_base_for_sector(sector)
     # try common prefixes
@@ -578,88 +639,37 @@ async def run_monte_carlo(req: MonteCarloRequest):
         # методологически: r = start_run_id..start_run_id+runs-1
         run_id = int(req.start_run_id) + (i - 1)
         duration = random.randint(req.duration_min, req.duration_max)
+        dependency_multiplier = 1.0
+        if float(getattr(req, "stochastic_scale", 0.0)) > 0.0:
+            noise = random.gauss(0.0, float(req.stochastic_scale))
+            dependency_multiplier = max(0.0, 1.0 + noise)
 
-        # Real mode (only)
-        # Initialize all sector states
-        await _init_sector_state("energy", req.scenario_id, run_id, force=True)
-        await _init_sector_state("water", req.scenario_id, run_id, force=True)
-        await _init_sector_state("transport", req.scenario_id, run_id, force=True)
+        steps = _build_mc_steps(req, duration, dependency_multiplier=dependency_multiplier)
+        scenario_res = await run_scenario(
+            ScenarioRequest(
+                scenario_id=req.scenario_id,
+                run_id=run_id,
+                method="both",
+                steps=steps,
+                init_all_sectors=True,
+                theta_classical=req.theta_classical,
+            ),
+            use_catalog=False,
+        )
 
-        base_risk_cl = await fetch_risk(req.scenario_id, run_id, method="classical")
-        base_risk_q = await fetch_risk(req.scenario_id, run_id, method="quantitative")
-        base_vec_cl = _sector_risk_vector(base_risk_cl)
-        base_vec_q = _sector_risk_vector(base_risk_q)
-        BASELINE_VECTORS[(req.scenario_id, run_id)] = base_vec_q
-
-        base_total = float(base_risk_q.get("total_risk", 0.0))
-        base_total_cl = float(base_risk_cl.get("total_risk", 0.0))
-
-        initiator_action = getattr(req, "initiator_action", "outage")
-
-        step_vecs_cl: list[dict[str, float]] = []
-
-        if initiator_action == "outage":
-            step = ScenarioStep(
-                step_index=1,
-                sector=req.sector,
-                action="outage",
-                params={"duration": duration, "reason": "mc_outage"},
-            )
-            out = await _apply_step(step, req.scenario_id, run_id)
-
-            if bool(getattr(req, "auto_dependency_checks", False)) and req.sector == "energy":
-                source_degradation = float(out.get("degradation", min(1.0, duration / 30.0)))
-                for idx, dependent in enumerate(("water", "transport"), start=2):
-                    dep_step = ScenarioStep(
-                        step_index=idx,
-                        sector=dependent,
-                        action="dependency_check",
-                        params={
-                            "source_sector": "energy",
-                            "source_duration": duration,
-                            "source_degradation": source_degradation,
-                        },
-                    )
-                    await _apply_step(dep_step, req.scenario_id, run_id)
-
-        elif initiator_action == "load_increase":
-            amount = float(getattr(req, "load_amount", 0.25))
-            step = ScenarioStep(
-                step_index=1,
-                sector=req.sector,
-                action="load_increase",
-                params={"amount": amount},
-            )
-            await _apply_step(step, req.scenario_id, run_id)
-
-        else:
-            raise HTTPException(status_code=400, detail=f"Unknown initiator_action: {initiator_action}")
-
-        step_cl = await fetch_risk(req.scenario_id, run_id, method="classical")
-        step_vecs_cl.append(_sector_risk_vector(step_cl))
-
-        after_risk_cl = await fetch_risk(req.scenario_id, run_id, method="classical")
-        after_risk_q = await fetch_risk(req.scenario_id, run_id, method="quantitative")
-
-        after_total = float(after_risk_q.get("total_risk", 0.0))
-        after_total_cl = float(after_risk_cl.get("total_risk", 0.0))
-        after_vec_cl = _sector_risk_vector(after_risk_cl)
-        after_vec_q = _sector_risk_vector(after_risk_q)
-        delta_vec_cl = _vector_delta(after_vec_cl, base_vec_cl)
-        delta_vec_q = _vector_delta(after_vec_q, base_vec_q)
-
-        # --- Cascade indicators ---
-        initiator = req.sector
-        non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
-
-        # Classical by definition: y_i,t = I(Δx_i,t >= θ)
-        I_cl = compute_I_cl_over_steps(base_vec_cl, step_vecs_cl, req.theta_classical, initiator)
-
-        # Quantitative: cascade if any non-initiator sector risk increased by at least δ
-        I_q = 1 if any(float(delta_vec_q.get(s, 0.0)) >= req.delta_sector_threshold for s in non_initiators) else 0
-
-        effective_delta = after_total - base_total
-        after = after_total
+        base_total = float(scenario_res.before)
+        after = float(scenario_res.after)
+        effective_delta = float(scenario_res.delta)
+        base_total_cl = float(scenario_res.method_cl_total_before or 0.0)
+        after_total_cl = float(scenario_res.method_cl_total_after or 0.0)
+        base_vec_q = dict(scenario_res.before_vec_q or {})
+        after_vec_q = dict(scenario_res.after_vec_q or {})
+        delta_vec_q = dict(scenario_res.delta_vec_q or {})
+        base_vec_cl = dict(scenario_res.before_vec_cl or {})
+        after_vec_cl = dict(scenario_res.after_vec_cl or {})
+        delta_vec_cl = dict(scenario_res.delta_vec_cl or {})
+        I_cl = int(scenario_res.I_cl or 0)
+        I_q = int(scenario_res.I_q or 0)
 
         deltas.append(effective_delta)
 

@@ -64,6 +64,13 @@ class ScenarioRequest(BaseModel):
         default=False,
         description="[DEPRECATED] Автоматический dependency_check отключён; используйте явные шаги action=dependency_check"
     )
+
+    stochastic_scale: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Опциональный уровень стохастики Monte-Carlo: относительный шум N(0, stochastic_scale) для параметров воздействия. 0.0 = полностью детерминированный прогон."
+    )
     theta_classical: float = Field(
         default=0.3,
         ge=0.0,
@@ -151,12 +158,12 @@ class MonteCarloRequest(BaseModel):
     duration_min: int = Field(
         default=5,
         ge=1,
-        description="Минимальная длительность outage в минутах"
+        description="Минимальная длительность outage в минутах (используется напрямую как интенсивность воздействия без центрирования)"
     )
     duration_max: int = Field(
         default=60,
         ge=1,
-        description="Максимальная длительность outage в минутах"
+        description="Максимальная длительность outage в минутах (монотонно усиливает воздействие)"
     )
     initiator_action: Literal["outage", "load_increase"] = Field(
         default="outage",
@@ -186,6 +193,13 @@ class MonteCarloRequest(BaseModel):
     auto_dependency_checks: bool = Field(
         default=False,
         description="[DEPRECATED] Автоматический dependency_check отключён; используйте явные шаги action=dependency_check"
+    )
+
+    stochastic_scale: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Опциональный уровень стохастики Monte-Carlo: относительный шум N(0, stochastic_scale) для параметров воздействия. 0.0 = полностью детерминированный прогон."
     )
 
 

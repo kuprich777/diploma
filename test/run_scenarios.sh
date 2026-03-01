@@ -39,6 +39,14 @@ BASE_RUN_ID="${BASE_RUN_ID:-$(date +%s)}"
 
 : "${MONTE_CARLO_RUNS:=300}"
 : "${MONTE_CARLO_START_RUN_ID:=$((BASE_RUN_ID + 1000))}"
+
+# Optional deterministic seeds for simulator endpoints
+: "${CATALOG_SEED:=${CATALOG_RUN_ID}}"
+: "${CUSTOM_SEED:=${CUSTOM_RUN_ID}}"
+: "${CUSTOM_CASCADE_SEED:=${CUSTOM_CASCADE_RUN_ID}}"
+: "${INIT_SCENARIO_SEED:=${INIT_SCENARIO_RUN_ID}}"
+: "${MONTE_CARLO_BASE_SEED:=${MONTE_CARLO_START_RUN_ID}}"
+: "${PARITY_SEED:=$((MONTE_CARLO_START_RUN_ID + MONTE_CARLO_RUNS + 1))}"
 : "${MONTE_CARLO_MIN_DURATION:=5}"
 : "${MONTE_CARLO_MAX_DURATION:=30}"
 : "${MONTE_CARLO_STOCHASTIC_SCALE:=0.0}"
@@ -131,15 +139,18 @@ echo "manual_after=${MANUAL_AFTER}"
 request_json "simulator catalog" "${SIM_BASE}/catalog"
 request_json "run catalog scenario (isolated run_id)" -X POST "${SIM_BASE}/run_scenario?use_catalog=true" \
   -H 'Content-Type: application/json' \
-  -d "{\"scenario_id\":\"${SCENARIO_ID}\",\"run_id\":${CATALOG_RUN_ID},\"init_all_sectors\":true}"
+  -d "{\"scenario_id\":\"${SCENARIO_ID}\",\"run_id\":${CATALOG_RUN_ID},\"seed\":${CATALOG_SEED},\"init_all_sectors\":true}"
 CATALOG_BEFORE="$(json_get "$LAST_RESPONSE" "before")"
 CATALOG_RUN_ID_RESP="$(json_get "$LAST_RESPONSE" "run_id")"
-echo "catalog_before=${CATALOG_BEFORE}, catalog_run_id=${CATALOG_RUN_ID_RESP}"
+CATALOG_SEED_RESP="$(json_get "$LAST_RESPONSE" "seed")"
+CATALOG_CACHE_KEY="$(json_get "$LAST_RESPONSE" "cache_key")"
+echo "catalog_before=${CATALOG_BEFORE}, catalog_run_id=${CATALOG_RUN_ID_RESP}, seed=${CATALOG_SEED_RESP}"
+echo "catalog_cache_key=${CATALOG_CACHE_KEY}"
 
 # 3) Custom scenario on separate run_id
 request_json "run custom scenario (isolated run_id)" -X POST "${SIM_BASE}/run_scenario?use_catalog=false" \
   -H 'Content-Type: application/json' \
-  -d "{\"scenario_id\":\"qa_custom_transport\",\"run_id\":${CUSTOM_RUN_ID},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"transport\",\"action\":\"load_increase\",\"params\":{\"amount\":${TRANSPORT_LOAD_AMOUNT}}}]}"
+  -d "{\"scenario_id\":\"qa_custom_transport\",\"run_id\":${CUSTOM_RUN_ID},\"seed\":${CUSTOM_SEED},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"transport\",\"action\":\"load_increase\",\"params\":{\"amount\":${TRANSPORT_LOAD_AMOUNT}}}]}"
 CUSTOM_BEFORE="$(json_get "$LAST_RESPONSE" "before")"
 CUSTOM_RUN_ID_RESP="$(json_get "$LAST_RESPONSE" "run_id")"
 CUSTOM_I_CL="$(json_get "$LAST_RESPONSE" "I_cl")"
@@ -154,7 +165,7 @@ echo "NOTE: transport load scenario is intentionally an intra-sector control; wi
 # 3b) Custom cascade scenario on separate run_id (explicit dependency checks)
 request_json "run custom cascade scenario (isolated run_id)" -X POST "${SIM_BASE}/run_scenario?use_catalog=false" \
   -H 'Content-Type: application/json' \
-  -d "{\"scenario_id\":\"qa_custom_energy_cascade\",\"run_id\":${CUSTOM_CASCADE_RUN_ID},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"energy\",\"action\":\"outage\",\"params\":{\"duration\":${OUTAGE_DURATION},\"reason\":\"custom_cascade\"}},{\"step_index\":2,\"sector\":\"water\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\",\"source_duration\":${OUTAGE_DURATION}}},{\"step_index\":3,\"sector\":\"transport\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\",\"source_duration\":${OUTAGE_DURATION}}}]}"
+  -d "{\"scenario_id\":\"qa_custom_energy_cascade\",\"run_id\":${CUSTOM_CASCADE_RUN_ID},\"seed\":${CUSTOM_CASCADE_SEED},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"energy\",\"action\":\"outage\",\"params\":{\"duration\":${OUTAGE_DURATION},\"reason\":\"custom_cascade\"}},{\"step_index\":2,\"sector\":\"water\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\",\"source_duration\":${OUTAGE_DURATION}}},{\"step_index\":3,\"sector\":\"transport\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\",\"source_duration\":${OUTAGE_DURATION}}}]}"
 CUSTOM_CASCADE_I_CL="$(json_get "$LAST_RESPONSE" "I_cl")"
 CUSTOM_CASCADE_I_Q="$(json_get "$LAST_RESPONSE" "I_q")"
 echo "custom_cascade_indicators: I_cl=${CUSTOM_CASCADE_I_CL}, I_q=${CUSTOM_CASCADE_I_Q}, run_id=${CUSTOM_CASCADE_RUN_ID}"
@@ -168,7 +179,7 @@ FORCE_BASELINE="$(json_get "$LAST_RESPONSE" "total_risk")"
 
 request_json "run_scenario init_all_sectors baseline check" -X POST "${SIM_BASE}/run_scenario?use_catalog=false" \
   -H 'Content-Type: application/json' \
-  -d "{\"scenario_id\":\"qa_init_compare\",\"run_id\":${INIT_SCENARIO_RUN_ID},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"transport\",\"action\":\"load_increase\",\"params\":{\"amount\":0.0}}]}"
+  -d "{\"scenario_id\":\"qa_init_compare\",\"run_id\":${INIT_SCENARIO_RUN_ID},\"seed\":${INIT_SCENARIO_SEED},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"transport\",\"action\":\"load_increase\",\"params\":{\"amount\":0.0}}]}"
 INIT_ALL_BEFORE="$(json_get "$LAST_RESPONSE" "before")"
 
 assert_close "$FORCE_BASELINE" "$INIT_ALL_BEFORE" "1e-9"
@@ -177,7 +188,7 @@ echo "force_baseline=${FORCE_BASELINE}, init_all_before=${INIT_ALL_BEFORE}"
 # 5) Monte Carlo (N>=100) + duration impact stats
 request_json "monte_carlo" -X POST "${SIM_BASE}/monte_carlo" \
   -H 'Content-Type: application/json' \
-  -d "{\"scenario_id\":\"${SCENARIO_ID}\",\"sector\":\"${MONTE_CARLO_SECTOR}\",\"mode\":\"real\",\"runs\":${MONTE_CARLO_RUNS},\"start_run_id\":${MONTE_CARLO_START_RUN_ID},\"duration_min\":${MONTE_CARLO_MIN_DURATION},\"duration_max\":${MONTE_CARLO_MAX_DURATION},\"initiator_action\":\"${MONTE_CARLO_ACTION}\",\"stochastic_scale\":${MONTE_CARLO_STOCHASTIC_SCALE}}"
+  -d "{\"scenario_id\":\"${SCENARIO_ID}\",\"sector\":\"${MONTE_CARLO_SECTOR}\",\"mode\":\"real\",\"runs\":${MONTE_CARLO_RUNS},\"start_run_id\":${MONTE_CARLO_START_RUN_ID},\"duration_min\":${MONTE_CARLO_MIN_DURATION},\"duration_max\":${MONTE_CARLO_MAX_DURATION},\"initiator_action\":\"${MONTE_CARLO_ACTION}\",\"stochastic_scale\":${MONTE_CARLO_STOCHASTIC_SCALE},\"base_seed\":${MONTE_CARLO_BASE_SEED}}"
 
 JSON_MC="$LAST_RESPONSE" python - <<'PY'
 import json
@@ -209,6 +220,14 @@ means = {k: (fmean(v) if v else None) for k, v in bins.items()}
 
 print(f"MC diagnostics: corr(duration, ΔR)={corr:.6f}")
 print("MC bin means ΔR:", means)
+seeds = [int(r.get("seed", -1)) for r in runs]
+cache_keys = [r.get("cache_key") for r in runs]
+if any(k is None for k in cache_keys):
+    raise SystemExit("Monte-Carlo runs_data must include cache_key for diagnostics")
+if len(set(seeds)) <= 1:
+    raise SystemExit("Monte-Carlo seeds are degenerate: expected >1 unique seed")
+print(f"MC seed diagnostics: unique_seeds={len(set(seeds))}, first_seed={seeds[0]}")
+print(f"MC cache diagnostics: first_cache_key={cache_keys[0]}")
 PY
 
 # 5b) MC parity check with run_scenario for S1 at duration=30 (deterministic)
@@ -217,14 +236,14 @@ MC_PARITY_START_RUN_ID="$((MONTE_CARLO_START_RUN_ID + MONTE_CARLO_RUNS + 1000))"
 
 request_json "run_scenario parity baseline (S1, duration=30)" -X POST "${SIM_BASE}/run_scenario?use_catalog=true" \
   -H 'Content-Type: application/json' \
-  -d "{\"scenario_id\":\"S1_energy_outage\",\"run_id\":${PARITY_RUN_ID},\"init_all_sectors\":true}"
+  -d "{\"scenario_id\":\"S1_energy_outage\",\"run_id\":${PARITY_RUN_ID},\"seed\":${PARITY_SEED},\"init_all_sectors\":true}"
 PARITY_I_CL="$(json_get "$LAST_RESPONSE" "I_cl")"
 PARITY_I_Q="$(json_get "$LAST_RESPONSE" "I_q")"
 PARITY_AFTER="$(json_get "$LAST_RESPONSE" "after")"
 
 request_json "mc parity deterministic (duration=30)" -X POST "${SIM_BASE}/monte_carlo" \
   -H 'Content-Type: application/json' \
-  -d "{\"scenario_id\":\"S1_energy_outage\",\"sector\":\"energy\",\"mode\":\"real\",\"runs\":100,\"start_run_id\":${MC_PARITY_START_RUN_ID},\"duration_min\":30,\"duration_max\":30,\"initiator_action\":\"outage\",\"stochastic_scale\":0.0}"
+  -d "{\"scenario_id\":\"S1_energy_outage\",\"sector\":\"energy\",\"mode\":\"real\",\"runs\":100,\"start_run_id\":${MC_PARITY_START_RUN_ID},\"duration_min\":30,\"duration_max\":30,\"initiator_action\":\"outage\",\"stochastic_scale\":0.0,\"base_seed\":${MC_PARITY_START_RUN_ID}}"
 MC_PARITY_AFTER="$(json_get "$LAST_RESPONSE" "runs_data.0.after")"
 MC_PARITY_I_CL="$(json_get "$LAST_RESPONSE" "runs_data.0.I_cl")"
 MC_PARITY_I_Q="$(json_get "$LAST_RESPONSE" "runs_data.0.I_q")"

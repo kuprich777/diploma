@@ -111,7 +111,7 @@ async def fetch_dependency_matrix_meta() -> dict:
         logger.warning(f"⚠️ Failed to fetch dependency matrix meta from {url}: {e}")
         return {}
 
-async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict:
+async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int, auto_dependency_checks: bool = False) -> dict:
     """Apply one ScenarioStep to a domain microservice.
 
     Contract: every call is tagged with (scenario_id, run_id, step_index, action)
@@ -145,14 +145,17 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
                     resp = await client.post(url, params=q, json=payload)
                     if resp.status_code < 400:
                         result = resp.json()
-                        checks = await _trigger_dependency_checks_after_outage(
-                            source_sector=sector,
-                            scenario_id=scenario_id,
-                            run_id=run_id,
-                            step_index=step.step_index,
-                        )
-                        if checks:
-                            result["dependency_checks"] = checks
+                        if auto_dependency_checks:
+                            checks = await _trigger_dependency_checks_after_outage(
+                                source_sector=sector,
+                                scenario_id=scenario_id,
+                                run_id=run_id,
+                                step_index=step.step_index,
+                                source_duration=duration,
+                                source_degradation=float(result.get("degradation", min(1.0, duration / 30.0))),
+                            )
+                            if checks:
+                                result["dependency_checks"] = checks
                         return result
                 except httpx.HTTPError:
                     continue
@@ -302,16 +305,16 @@ async def run_scenario(
     # Mathematically: x_T = F(x_0, s)
     step_logs: list[dict] = []
     theta_classical = float(req.theta_classical)
-    I_cl = 0
+    step_vectors_cl: list[dict[str, float]] = []
     for step in steps:
-        out = await _apply_step(step, scenario_id, run_id)
+        out = await _apply_step(step, scenario_id, run_id, auto_dependency_checks=req.auto_dependency_checks)
 
         # Methodological rule for classical mode:
         # y_i,t = I(Δx_i,t >= θ), I_cl = 1 if ∃ t for any non-initiator i != i0.
         step_cl = await fetch_risk(scenario_id, run_id, method="classical")
         step_delta_cl = _vector_delta(_sector_risk_vector(step_cl), base_vec_cl)
+        step_vectors_cl.append(_sector_risk_vector(step_cl))
         step_I_cl = 1 if any(float(step_delta_cl.get(s, 0.0)) >= theta_classical for s in non_initiators) else 0
-        I_cl = 1 if (I_cl == 1 or step_I_cl == 1) else 0
 
         out["step_I_cl"] = step_I_cl
         out["step_delta_x_cl"] = step_delta_cl
@@ -332,7 +335,7 @@ async def run_scenario(
     delta_q = final_total_q - base_total_q
 
     # --- Cascade indicators (methodology-aligned) ---
-    # Classical already aggregated as "exists t" over all steps.
+    I_cl = compute_I_cl_over_steps(base_vec_cl, step_vectors_cl, theta_classical, initiator)
 
     # Quantitative: cascade if any non-initiator increased by at least δ
     delta_sector_threshold = 0.1
@@ -358,8 +361,16 @@ async def run_scenario(
         I_cl=I_cl,
         I_q=I_q,
         baseline_x0=base_vec_q,
+        before_vec_q=base_vec_q,
+        after_vec_q=final_vec_q,
+        delta_vec_q=delta_vec_q,
+        before_vec_cl=base_vec_cl,
+        after_vec_cl=final_vec_cl,
+        delta_vec_cl=delta_vec_cl,
         delta_x_q=delta_vec_q,
         delta_x_cl=delta_vec_cl,
+        theta_classical=theta_classical,
+        delta_sector_threshold=delta_sector_threshold,
     )
 
 
@@ -386,6 +397,8 @@ async def _trigger_dependency_checks_after_outage(
     scenario_id: str,
     run_id: int,
     step_index: int,
+    source_duration: int,
+    source_degradation: float,
 ) -> list[dict]:
     """After outage, run dependency-check for all sectors depending on source sector."""
     dependency_map: dict[str, tuple[str, ...]] = {
@@ -400,6 +413,8 @@ async def _trigger_dependency_checks_after_outage(
         "run_id": run_id,
         "step_index": step_index,
         "action": f"dependency_check_after_{source_sector}_outage",
+        "source_duration": source_duration,
+        "source_degradation": source_degradation,
     }
     results: list[dict] = []
 
@@ -454,6 +469,29 @@ def _vector_delta(final_vec: dict[str, float], base_vec: dict[str, float]) -> di
     }
 
 
+
+
+def compute_I_cl_over_steps(
+    base_vec: dict[str, float],
+    step_vecs: list[dict[str, float]],
+    theta: float,
+    initiator: str,
+) -> int:
+    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
+    for step_vec in step_vecs:
+        delta = _vector_delta(step_vec, base_vec)
+        if any(float(delta.get(s, 0.0)) >= theta for s in non_initiators):
+            return 1
+    return 0
+
+
+def compute_duration_delta_correlation(durations: list[int], deltas: list[float]) -> float | None:
+    if len(durations) < 2 or len(set(durations)) <= 1:
+        return None
+    try:
+        return float(statistics.correlation(durations, deltas))
+    except Exception:
+        return None
 async def _init_sector_state(sector: str, scenario_id: str, run_id: int, force: bool = False) -> None:
     base = _service_base_for_sector(sector)
     # try common prefixes
@@ -598,6 +636,8 @@ async def run_monte_carlo(req: MonteCarloRequest):
 
         initiator_action = getattr(req, "initiator_action", "outage")
 
+        step_vecs_cl: list[dict[str, float]] = []
+
         if initiator_action == "outage":
             step = ScenarioStep(
                 step_index=1,
@@ -605,7 +645,7 @@ async def run_monte_carlo(req: MonteCarloRequest):
                 action="outage",
                 params={"duration": duration, "reason": "mc_outage"},
             )
-            await _apply_step(step, req.scenario_id, run_id)
+            await _apply_step(step, req.scenario_id, run_id, auto_dependency_checks=req.auto_dependency_checks)
 
         elif initiator_action == "load_increase":
             amount = float(getattr(req, "load_amount", 0.25))
@@ -615,10 +655,13 @@ async def run_monte_carlo(req: MonteCarloRequest):
                 action="load_increase",
                 params={"amount": amount},
             )
-            await _apply_step(step, req.scenario_id, run_id)
+            await _apply_step(step, req.scenario_id, run_id, auto_dependency_checks=req.auto_dependency_checks)
 
         else:
             raise HTTPException(status_code=400, detail=f"Unknown initiator_action: {initiator_action}")
+
+        step_cl = await fetch_risk(req.scenario_id, run_id, method="classical")
+        step_vecs_cl.append(_sector_risk_vector(step_cl))
 
         after_risk_cl = await fetch_risk(req.scenario_id, run_id, method="classical")
         after_risk_q = await fetch_risk(req.scenario_id, run_id, method="quantitative")
@@ -635,7 +678,7 @@ async def run_monte_carlo(req: MonteCarloRequest):
         non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
 
         # Classical by definition: y_i,t = I(Δx_i,t >= θ)
-        I_cl = 1 if any(float(delta_vec_cl.get(s, 0.0)) >= req.theta_classical for s in non_initiators) else 0
+        I_cl = compute_I_cl_over_steps(base_vec_cl, step_vecs_cl, req.theta_classical, initiator)
 
         # Quantitative: cascade if any non-initiator sector risk increased by at least δ
         I_q = 1 if any(float(delta_vec_q.get(s, 0.0)) >= req.delta_sector_threshold for s in non_initiators) else 0
@@ -653,6 +696,14 @@ async def run_monte_carlo(req: MonteCarloRequest):
             I_cl=I_cl,
             I_q=I_q,
             delta_R=effective_delta,
+            before_vec_q=base_vec_q,
+            after_vec_q=after_vec_q,
+            delta_vec_q=delta_vec_q,
+            before_vec_cl=base_vec_cl,
+            after_vec_cl=after_vec_cl,
+            delta_vec_cl=delta_vec_cl,
+            theta_classical=req.theta_classical,
+            delta_sector_threshold=req.delta_sector_threshold,
         )
 
         runs_data.append(
@@ -700,6 +751,11 @@ async def run_monte_carlo(req: MonteCarloRequest):
         f"🎲 Monte-Carlo done: meanΔ={mean_delta:.4f}, minΔ={min_delta:.4f}, "
         f"maxΔ={max_delta:.4f}, p95Δ={p95_delta:.4f}"
     )
+
+    std_delta = float(statistics.pstdev(deltas)) if len(deltas) > 1 else 0.0
+    if std_delta == 0.0:
+        logger.warning("⚠️ ΔR has zero variance; check duration influence / saturation")
+    duration_correlation = compute_duration_delta_correlation([r.duration for r in runs_data], deltas)
 
     # --- Experiment Registry export (reporting service) ---
     payload = {
@@ -754,4 +810,7 @@ async def run_monte_carlo(req: MonteCarloRequest):
         K_q=K_q,
         Delta_percent=Delta_percent,
         runs_data=runs_data,
+        theta_classical=req.theta_classical,
+        delta_sector_threshold=req.delta_sector_threshold,
+        duration_correlation=duration_correlation,
     )

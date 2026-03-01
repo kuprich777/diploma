@@ -60,6 +60,10 @@ class ScenarioRequest(BaseModel):
         default=True,
         description="Инициализировать базовое состояние всех доменных микросервисов перед сценарием"
     )
+    auto_dependency_checks: bool = Field(
+        default=False,
+        description="Автоматически запускать dependency_check после outage"
+    )
     theta_classical: float = Field(
         default=0.3,
         ge=0.0,
@@ -106,6 +110,15 @@ class ScenarioRunResult(BaseModel):
         default=None,
         description="Вектор приращений Δx_i,T в классическом методе",
     )
+
+    before_vec_q: Optional[Dict[str, float]] = Field(default=None, description="Вектор рисков до сценария (quantitative)")
+    after_vec_q: Optional[Dict[str, float]] = Field(default=None, description="Вектор рисков после сценария (quantitative)")
+    delta_vec_q: Optional[Dict[str, float]] = Field(default=None, description="Приращение вектора рисков (quantitative)")
+    before_vec_cl: Optional[Dict[str, float]] = Field(default=None, description="Вектор рисков до сценария (classical)")
+    after_vec_cl: Optional[Dict[str, float]] = Field(default=None, description="Вектор рисков после сценария (classical)")
+    delta_vec_cl: Optional[Dict[str, float]] = Field(default=None, description="Приращение вектора рисков (classical)")
+    theta_classical: Optional[float] = Field(default=None)
+    delta_sector_threshold: Optional[float] = Field(default=None)
 
     # --- совместимость со старым интерфейсом (используется в визуализациях) ---
     before: Optional[float] = Field(default=None, description="Интегральный риск до сценария (по умолчанию quantitative)")
@@ -170,6 +183,10 @@ class MonteCarloRequest(BaseModel):
         le=1.0,
         description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
     )
+    auto_dependency_checks: bool = Field(
+        default=False,
+        description="Автоматически запускать dependency_check после outage"
+    )
 
 
 class MonteCarloRun(BaseModel):
@@ -190,6 +207,14 @@ class MonteCarloRun(BaseModel):
     I_q: Optional[int] = Field(default=None, description="Индикатор каскада по количественному подходу (0/1)")
 
     delta_R: Optional[float] = Field(default=None, description="ΔR = total_risk(q)_after - total_risk(q)_before")
+    before_vec_q: Optional[Dict[str, float]] = Field(default=None)
+    after_vec_q: Optional[Dict[str, float]] = Field(default=None)
+    delta_vec_q: Optional[Dict[str, float]] = Field(default=None)
+    before_vec_cl: Optional[Dict[str, float]] = Field(default=None)
+    after_vec_cl: Optional[Dict[str, float]] = Field(default=None)
+    delta_vec_cl: Optional[Dict[str, float]] = Field(default=None)
+    theta_classical: Optional[float] = Field(default=None)
+    delta_sector_threshold: Optional[float] = Field(default=None)
 
 
 class MonteCarloResult(BaseModel):
@@ -210,6 +235,9 @@ class MonteCarloResult(BaseModel):
     runs_data: List[MonteCarloRun] = Field(
         description="Подробные результаты каждого прогона Monte-Carlo"
     )
+    theta_classical: Optional[float] = Field(default=None)
+    delta_sector_threshold: Optional[float] = Field(default=None)
+    duration_correlation: Optional[float] = Field(default=None)
 
 
 # --- DTOs for scenario catalog exposure ---

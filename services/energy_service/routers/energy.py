@@ -112,7 +112,8 @@ async def get_energy_status(
     return EnergyStatus(
         production=record.production,
         consumption=record.consumption,
-        is_operational=record.is_operational
+        is_operational=record.is_operational,
+        degradation=compute_energy_risk(record),
     )
 
 @router.get("/risk/current", response_model=EnergyRisk)
@@ -230,10 +231,13 @@ async def simulate_outage(
         raise HTTPException(status_code=404, detail="No records found for given scenario/run")
 
     action = action or "outage"
+    duration_factor = clip01(float(outage.duration) / float(settings.MAX_OUTAGE_DURATION))
+    degraded_production = max(0.0, float(record.production) * (1.0 - 0.85 * duration_factor))
+
     new_record = EnergyRecord(
-        production=record.production,
+        production=degraded_production,
         consumption=record.consumption,
-        is_operational=False,
+        is_operational=duration_factor < 0.98,
         reason=outage.reason,
         duration=outage.duration,
         scenario_id=scenario_id,
@@ -248,6 +252,9 @@ async def simulate_outage(
     logger.warning(f"⚠️ Outage simulated: {outage.reason}, duration {outage.duration} min")
     return {
         "message": f"Outage simulated: {outage.reason}, duration: {outage.duration} minutes",
+        "degradation": risk_after,
+        "operational": new_record.is_operational,
+        "duration": outage.duration,
         **ScenarioStepResult(
             sector="energy",
             scenario_id=scenario_id or "manual",

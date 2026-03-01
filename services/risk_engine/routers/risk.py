@@ -193,10 +193,26 @@ async def fetch_sector_risk(url: str, name: str, scenario_id: Optional[str] = No
                 except (httpx.RequestError, httpx.HTTPStatusError, ValueError, TypeError):
                     continue
 
-            # Fallback to binary status endpoint behavior
+            # Fallback to status endpoint behavior (prefer continuous degradation over binary flag)
             resp = await client.get(url, params=params)
             resp.raise_for_status()
             data = resp.json()
+
+            degradation = data.get("degradation")
+            if degradation is None:
+                degradation = data.get("risk_proxy")
+            if degradation is None and "supply" in data and "demand" in data:
+                demand = float(data.get("demand", 0.0) or 0.0)
+                supply = float(data.get("supply", 0.0) or 0.0)
+                degradation = max(0.0, demand - supply) / max(demand, 1.0)
+            if degradation is None and "load" in data:
+                degradation = float(data.get("load", 0.0) or 0.0)
+
+            if degradation is not None:
+                risk = max(0.0, min(1.0, float(degradation)))
+                logger.debug("🔍 Sector %s: fallback degradation risk=%.3f", name, risk)
+                return risk
+
             is_op = data.get("is_operational")
             if is_op is None:
                 is_op = data.get("operational")

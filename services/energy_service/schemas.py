@@ -10,6 +10,7 @@ class EnergyStatus(BaseModel):
     production: float = Field(ge=0, description="Текущее производство, MW")
     consumption: float = Field(ge=0, description="Текущее потребление, MW")
     is_operational: bool = Field(description="Флаг работоспособности")
+    degradation: float = Field(ge=0.0, le=1.0, default=0.0, description="Нормированная деградация [0..1]")
 
 
 class EnergyRisk(BaseModel):

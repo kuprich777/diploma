@@ -6,13 +6,27 @@ import httpx
 
 from database import get_db
 from models import TransportStatus as TransportStatusModel
-from schemas import TransportStatus, LoadUpdate
+from schemas import TransportStatus, LoadUpdate, TransportRisk
 from utils.logging import setup_logging
 from config import settings
 
 logger = setup_logging()
 
 router = APIRouter(prefix="/api/v1/transport", tags=["transport"])
+
+
+def clip01(value: float) -> float:
+    return max(0.0, min(1.0, float(value)))
+
+
+def compute_transport_degradation(record: TransportStatusModel) -> float:
+    if record is None:
+        return 0.0
+
+    if not bool(record.operational):
+        return 1.0
+
+    return clip01(float(record.load))
 
 
 # ----------------------------
@@ -39,8 +53,7 @@ def mutation_trace(
 
 async def fetch_energy_operational(scenario_id: str, run_id: int) -> bool:
     """Fetch energy status for the SAME experiment key."""
-    # In docker-compose, ENERGY_SERVICE_URL is configured as the full status endpoint.
-    energy_status_url = settings.ENERGY_SERVICE_URL.rstrip("/")
+    energy_status_url = settings.ENERGY_SERVICE_URL.rstrip("/") + "/api/v1/energy/status"
 
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
@@ -79,6 +92,7 @@ def to_dto(record: TransportStatusModel) -> TransportStatus:
         operational=record.operational,
         energy_dependent=record.energy_dependent,
         reason=record.reason,
+        degradation=compute_transport_degradation(record),
     )
 
 
@@ -154,6 +168,20 @@ async def get_transport_status(
     return to_dto(record)
 
 
+
+
+@router.get("/risk/current", response_model=TransportRisk)
+async def get_transport_risk(
+    key: tuple[str, int] = Depends(experiment_key),
+    db: Session = Depends(get_db),
+):
+    scenario_id, run_id = key
+    record = latest_status(db, scenario_id, run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="No transport status found for given experiment key")
+
+    degradation = compute_transport_degradation(record)
+    return TransportRisk(risk=degradation, degradation=degradation)
 @router.post("/update_load")
 async def update_load(
     update: LoadUpdate,
@@ -240,6 +268,8 @@ async def increase_load(
 
 @router.post("/check_energy_dependency")
 async def check_energy_dependency(
+    source_duration: int = Query(default=0, ge=0, description="Длительность outage источника (мин)"),
+    source_degradation: float = Query(default=0.0, ge=0.0, le=1.0, description="Уровень деградации источника"),
     key: tuple[str, int] = Depends(experiment_key),
     trace: tuple[int, str] = Depends(mutation_trace),
     db: Session = Depends(get_db),
@@ -255,20 +285,28 @@ async def check_energy_dependency(
     is_energy_ok = await fetch_energy_operational(scenario_id, run_id)
 
     if not is_energy_ok:
+        source_level = max(float(source_degradation), clip01(float(source_duration) / 30.0))
+        dependency_weight = 0.70
+        impact = clip01(source_level * dependency_weight)
+
+        new_load = clip01(float(record.load) + impact * 0.6)
+        operational = impact < 0.95
+        reason = f"Energy dependency impact={impact:.2f}"
+
         new_record = TransportStatusModel(
             scenario_id=scenario_id,
             run_id=run_id,
-            load=record.load,
-            operational=False,
+            load=new_load,
+            operational=operational,
             energy_dependent=True,
-            reason="Energy service outage",
+            reason=reason,
         )
         db.add(new_record)
         db.commit()
         db.refresh(new_record)
 
         logger.warning(
-            f"🚨 [{scenario_id}:{run_id} step={step_index} action={action}] impacted by energy outage"
+            f"🚨 [{scenario_id}:{run_id} step={step_index} action={action}] impacted by energy outage: impact={impact:.2f}"
         )
         return {
             "message": "Transport system impacted by energy outage",
@@ -276,8 +314,9 @@ async def check_energy_dependency(
             "run_id": run_id,
             "step_index": step_index,
             "action": action,
-            "operational": False,
+            "operational": operational,
             "reason": new_record.reason,
+            "degradation": compute_transport_degradation(new_record),
         }
 
     logger.info(
@@ -291,6 +330,7 @@ async def check_energy_dependency(
         "action": action,
         "operational": record.operational,
         "reason": record.reason,
+        "degradation": compute_transport_degradation(record),
     }
 
 

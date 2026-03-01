@@ -30,7 +30,7 @@ class ScenarioStep(BaseModel):
     sector: Literal["energy", "water", "transport"] = Field(
         description="Сектор, над которым выполняется воздействие"
     )
-    action: Literal["outage", "load_increase", "adjust_production", "adjust_consumption", "resolve_outage"] = Field(
+    action: Literal["outage", "load_increase", "adjust_production", "adjust_consumption", "resolve_outage", "dependency_check"] = Field(
         description="Тип воздействия (действие сценария)"
     )
     params: Dict[str, Any] = Field(
@@ -62,7 +62,7 @@ class ScenarioRequest(BaseModel):
     )
     auto_dependency_checks: bool = Field(
         default=False,
-        description="Автоматически запускать dependency_check после outage"
+        description="[DEPRECATED] Автоматический dependency_check отключён; используйте явные шаги action=dependency_check"
     )
     theta_classical: float = Field(
         default=0.3,
@@ -185,7 +185,7 @@ class MonteCarloRequest(BaseModel):
     )
     auto_dependency_checks: bool = Field(
         default=False,
-        description="Автоматически запускать dependency_check после outage"
+        description="[DEPRECATED] Автоматический dependency_check отключён; используйте явные шаги action=dependency_check"
     )
 
 

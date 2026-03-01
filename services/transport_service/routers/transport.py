@@ -23,10 +23,14 @@ def compute_transport_degradation(record: TransportStatusModel) -> float:
     if record is None:
         return 0.0
 
-    if not bool(record.operational):
-        return 1.0
+    load_term = 1.0 - pow(2.718281828, -3.0 * max(0.0, float(record.load)))
 
-    return clip01(float(record.load))
+    # Avoid hard binary risk jumps from the operational flag.
+    # Even when operational=False, keep a soft degradation floor.
+    if not bool(record.operational):
+        return clip01(max(0.85, load_term))
+
+    return clip01(load_term)
 
 
 # ----------------------------
@@ -289,9 +293,9 @@ async def check_energy_dependency(
         dependency_weight = 0.70
         impact = clip01(source_level * dependency_weight)
 
-        new_load = clip01(float(record.load) + impact * 0.6)
-        operational = impact < 0.95
-        reason = f"Energy dependency impact={impact:.2f}"
+        new_load = clip01(float(record.load) + impact * 0.8)
+        operational = True
+        reason = f"Energy dependency soft impact={impact:.2f}"
 
         new_record = TransportStatusModel(
             scenario_id=scenario_id,

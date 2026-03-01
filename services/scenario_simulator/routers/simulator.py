@@ -36,6 +36,8 @@ SCENARIO_CATALOG: dict[str, dict] = {
         "description": "Отказ энергоснабжения: инициатор energy, outage 30 минут",
         "steps": [
             {"step_index": 1, "sector": "energy", "action": "outage", "params": {"duration": 30, "reason": "scenario"}},
+            {"step_index": 2, "sector": "water", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 30}},
+            {"step_index": 3, "sector": "transport", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 30}},
         ],
     },
     "S2_water_outage": {
@@ -111,7 +113,7 @@ async def fetch_dependency_matrix_meta() -> dict:
         logger.warning(f"⚠️ Failed to fetch dependency matrix meta from {url}: {e}")
         return {}
 
-async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int, auto_dependency_checks: bool = False) -> dict:
+async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict:
     """Apply one ScenarioStep to a domain microservice.
 
     Contract: every call is tagged with (scenario_id, run_id, step_index, action)
@@ -144,22 +146,41 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int, auto_de
                 try:
                     resp = await client.post(url, params=q, json=payload)
                     if resp.status_code < 400:
-                        result = resp.json()
-                        if auto_dependency_checks:
-                            checks = await _trigger_dependency_checks_after_outage(
-                                source_sector=sector,
-                                scenario_id=scenario_id,
-                                run_id=run_id,
-                                step_index=step.step_index,
-                                source_duration=duration,
-                                source_degradation=float(result.get("degradation", min(1.0, duration / 30.0))),
-                            )
-                            if checks:
-                                result["dependency_checks"] = checks
-                        return result
+                        return resp.json()
                 except httpx.HTTPError:
                     continue
             raise HTTPException(status_code=502, detail=f"{sector} service outage failed")
+
+        if action == "dependency_check":
+            source_sector = str(params.get("source_sector", "energy")).strip().lower()
+            if source_sector not in {"energy", "water", "transport"}:
+                raise HTTPException(status_code=400, detail=f"Unsupported source_sector for dependency_check: {source_sector}")
+
+            source_duration = int(params.get("source_duration", 0))
+            source_degradation = float(params.get("source_degradation", 0.0))
+
+            candidates = [
+                _build_url(base, f"/api/v1/{sector}/check_{source_sector}_dependency"),
+                _build_url(base, f"/{sector}/check_{source_sector}_dependency"),
+                _build_url(base, f"/api/v1/check_{source_sector}_dependency"),
+                _build_url(base, f"/check_{source_sector}_dependency"),
+            ]
+
+            for url in candidates:
+                try:
+                    resp = await client.post(
+                        url,
+                        params={
+                            **q,
+                            "source_duration": source_duration,
+                            "source_degradation": source_degradation,
+                        },
+                    )
+                    if resp.status_code < 400:
+                        return resp.json()
+                except httpx.HTTPError:
+                    continue
+            raise HTTPException(status_code=502, detail=f"{sector} service dependency_check failed for source={source_sector}")
 
         if action == "resolve_outage":
             candidates = [
@@ -307,7 +328,7 @@ async def run_scenario(
     theta_classical = float(req.theta_classical)
     step_vectors_cl: list[dict[str, float]] = []
     for step in steps:
-        out = await _apply_step(step, scenario_id, run_id, auto_dependency_checks=req.auto_dependency_checks)
+        out = await _apply_step(step, scenario_id, run_id)
 
         # Methodological rule for classical mode:
         # y_i,t = I(Δx_i,t >= θ), I_cl = 1 if ∃ t for any non-initiator i != i0.
@@ -390,67 +411,6 @@ def _build_url(base: str, path: str) -> str:
     b = base.rstrip("/")
     p = path if path.startswith("/") else f"/{path}"
     return f"{b}{p}"
-
-
-async def _trigger_dependency_checks_after_outage(
-    source_sector: str,
-    scenario_id: str,
-    run_id: int,
-    step_index: int,
-    source_duration: int,
-    source_degradation: float,
-) -> list[dict]:
-    """After outage, run dependency-check for all sectors depending on source sector."""
-    dependency_map: dict[str, tuple[str, ...]] = {
-        "energy": ("water", "transport"),
-    }
-    dependents = dependency_map.get(source_sector, ())
-    if not dependents:
-        return []
-
-    params = {
-        "scenario_id": scenario_id,
-        "run_id": run_id,
-        "step_index": step_index,
-        "action": f"dependency_check_after_{source_sector}_outage",
-        "source_duration": source_duration,
-        "source_degradation": source_degradation,
-    }
-    results: list[dict] = []
-
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        for dependent_sector in dependents:
-            base = _service_base_for_sector(dependent_sector)
-            candidates = [
-                _build_url(base, f"/api/v1/{dependent_sector}/check_{source_sector}_dependency"),
-                _build_url(base, f"/{dependent_sector}/check_{source_sector}_dependency"),
-                _build_url(base, f"/api/v1/check_{source_sector}_dependency"),
-                _build_url(base, f"/check_{source_sector}_dependency"),
-            ]
-
-            called = False
-            for url in candidates:
-                try:
-                    resp = await client.post(url, params=params)
-                    if resp.status_code < 400:
-                        results.append({
-                            "sector": dependent_sector,
-                            "status": "ok",
-                            "result": resp.json(),
-                        })
-                        called = True
-                        break
-                except httpx.HTTPError:
-                    continue
-
-            if not called:
-                logger.warning(
-                    f"⚠️ Dependency check failed after outage: source={source_sector}, dependent={dependent_sector}, "
-                    f"scenario_id={scenario_id}, run_id={run_id}"
-                )
-                results.append({"sector": dependent_sector, "status": "failed"})
-
-    return results
 
 
 def _sector_risk_vector(risk_payload: dict) -> dict[str, float]:
@@ -645,7 +605,22 @@ async def run_monte_carlo(req: MonteCarloRequest):
                 action="outage",
                 params={"duration": duration, "reason": "mc_outage"},
             )
-            await _apply_step(step, req.scenario_id, run_id, auto_dependency_checks=req.auto_dependency_checks)
+            out = await _apply_step(step, req.scenario_id, run_id)
+
+            if bool(getattr(req, "auto_dependency_checks", False)) and req.sector == "energy":
+                source_degradation = float(out.get("degradation", min(1.0, duration / 30.0)))
+                for idx, dependent in enumerate(("water", "transport"), start=2):
+                    dep_step = ScenarioStep(
+                        step_index=idx,
+                        sector=dependent,
+                        action="dependency_check",
+                        params={
+                            "source_sector": "energy",
+                            "source_duration": duration,
+                            "source_degradation": source_degradation,
+                        },
+                    )
+                    await _apply_step(dep_step, req.scenario_id, run_id)
 
         elif initiator_action == "load_increase":
             amount = float(getattr(req, "load_amount", 0.25))
@@ -655,7 +630,7 @@ async def run_monte_carlo(req: MonteCarloRequest):
                 action="load_increase",
                 params={"amount": amount},
             )
-            await _apply_step(step, req.scenario_id, run_id, auto_dependency_checks=req.auto_dependency_checks)
+            await _apply_step(step, req.scenario_id, run_id)
 
         else:
             raise HTTPException(status_code=400, detail=f"Unknown initiator_action: {initiator_action}")

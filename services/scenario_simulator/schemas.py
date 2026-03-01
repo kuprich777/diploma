@@ -60,6 +60,11 @@ class ScenarioRequest(BaseModel):
         default=True,
         description="Инициализировать базовое состояние всех доменных микросервисов перед сценарием"
     )
+    theta_classical: float = Field(
+        default=0.3,
+        ge=0.0,
+        description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
+    )
 
 
 class ScenarioRunResult(BaseModel):
@@ -87,6 +92,20 @@ class ScenarioRunResult(BaseModel):
     # --- бинарные индикаторы каскада (для K^(cl), K^(q)) ---
     I_cl: Optional[int] = Field(default=None, description="Индикатор каскада по классическому подходу (0/1)")
     I_q: Optional[int] = Field(default=None, description="Индикатор каскада по количественному подходу (0/1)")
+
+    # --- векторные метрики x_i,0 и Δx_i,T ---
+    baseline_x0: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Базовый вектор рисков x_i,0 по секторам для ключа (scenario_id, run_id)",
+    )
+    delta_x_q: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Вектор приращений Δx_i,T в количественном методе",
+    )
+    delta_x_cl: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Вектор приращений Δx_i,T в классическом методе",
+    )
 
     # --- совместимость со старым интерфейсом (используется в визуализациях) ---
     before: Optional[float] = Field(default=None, description="Интегральный риск до сценария (по умолчанию quantitative)")
@@ -145,11 +164,11 @@ class MonteCarloRequest(BaseModel):
         ge=0.0,
         description="Порог δ для фиксации каскада в количественном подходе: прирост риска сектора-неинициатора ≥ δ"
     )
-    non_initiator_threshold_classical: float = Field(
-        default=1.0,
+    theta_classical: float = Field(
+        default=0.3,
         ge=0.0,
         le=1.0,
-        description="Порог для фиксации каскада в классическом подходе по бинарным рискам (обычно 1.0)"
+        description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
     )
 
 

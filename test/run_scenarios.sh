@@ -29,6 +29,7 @@ BASE_RUN_ID="${BASE_RUN_ID:-$(date +%s)}"
 : "${MANUAL_RUN_ID:=$((BASE_RUN_ID + 1))}"
 : "${CATALOG_RUN_ID:=$((BASE_RUN_ID + 2))}"
 : "${CUSTOM_RUN_ID:=$((BASE_RUN_ID + 3))}"
+: "${CUSTOM_CASCADE_RUN_ID:=$((BASE_RUN_ID + 6))}"
 : "${INIT_FORCE_RUN_ID:=$((BASE_RUN_ID + 4))}"
 : "${INIT_SCENARIO_RUN_ID:=$((BASE_RUN_ID + 5))}"
 
@@ -99,7 +100,7 @@ print(f"assert_close ok: {lhs} ~ {rhs} (eps={eps})")
 PY
 }
 
-echo "Run IDs => manual=${MANUAL_RUN_ID}, catalog=${CATALOG_RUN_ID}, custom=${CUSTOM_RUN_ID}, init_force=${INIT_FORCE_RUN_ID}, init_scenario=${INIT_SCENARIO_RUN_ID}, mc_start=${MONTE_CARLO_START_RUN_ID}"
+echo "Run IDs => manual=${MANUAL_RUN_ID}, catalog=${CATALOG_RUN_ID}, custom=${CUSTOM_RUN_ID}, custom_cascade=${CUSTOM_CASCADE_RUN_ID}, init_force=${INIT_FORCE_RUN_ID}, init_scenario=${INIT_SCENARIO_RUN_ID}, mc_start=${MONTE_CARLO_START_RUN_ID}"
 
 # 1) Manual block on dedicated run_id
 request_json "init energy (manual run)" -X POST "${ENERGY_BASE}/init?scenario_id=${SCENARIO_ID}&run_id=${MANUAL_RUN_ID}&force=true"
@@ -140,7 +141,22 @@ request_json "run custom scenario (isolated run_id)" -X POST "${SIM_BASE}/run_sc
   -d "{\"scenario_id\":\"qa_custom_transport\",\"run_id\":${CUSTOM_RUN_ID},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"transport\",\"action\":\"load_increase\",\"params\":{\"amount\":${TRANSPORT_LOAD_AMOUNT}}}]}"
 CUSTOM_BEFORE="$(json_get "$LAST_RESPONSE" "before")"
 CUSTOM_RUN_ID_RESP="$(json_get "$LAST_RESPONSE" "run_id")"
+CUSTOM_I_CL="$(json_get "$LAST_RESPONSE" "I_cl")"
+CUSTOM_I_Q="$(json_get "$LAST_RESPONSE" "I_q")"
+CUSTOM_CL_BEFORE="$(json_get "$LAST_RESPONSE" "method_cl_total_before")"
+CUSTOM_CL_AFTER="$(json_get "$LAST_RESPONSE" "method_cl_total_after")"
 echo "custom_before=${CUSTOM_BEFORE}, custom_run_id=${CUSTOM_RUN_ID_RESP}"
+
+echo "custom transport-only diagnostics: I_cl=${CUSTOM_I_CL}, I_q=${CUSTOM_I_Q}, cl_before=${CUSTOM_CL_BEFORE}, cl_after=${CUSTOM_CL_AFTER}"
+echo "NOTE: transport load scenario is intentionally an intra-sector control; with current dependency graph only energy propagates to other sectors, so I_cl/I_q may stay 0."
+
+# 3b) Custom cascade scenario on separate run_id (explicit dependency checks)
+request_json "run custom cascade scenario (isolated run_id)" -X POST "${SIM_BASE}/run_scenario?use_catalog=false" \
+  -H 'Content-Type: application/json' \
+  -d "{\"scenario_id\":\"qa_custom_energy_cascade\",\"run_id\":${CUSTOM_CASCADE_RUN_ID},\"init_all_sectors\":true,\"steps\":[{\"step_index\":1,\"sector\":\"energy\",\"action\":\"outage\",\"params\":{\"duration\":${OUTAGE_DURATION},\"reason\":\"custom_cascade\"}},{\"step_index\":2,\"sector\":\"water\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\"}},{\"step_index\":3,\"sector\":\"transport\",\"action\":\"dependency_check\",\"params\":{\"source_sector\":\"energy\"}}]}"
+CUSTOM_CASCADE_I_CL="$(json_get "$LAST_RESPONSE" "I_cl")"
+CUSTOM_CASCADE_I_Q="$(json_get "$LAST_RESPONSE" "I_q")"
+echo "custom_cascade_indicators: I_cl=${CUSTOM_CASCADE_I_CL}, I_q=${CUSTOM_CASCADE_I_Q}, run_id=${CUSTOM_CASCADE_RUN_ID}"
 
 # 4) Check init_all_sectors=true baseline equivalence with force=true on fresh run_ids
 request_json "force init energy (equivalence run)" -X POST "${ENERGY_BASE}/init?scenario_id=${SCENARIO_ID}&run_id=${INIT_FORCE_RUN_ID}&force=true"

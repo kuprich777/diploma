@@ -143,6 +143,11 @@ def _dependency_matrix_from_meta(meta: dict | None) -> tuple[list[str], list[lis
     return ["energy", "water", "transport"], [[0.0] * 3 for _ in range(3)]
 
 
+def _should_propagate_action(action: str) -> bool:
+    """Keep queue overhead low: propagate only impactful scenario actions."""
+    return action in {"outage", "dependency_check", "load_increase"}
+
+
 async def _run_interaction_queue(
     *,
     scenario_id: str,
@@ -173,8 +178,8 @@ async def _run_interaction_queue(
     )
 
     idx = {name: i for i, name in enumerate(matrix_order)}
-    max_depth = 2
-    max_messages = 8
+    max_depth = 1
+    max_messages = 4
     consumed = 0
     interaction_logs: list[dict] = []
 
@@ -187,27 +192,25 @@ async def _run_interaction_queue(
             continue
         src_j = idx[src]
 
+        candidates: list[tuple[float, str, int]] = []
         for dest in matrix_order:
             if dest == src or dest not in idx:
                 continue
-
             dest_i = idx[dest]
             base_weight = max(0.0, min(1.0, float(matrix[dest_i][src_j])))
-            if base_weight <= 0.0:
-                continue
+            if base_weight > 0.0:
+                candidates.append((base_weight, dest, dest_i))
 
-            # Probability and intensity are close to matrix A but with noise.
-            probability = max(0.05, min(0.95, base_weight * rng.uniform(0.85, 1.15)))
+        # Lightweight mode: fanout only to top-1 dependency per message.
+        for base_weight, dest, dest_i in sorted(candidates, key=lambda x: x[0], reverse=True)[:1]:
+            probability = max(0.05, min(0.95, base_weight * rng.uniform(0.9, 1.1)))
             if rng.random() > probability:
                 continue
 
             source_duration = int((msg.get("source_payload") or {}).get("duration", 10) or 10)
             source_degradation = max(
                 0.0,
-                min(
-                    1.0,
-                    base_weight * rng.uniform(0.75, 1.35) + rng.uniform(0.0, 0.25),
-                ),
+                min(1.0, base_weight * rng.uniform(0.85, 1.2) + rng.uniform(0.0, 0.15)),
             )
 
             queue_step_index = int(parent_step_index * 100 + consumed * 10 + dest_i + 1)
@@ -564,23 +567,25 @@ async def run_scenario(
         step_logs.append(out)
 
         # Message queue propagation: sectors affect each other based on matrix A.
-        interaction_logs = await _run_interaction_queue(
-            scenario_id=scenario_id,
-            run_id=run_id,
-            seed=seed,
-            parent_step_index=step.step_index,
-            source_sector=step.sector,
-            source_action=step.action,
-            source_payload=step.params or {},
-            matrix_order=matrix_order,
-            matrix=matrix_A,
-        )
-        step_logs.extend(interaction_logs)
+        # Lightweight: only for impactful actions and with a single post-queue risk read.
+        if _should_propagate_action(step.action):
+            interaction_logs = await _run_interaction_queue(
+                scenario_id=scenario_id,
+                run_id=run_id,
+                seed=seed,
+                parent_step_index=step.step_index,
+                source_sector=step.sector,
+                source_action=step.action,
+                source_payload=step.params or {},
+                matrix_order=matrix_order,
+                matrix=matrix_A,
+            )
+            step_logs.extend(interaction_logs)
 
-        for _ in interaction_logs:
-            step_cl_interaction = await fetch_risk(scenario_id, run_id, method="classical")
-            vec_cl_interaction = _sector_risk_vector(step_cl_interaction)
-            step_vectors_cl.append(vec_cl_interaction)
+            if interaction_logs:
+                step_cl_interaction = await fetch_risk(scenario_id, run_id, method="classical")
+                vec_cl_interaction = _sector_risk_vector(step_cl_interaction)
+                step_vectors_cl.append(vec_cl_interaction)
 
     # --- 5. Read final state x_T for both operators ---
     final_cl = await fetch_risk(scenario_id, run_id, method="classical")

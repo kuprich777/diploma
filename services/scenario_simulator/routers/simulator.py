@@ -3,6 +3,7 @@ from typing import Optional
 import time
 import hashlib
 import json
+from collections import deque
 
 import httpx
 import random
@@ -114,6 +115,155 @@ async def fetch_dependency_matrix_meta() -> dict:
     except httpx.HTTPError as e:
         logger.warning(f"⚠️ Failed to fetch dependency matrix meta from {url}: {e}")
         return {}
+
+
+def _dependency_matrix_from_meta(meta: dict | None) -> tuple[list[str], list[list[float]]]:
+    """Return normalized matrix metadata for event propagation.
+
+    Matrix semantics follow risk_engine convention: A[i][j] is src=j -> dest=i.
+    """
+    if not isinstance(meta, dict):
+        return ["energy", "water", "transport"], [[0.0] * 3 for _ in range(3)]
+
+    order = meta.get("sectors_order")
+    matrix = meta.get("matrix")
+
+    if (
+        isinstance(order, list)
+        and len(order) == 3
+        and isinstance(matrix, list)
+        and len(matrix) == 3
+        and all(isinstance(row, list) and len(row) == 3 for row in matrix)
+    ):
+        try:
+            return [str(x) for x in order], [[float(v) for v in row] for row in matrix]
+        except (TypeError, ValueError):
+            pass
+
+    return ["energy", "water", "transport"], [[0.0] * 3 for _ in range(3)]
+
+
+def _should_propagate_action(action: str) -> bool:
+    """Keep queue overhead low: propagate only impactful scenario actions."""
+    return action in {"outage", "dependency_check", "load_increase"}
+
+
+async def _run_interaction_queue(
+    *,
+    scenario_id: str,
+    run_id: int,
+    seed: int,
+    parent_step_index: int,
+    source_sector: str,
+    source_action: str,
+    source_payload: dict,
+    matrix_order: list[str],
+    matrix: list[list[float]],
+) -> list[dict]:
+    """Propagate cross-sector interactions through an async message queue.
+
+    Each message may spawn downstream dependency checks according to matrix weights,
+    with stochastic jitter to keep reactions non-deterministic across runs.
+    """
+    rng = random.Random(seed ^ ((parent_step_index + 1) * 7919))
+    queue = deque(
+        [
+            {
+                "source_sector": source_sector,
+                "depth": 0,
+                "parent_action": source_action,
+                "source_payload": source_payload,
+            }
+        ]
+    )
+
+    idx = {name: i for i, name in enumerate(matrix_order)}
+    max_depth = 1
+    max_messages = 4
+    consumed = 0
+    interaction_logs: list[dict] = []
+
+    while queue and consumed < max_messages:
+        msg = queue.popleft()
+        consumed += 1
+
+        src = msg["source_sector"]
+        if src not in idx:
+            continue
+        src_j = idx[src]
+
+        candidates: list[tuple[float, str, int]] = []
+        for dest in matrix_order:
+            if dest == src or dest not in idx:
+                continue
+            dest_i = idx[dest]
+            base_weight = max(0.0, min(1.0, float(matrix[dest_i][src_j])))
+            if base_weight > 0.0:
+                candidates.append((base_weight, dest, dest_i))
+
+        # Lightweight mode: fanout only to top-1 dependency per message.
+        for base_weight, dest, dest_i in sorted(candidates, key=lambda x: x[0], reverse=True)[:1]:
+            probability = max(0.05, min(0.95, base_weight * rng.uniform(0.9, 1.1)))
+            if rng.random() > probability:
+                continue
+
+            source_duration = int((msg.get("source_payload") or {}).get("duration", 10) or 10)
+            source_degradation = max(
+                0.0,
+                min(1.0, base_weight * rng.uniform(0.85, 1.2) + rng.uniform(0.0, 0.15)),
+            )
+
+            queue_step_index = int(parent_step_index * 100 + consumed * 10 + dest_i + 1)
+            queue_step = ScenarioStep(
+                step_index=queue_step_index,
+                sector=dest,
+                action="dependency_check",
+                params={
+                    "source_sector": src,
+                    "source_duration": source_duration,
+                    "source_degradation": source_degradation,
+                },
+            )
+
+            try:
+                out = await _apply_step(queue_step, scenario_id, run_id)
+            except HTTPException as exc:
+                # Queue propagation is best-effort: unsupported dependency pairs
+                # must not abort the whole scenario run.
+                logger.warning(
+                    "⚠️ Queue dependency step skipped: src=%s dest=%s scenario_id=%s run_id=%s detail=%s",
+                    src,
+                    dest,
+                    scenario_id,
+                    run_id,
+                    exc.detail,
+                )
+                continue
+
+            out["queue_event"] = {
+                "source_sector": src,
+                "target_sector": dest,
+                "matrix_weight": round(base_weight, 4),
+                "trigger_probability": round(probability, 4),
+                "propagation_depth": int(msg.get("depth", 0)),
+                "generated_by": msg.get("parent_action"),
+            }
+            interaction_logs.append(out)
+
+            if int(msg.get("depth", 0)) < max_depth:
+                queue.append(
+                    {
+                        "source_sector": dest,
+                        "depth": int(msg.get("depth", 0)) + 1,
+                        "parent_action": "queue_dependency_check",
+                        "source_payload": {
+                            "duration": source_duration,
+                            "degradation": source_degradation,
+                        },
+                    }
+                )
+
+    return interaction_logs
 
 async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict:
     """Apply one ScenarioStep to a domain microservice.
@@ -415,6 +565,7 @@ async def run_scenario(
     step_logs: list[dict] = []
     theta_classical = float(req.theta_classical)
     step_vectors_cl: list[dict[str, float]] = []
+    matrix_order, matrix_A = _dependency_matrix_from_meta(dm_meta)
     for step in steps:
         out = await _apply_step(step, scenario_id, run_id)
 
@@ -428,6 +579,27 @@ async def run_scenario(
         out["step_I_cl"] = step_I_cl
         out["step_delta_x_cl"] = step_delta_cl
         step_logs.append(out)
+
+        # Message queue propagation: sectors affect each other based on matrix A.
+        # Lightweight: only for impactful actions and with a single post-queue risk read.
+        if _should_propagate_action(step.action):
+            interaction_logs = await _run_interaction_queue(
+                scenario_id=scenario_id,
+                run_id=run_id,
+                seed=seed,
+                parent_step_index=step.step_index,
+                source_sector=step.sector,
+                source_action=step.action,
+                source_payload=step.params or {},
+                matrix_order=matrix_order,
+                matrix=matrix_A,
+            )
+            step_logs.extend(interaction_logs)
+
+            if interaction_logs:
+                step_cl_interaction = await fetch_risk(scenario_id, run_id, method="classical")
+                vec_cl_interaction = _sector_risk_vector(step_cl_interaction)
+                step_vectors_cl.append(vec_cl_interaction)
 
     # --- 5. Read final state x_T for both operators ---
     final_cl = await fetch_risk(scenario_id, run_id, method="classical")

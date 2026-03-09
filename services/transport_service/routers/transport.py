@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import asyncio
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 import httpx
@@ -13,6 +16,61 @@ from config import settings
 logger = setup_logging()
 
 router = APIRouter(prefix="/api/v1/transport", tags=["transport"])
+
+# ---------------------------------------------------------------------------
+# Async messaging state
+# ---------------------------------------------------------------------------
+_mq: Any = None  # RabbitMQConnection | None
+
+# In-memory cache of last known energy state, keyed by (scenario_id, run_id)
+# Updated by the "energy.state_changed" consumer.
+_energy_cache: dict[tuple[str, str], dict] = {}
+
+
+def set_mq(conn: Any) -> None:
+    """Injected by main.py startup after the broker connects."""
+    global _mq
+    _mq = conn
+
+
+def _is_mq_connected() -> bool:
+    return _mq is not None and _mq.is_connected
+
+
+async def handle_energy_event(envelope: dict) -> None:
+    """Consumer handler: update local energy cache from energy.state_changed event."""
+    scenario_id = str(envelope.get("scenario_id", ""))
+    run_id = str(envelope.get("run_id", ""))
+    payload = envelope.get("payload", {})
+    _energy_cache[(scenario_id, run_id)] = payload
+    logger.info(
+        "🔄 [transport] energy cache updated (%s, %s): operational=%s risk=%.3f",
+        scenario_id,
+        run_id,
+        payload.get("operational"),
+        float(payload.get("risk_level", 0.0)),
+    )
+
+
+def _publish(routing_key: str, payload: dict, scenario_id: str, run_id: str) -> None:
+    """Schedule a fire-and-forget publish if messaging is available."""
+    if not _is_mq_connected():
+        return
+    try:
+        from messaging import publish_event_safe
+        asyncio.create_task(
+            publish_event_safe(
+                _mq.channel,
+                settings.RABBITMQ_EXCHANGE,
+                routing_key,
+                payload,
+                scenario_id=scenario_id,
+                run_id=run_id,
+                sector="transport",
+            )
+        )
+    except Exception as exc:
+        logger.warning("📤 Publish scheduling failed (non-critical): %s", exc)
 
 
 def clip01(value: float) -> float:
@@ -55,12 +113,11 @@ def mutation_trace(
 # Internal helpers
 # ----------------------------
 
-async def fetch_energy_operational(scenario_id: str, run_id: int) -> bool:
-    """Fetch energy status for the SAME experiment key."""
-    energy_status_url = settings.ENERGY_SERVICE_URL.rstrip("/") + "/api/v1/energy/status"
-
+async def _fetch_energy_operational_http(scenario_id: str, run_id: int) -> bool:
+    """Synchronous HTTP fallback: fetch energy operational flag directly."""
+    energy_status_url = settings.ENERGY_SERVICE_URL.rstrip("/") + "/status"
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=settings.ENERGY_CHECK_TIMEOUT) as client:
             resp = await client.get(
                 energy_status_url,
                 params={"scenario_id": scenario_id, "run_id": run_id},
@@ -68,14 +125,31 @@ async def fetch_energy_operational(scenario_id: str, run_id: int) -> bool:
         resp.raise_for_status()
         data = resp.json()
         is_op = bool(data.get("is_operational", False))
-        logger.debug(f"🔌 Energy operational for ({scenario_id}, {run_id}): {is_op}")
+        logger.debug("🔌 [transport HTTP] energy operational (%s, %s): %s", scenario_id, run_id, is_op)
         return is_op
-    except httpx.RequestError as e:
-        logger.error(f"❌ Error connecting to Energy Service: {e}")
+    except httpx.RequestError as exc:
+        logger.error("❌ [transport] HTTP energy fetch failed: %s", exc)
         return False
-    except httpx.HTTPStatusError as e:
-        logger.warning(f"⚠️ Energy Service returned HTTP {e.response.status_code}")
+    except httpx.HTTPStatusError as exc:
+        logger.warning("⚠️ [transport] Energy service HTTP %s", exc.response.status_code)
         return False
+
+
+async def get_energy_operational(scenario_id: str, run_id: int) -> bool:
+    """Return energy operational status.
+
+    Fast-path (async mode): read from local cache populated by energy.state_changed events.
+    Fallback (sync mode or broker down): direct HTTP call.
+    """
+    if _is_mq_connected():
+        cached = _energy_cache.get((scenario_id, str(run_id)))
+        if cached is not None:
+            return bool(cached.get("operational", True))
+        logger.debug(
+            "📭 [transport] energy cache miss for (%s, %s); assuming operational", scenario_id, run_id
+        )
+        return True
+    return await _fetch_energy_operational_http(scenario_id, run_id)
 
 
 def latest_status(db: Session, scenario_id: str, run_id: int) -> TransportStatusModel | None:
@@ -286,7 +360,7 @@ async def check_energy_dependency(
     if not record:
         raise HTTPException(status_code=404, detail="No transport status found for given experiment key")
 
-    is_energy_ok = await fetch_energy_operational(scenario_id, run_id)
+    is_energy_ok = await get_energy_operational(scenario_id, run_id)
 
     if not is_energy_ok:
         source_level = max(float(source_degradation), clip01(float(source_duration) / 30.0))
@@ -309,8 +383,19 @@ async def check_energy_dependency(
         db.commit()
         db.refresh(new_record)
 
+        degradation = compute_transport_degradation(new_record)
         logger.warning(
             f"🚨 [{scenario_id}:{run_id} step={step_index} action={action}] impacted by energy outage: impact={impact:.2f}"
+        )
+        _publish(
+            "transport.state_changed",
+            {
+                "load": new_load,
+                "operational": operational,
+                "energy_impact": impact,
+            },
+            scenario_id=scenario_id,
+            run_id=str(run_id),
         )
         return {
             "message": "Transport system impacted by energy outage",
@@ -320,7 +405,7 @@ async def check_energy_dependency(
             "action": action,
             "operational": operational,
             "reason": new_record.reason,
-            "degradation": compute_transport_degradation(new_record),
+            "degradation": degradation,
         }
 
     logger.info(

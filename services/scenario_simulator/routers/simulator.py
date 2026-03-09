@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
+import asyncio
 import time
 import hashlib
 import json
@@ -53,6 +54,18 @@ SCENARIO_CATALOG: dict[str, dict] = {
         "description": "Рост нагрузки транспорта: инициатор transport, load_increase (amount)",
         "steps": [
             {"step_index": 1, "sector": "transport", "action": "load_increase", "params": {"amount": 0.25}},
+        ],
+    },
+    "S4_cyclic_transport_load": {
+        "description": (
+            "Циклическая нагрузка транспорта: 2 полных цикла ±0.25 (рост/снижение). "
+            "Моделирует знакочередующееся воздействие через стандартный load_increase с отрицательной амплитудой."
+        ),
+        "steps": [
+            {"step_index": 1, "sector": "transport", "action": "load_increase", "params": {"amount":  0.25}},
+            {"step_index": 2, "sector": "transport", "action": "load_increase", "params": {"amount": -0.25}},
+            {"step_index": 3, "sector": "transport", "action": "load_increase", "params": {"amount":  0.25}},
+            {"step_index": 4, "sector": "transport", "action": "load_increase", "params": {"amount": -0.25}},
         ],
     },
 }
@@ -304,6 +317,7 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
                 _build_url(base, f"/check_{source_sector}_dependency"),
             ]
 
+            _dep_statuses: list[int] = []
             for url in candidates:
                 try:
                     resp = await client.post(
@@ -314,10 +328,23 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
                             "source_degradation": source_degradation,
                         },
                     )
+                    _dep_statuses.append(resp.status_code)
                     if resp.status_code < 400:
                         return resp.json()
                 except httpx.HTTPError:
                     continue
+            # All 404s → the domain service simply has no endpoint for this
+            # dependency pair (e.g. transport has no check_water_dependency).
+            # Treat as a no-op rather than a hard failure.
+            if _dep_statuses and all(c == 404 for c in _dep_statuses):
+                logger.warning(
+                    "⚠️ No check_%s_dependency endpoint on %s — skipped by interaction queue",
+                    source_sector, sector,
+                )
+                return {
+                    "sector": sector, "action": action, "status": "skipped",
+                    "reason": f"no_endpoint_check_{source_sector}_dependency",
+                }
             raise HTTPException(status_code=502, detail=f"{sector} service dependency_check failed for source={source_sector}")
 
         if action == "resolve_outage":
@@ -550,42 +577,29 @@ async def run_scenario(
     # Mathematically: x_T = F(x_0, s)
     # For cascade indicators we track all t <= T, as in formulas I^(cl)(s,r), I^(q)(s,r).
     step_logs: list[dict] = []
-<<<<<<< HEAD
-    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
-
-    non_initiator_threshold_classical = 1.0
-    delta_sector_threshold = 0.1
-
-    classical_cascade_seen = False
-    quantitative_max_delta = {s: 0.0 for s in non_initiators}
-
-    final_cl = base_cl
-    final_q = base_q
-
-=======
     theta_classical = float(req.theta_classical)
     step_vectors_cl: list[dict[str, float]] = []
+    step_vectors_q: list[dict[str, float]] = []
     matrix_order, matrix_A = _dependency_matrix_from_meta(dm_meta)
->>>>>>> cdx
     for step in steps:
         out = await _apply_step(step, scenario_id, run_id)
 
         # Methodological rule for classical mode:
         # y_i,t = I(Δx_i,t >= θ), I_cl = 1 if ∃ t for any non-initiator i != i0.
-        step_cl = await fetch_risk(scenario_id, run_id, method="classical")
-        step_delta_cl = _vector_delta(_sector_risk_vector(step_cl), base_vec_cl)
-        step_vectors_cl.append(_sector_risk_vector(step_cl))
+        step_cl, step_q = await asyncio.gather(
+            fetch_risk(scenario_id, run_id, method="classical"),
+            fetch_risk(scenario_id, run_id, method="quantitative"),
+        )
+        vec_cl = _sector_risk_vector(step_cl)
+        step_delta_cl = _vector_delta(vec_cl, base_vec_cl)
+        step_vectors_cl.append(vec_cl)
+        step_vectors_q.append(_sector_risk_vector(step_q))
         step_I_cl = 1 if any(float(step_delta_cl.get(s, 0.0)) >= theta_classical for s in non_initiators) else 0
 
         out["step_I_cl"] = step_I_cl
         out["step_delta_x_cl"] = step_delta_cl
         step_logs.append(out)
 
-<<<<<<< HEAD
-        # Evaluate state at each t (not only at t=T), consistent with methodology formulas.
-        final_cl = await fetch_risk(scenario_id, run_id, method="classical")
-        final_q = await fetch_risk(scenario_id, run_id, method="quantitative")
-=======
         # Message queue propagation: sectors affect each other based on matrix A.
         # Lightweight: only for impactful actions and with a single post-queue risk read.
         if _should_propagate_action(step.action):
@@ -603,22 +617,16 @@ async def run_scenario(
             step_logs.extend(interaction_logs)
 
             if interaction_logs:
-                step_cl_interaction = await fetch_risk(scenario_id, run_id, method="classical")
-                vec_cl_interaction = _sector_risk_vector(step_cl_interaction)
-                step_vectors_cl.append(vec_cl_interaction)
+                step_cl_interaction, step_q_interaction = await asyncio.gather(
+                    fetch_risk(scenario_id, run_id, method="classical"),
+                    fetch_risk(scenario_id, run_id, method="quantitative"),
+                )
+                step_vectors_cl.append(_sector_risk_vector(step_cl_interaction))
+                step_vectors_q.append(_sector_risk_vector(step_q_interaction))
 
     # --- 5. Read final state x_T for both operators ---
     final_cl = await fetch_risk(scenario_id, run_id, method="classical")
     final_q = await fetch_risk(scenario_id, run_id, method="quantitative")
->>>>>>> cdx
-
-        if any(float(final_cl.get(f"{s}_risk", 0.0)) >= non_initiator_threshold_classical for s in non_initiators):
-            classical_cascade_seen = True
-
-        for s in non_initiators:
-            delta_s = float(final_q.get(f"{s}_risk", 0.0)) - float(base_q.get(f"{s}_risk", 0.0))
-            if delta_s > quantitative_max_delta[s]:
-                quantitative_max_delta[s] = delta_s
 
     # --- 5. Final state x_T for both operators ---
     final_total_cl = float(final_cl.get("total_risk", 0.0))
@@ -632,13 +640,6 @@ async def run_scenario(
     delta_q = final_total_q - base_total_q
 
     # --- Cascade indicators (methodology-aligned) ---
-<<<<<<< HEAD
-    # I^(cl)(s,r) = 1 if exists non-initiator and exists t <= T with binary risk flag.
-    I_cl = 1 if classical_cascade_seen else 0
-
-    # I^(q)(s,r) = 1 if exists non-initiator with max_{t<=T}(x_{i,t} - x_{i,0}) >= delta.
-    I_q = 1 if any(quantitative_max_delta[s] >= delta_sector_threshold for s in non_initiators) else 0
-=======
     I_cl = compute_I_cl_over_steps(base_vec_cl, step_vectors_cl, theta_classical, initiator)
 
     # Quantitative: cascade if any non-initiator increased by at least δ
@@ -666,7 +667,6 @@ async def run_scenario(
         False,
         randomized_params,
     )
->>>>>>> cdx
 
     # --- 6. Return both F_cl and F_q results with new fields ---
     return ScenarioRunResult(
@@ -703,6 +703,8 @@ async def run_scenario(
         delta_x_cl=delta_vec_cl,
         theta_classical=theta_classical,
         delta_sector_threshold=delta_sector_threshold,
+        risk_trajectory_q=step_vectors_q,
+        risk_trajectory_cl=step_vectors_cl,
     )
 
 
@@ -820,6 +822,27 @@ def _build_mc_steps(req: MonteCarloRequest, duration: int, dependency_multiplier
                 params={"amount": noisy_amount},
             ),
         ]
+
+    if initiator_action == "cyclic_load":
+        # Represent one cyclic_load run as `periods * 2` load_increase sub-steps
+        # with alternating signs: +amplitude, -amplitude, +amplitude, -amplitude, ...
+        # Negative amounts are contract-valid on transport (live-tested):
+        #   POST /increase_load?amount=-x  →  new_load = max(0.0, old_load - x)  → 200 OK
+        amplitude = float(getattr(req, "load_amount", 0.25))
+        periods = int(getattr(req, "cyclic_periods", 2))
+        noisy_amplitude = max(0.0, amplitude * dependency_multiplier)
+        steps = []
+        for half in range(periods * 2):
+            sign = 1.0 if half % 2 == 0 else -1.0
+            steps.append(
+                ScenarioStep(
+                    step_index=half + 1,
+                    sector=req.sector,
+                    action="load_increase",
+                    params={"amount": sign * noisy_amplitude},
+                )
+            )
+        return steps
 
     raise HTTPException(status_code=400, detail=f"Unknown initiator_action: {initiator_action}")
 
@@ -1009,6 +1032,8 @@ async def run_monte_carlo(req: MonteCarloRequest):
             cache_hit=scenario_res.cache_hit,
             randomized_params=scenario_res.randomized_params,
             x0_hash=scenario_res.x0_hash,
+            risk_trajectory_q=list(scenario_res.risk_trajectory_q or []),
+            risk_trajectory_cl=list(scenario_res.risk_trajectory_cl or []),
         )
 
         runs_data.append(

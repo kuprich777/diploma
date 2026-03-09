@@ -1,3 +1,6 @@
+import asyncio
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from database import get_db
@@ -9,6 +12,38 @@ from datetime import datetime
 
 logger = setup_logging()
 settings = Settings()
+
+# ---------------------------------------------------------------------------
+# Async messaging state — set by main.py after broker connects
+# ---------------------------------------------------------------------------
+_mq: Any = None  # RabbitMQConnection | None
+
+
+def set_mq(conn: Any) -> None:
+    """Called by main.py startup to inject the active broker connection."""
+    global _mq
+    _mq = conn
+
+
+def _publish(routing_key: str, payload: dict, scenario_id: str, run_id: str) -> None:
+    """Schedule a fire-and-forget publish if messaging is available."""
+    if _mq is None or not _mq.is_connected:
+        return
+    try:
+        from messaging import publish_event_safe
+        asyncio.create_task(
+            publish_event_safe(
+                _mq.channel,
+                settings.RABBITMQ_EXCHANGE,
+                routing_key,
+                payload,
+                scenario_id=scenario_id,
+                run_id=run_id,
+                sector="energy",
+            )
+        )
+    except Exception as exc:
+        logger.warning("📤 Publish scheduling failed (non-critical): %s", exc)
 
 def clip01(v: float) -> float:
     return max(0.0, min(1.0, float(v)))
@@ -158,6 +193,18 @@ async def adjust_production(
     db.add(new_record)
     db.commit()
     logger.info(f"🔧 Adjusted production by {amount} → {new_production} MW")
+    _publish(
+        "energy.state_changed",
+        {
+            "production": new_production,
+            "consumption": new_record.consumption,
+            "operational": new_record.is_operational,
+            "risk_level": risk_after,
+            "outage_duration": None,
+        },
+        scenario_id=scenario_id or "",
+        run_id=str(run_id or ""),
+    )
     return {
         "production": new_production,
         **ScenarioStepResult(
@@ -202,6 +249,18 @@ async def adjust_consumption(
     db.add(new_record)
     db.commit()
     logger.info(f"💡 Adjusted consumption by {amount} → {new_consumption} MW")
+    _publish(
+        "energy.state_changed",
+        {
+            "production": new_record.production,
+            "consumption": new_consumption,
+            "operational": new_record.is_operational,
+            "risk_level": risk_after,
+            "outage_duration": None,
+        },
+        scenario_id=scenario_id or "",
+        run_id=str(run_id or ""),
+    )
     return {
         "consumption": new_consumption,
         **ScenarioStepResult(
@@ -250,6 +309,18 @@ async def simulate_outage(
     db.add(new_record)
     db.commit()
     logger.warning(f"⚠️ Outage simulated: {outage.reason}, duration {outage.duration} min")
+    _publish(
+        "energy.state_changed",
+        {
+            "production": new_record.production,
+            "consumption": new_record.consumption,
+            "operational": new_record.is_operational,
+            "risk_level": risk_after,
+            "outage_duration": outage.duration,
+        },
+        scenario_id=scenario_id or "",
+        run_id=str(run_id or ""),
+    )
     return {
         "message": f"Outage simulated: {outage.reason}, duration: {outage.duration} minutes",
         "degradation": risk_after,
@@ -295,6 +366,18 @@ async def resolve_outage(
     db.add(new_record)
     db.commit()
     logger.info("✅ Outage resolved, system is operational again.")
+    _publish(
+        "energy.state_changed",
+        {
+            "production": new_record.production,
+            "consumption": new_record.consumption,
+            "operational": True,
+            "risk_level": risk_after,
+            "outage_duration": None,
+        },
+        scenario_id=scenario_id or "",
+        run_id=str(run_id or ""),
+    )
     return {
         "message": "Outage resolved, system is operational",
         **ScenarioStepResult(

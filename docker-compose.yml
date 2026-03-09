@@ -23,6 +23,25 @@ services:
     restart: unless-stopped
 
   # ==========================
+  # RABBITMQ
+  # ==========================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: diploma-rabbitmq
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping", "--quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  # ==========================
   # ENERGY SERVICE
   # ==========================
   energy_service:
@@ -30,13 +49,25 @@ services:
     container_name: energy_service
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672/}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-infrastructure_events}
+      ASYNC_MESSAGING_ENABLED: ${ASYNC_MESSAGING_ENABLED:-true}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8001:8000"
+    volumes:
+      - ./shared/messaging.py:/app/messaging.py:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   # ==========================
@@ -48,15 +79,27 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
       ENERGY_SERVICE_URL: http://energy_service:8000/api/v1/energy
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672/}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-infrastructure_events}
+      ASYNC_MESSAGING_ENABLED: ${ASYNC_MESSAGING_ENABLED:-true}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       energy_service:
         condition: service_started
     ports:
       - "8002:8000"
+    volumes:
+      - ./shared/messaging.py:/app/messaging.py:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   # ==========================
@@ -69,10 +112,15 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
       ENERGY_SERVICE_URL: http://energy_service:8000/api/v1/energy
       WATER_SERVICE_URL: http://water_service:8000/api/v1/water
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672/}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-infrastructure_events}
+      ASYNC_MESSAGING_ENABLED: ${ASYNC_MESSAGING_ENABLED:-true}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
       db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
       energy_service:
         condition: service_started
@@ -80,6 +128,13 @@ services:
         condition: service_started
     ports:
       - "8003:8000"
+    volumes:
+      - ./shared/messaging.py:/app/messaging.py:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   # ==========================
@@ -126,10 +181,16 @@ services:
       ENERGY_SERVICE_URL: http://energy_service:8000/api/v1/energy/status
       WATER_SERVICE_URL: http://water_service:8000/api/v1/water/status
       TRANSPORT_SERVICE_URL: http://transport_service:8000/api/v1/transport/status
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672/}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-infrastructure_events}
+      RABBITMQ_MANAGEMENT_URL: ${RABBITMQ_MANAGEMENT_URL:-http://rabbitmq:15672}
+      ASYNC_MESSAGING_ENABLED: ${ASYNC_MESSAGING_ENABLED:-true}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
     depends_on:
       db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
       energy_service:
         condition: service_started
@@ -141,6 +202,13 @@ services:
         condition: service_started
     ports:
       - "8004:8000"
+    volumes:
+      - ./shared/messaging.py:/app/messaging.py:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   # ==========================
@@ -195,3 +263,4 @@ services:
 
 volumes:
   dbdata:
+  rabbitmq_data:

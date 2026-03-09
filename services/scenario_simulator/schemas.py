@@ -145,6 +145,16 @@ class ScenarioRunResult(BaseModel):
     # --- трассировка выполнения сценария ---
     steps: List[Dict[str, Any]] = Field(description="Логи шагов сценария (ответы доменных микросервисов)")
 
+    # --- пошаговые траектории рисков x_t (t = 0..T) ---
+    risk_trajectory_q: Optional[List[Dict[str, float]]] = Field(
+        default=None,
+        description="Траектория вектора рисков x_t по шагам сценария (quantitative operator)",
+    )
+    risk_trajectory_cl: Optional[List[Dict[str, float]]] = Field(
+        default=None,
+        description="Траектория вектора рисков x_t по шагам сценария (classical operator)",
+    )
+
 
 class MonteCarloRequest(BaseModel):
     scenario_id: str = Field(
@@ -180,15 +190,28 @@ class MonteCarloRequest(BaseModel):
         ge=1,
         description="Максимальная длительность outage в минутах (монотонно усиливает воздействие)"
     )
-    initiator_action: Literal["outage", "load_increase"] = Field(
+    initiator_action: Literal["outage", "load_increase", "cyclic_load"] = Field(
         default="outage",
-        description="Инициирующее действие для Monte Carlo: outage (сбой) или load_increase (рост нагрузки)."
+        description=(
+            "Инициирующее действие для Monte Carlo: outage (сбой), load_increase (рост нагрузки), "
+            "cyclic_load (знакопеременный рост/снижение нагрузки по периодам)."
+        ),
     )
 
     load_amount: float = Field(
         default=0.25,
         ge=0.0,
-        description="Величина роста нагрузки (используется только при initiator_action=load_increase)."
+        description="Величина роста нагрузки (используется при initiator_action=load_increase или cyclic_load)."
+    )
+
+    cyclic_periods: int = Field(
+        default=2,
+        ge=1,
+        le=10,
+        description=(
+            "Количество полных циклов при initiator_action=cyclic_load. "
+            "Каждый цикл состоит из двух полушагов: +load_amount, затем -load_amount."
+        ),
     )
     mode: Literal["real"] = Field(
         default="real",
@@ -214,7 +237,11 @@ class MonteCarloRequest(BaseModel):
         default=0.0,
         ge=0.0,
         le=1.0,
-        description="Опциональный уровень стохастики Monte-Carlo: относительный шум N(0, stochastic_scale) для параметров воздействия. 0.0 = полностью детерминированный прогон."
+        description=(
+            "Уровень стохастики Monte-Carlo: относительный шум N(0, stochastic_scale) для параметров воздействия. "
+            "0.0 = полностью детерминированный прогон (воспроизводим по scenario_id + run_id). "
+            "Рекомендованное значение для диссертационного эксперимента: 0.3."
+        ),
     )
 
 
@@ -249,6 +276,10 @@ class MonteCarloRun(BaseModel):
     delta_vec_cl: Optional[Dict[str, float]] = Field(default=None)
     theta_classical: Optional[float] = Field(default=None)
     delta_sector_threshold: Optional[float] = Field(default=None)
+
+    # --- пошаговые траектории рисков x_t ---
+    risk_trajectory_q: Optional[List[Dict[str, float]]] = Field(default=None)
+    risk_trajectory_cl: Optional[List[Dict[str, float]]] = Field(default=None)
 
 
 class MonteCarloResult(BaseModel):

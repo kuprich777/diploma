@@ -27,7 +27,17 @@ class Settings(BaseSettings):
     DEFAULT_OPERATIONAL: bool = True          # изначально система рабочая
 
     # --- Поведение ---
-    ENERGY_CHECK_TIMEOUT: float = 5.0         # таймаут запроса в energy_service
+    ENERGY_CHECK_TIMEOUT: float = 5.0         # таймаут запроса в energy_service (sync fallback)
+
+    # --- Async messaging (RabbitMQ) ---
+    RABBITMQ_URL: str = os.getenv(
+        "RABBITMQ_URL",
+        "amqp://guest:guest@rabbitmq:5672/"
+    )
+    RABBITMQ_EXCHANGE: str = os.getenv("RABBITMQ_EXCHANGE", "infrastructure_events")
+    ASYNC_MESSAGING_ENABLED: bool = (
+        os.getenv("ASYNC_MESSAGING_ENABLED", "true").lower() == "true"
+    )
 
     # --- Логирование ---
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

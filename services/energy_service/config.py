@@ -19,9 +19,11 @@ class Settings(BaseSettings):
         "postgresql://postgres:postgres@db:5432/diploma"
     )
 
-    # --- Начальные параметры модели ---
+    # --- Начальные параметры модели (NOMINAL STATE) ---
+    # DEFAULT_CONSUMPTION задаётся ≤ UTILIZATION_LOW * DEFAULT_PRODUCTION = 700 МВт,
+    # чтобы номинальная загрузка не создавала ненулевого риска (x_0 = 0 по методологии).
     DEFAULT_PRODUCTION: float = 1000.0
-    DEFAULT_CONSUMPTION: float = 900.0
+    DEFAULT_CONSUMPTION: float = 700.0
 
     # --- Вероятность и параметры сбоя ---
     OUTAGE_PROBABILITY: float = 0.1       # Вероятность сбоя (10%)
@@ -34,6 +36,16 @@ class Settings(BaseSettings):
     OUTAGE_DURATION_WEIGHT: float = 0.5
     UTILIZATION_LOW: float = 0.7
     UTILIZATION_HIGH: float = 1.0
+
+    # --- Async messaging (RabbitMQ) ---
+    RABBITMQ_URL: str = os.getenv(
+        "RABBITMQ_URL",
+        "amqp://guest:guest@rabbitmq:5672/"
+    )
+    RABBITMQ_EXCHANGE: str = os.getenv("RABBITMQ_EXCHANGE", "infrastructure_events")
+    ASYNC_MESSAGING_ENABLED: bool = (
+        os.getenv("ASYNC_MESSAGING_ENABLED", "true").lower() == "true"
+    )
 
     # --- Логирование ---
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

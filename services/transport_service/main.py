@@ -25,11 +25,40 @@ Instrumentator().instrument(app).expose(app, include_in_schema=False)
 
 
 @app.on_event("startup")
-def startup_event():
-    """Создаёт схему, таблицы и запускает сервис."""
+async def startup_event():
+    """Создаёт схему, таблицы; подключает async messaging если включено."""
     ensure_schema()
     Base.metadata.create_all(bind=engine)
     logger.info("🚚 transport_service started and schema ensured.")
+
+    if settings.ASYNC_MESSAGING_ENABLED:
+        try:
+            from messaging import RabbitMQConnection, subscribe
+            from routers.transport import set_mq, handle_energy_event
+            mq = RabbitMQConnection(settings.RABBITMQ_URL)
+            await mq.connect()
+            set_mq(mq)
+            app.state.mq = mq
+            await subscribe(
+                mq.channel,
+                settings.RABBITMQ_EXCHANGE,
+                "energy.state_changed",
+                "transport_service.energy_events",
+                handle_energy_event,
+            )
+            logger.info("🐇 transport_service: async messaging connected, subscribed to energy.state_changed")
+        except Exception as exc:
+            logger.warning(
+                "⚠️  RabbitMQ unavailable — transport_service running in sync-only mode: %s", exc
+            )
+            app.state.mq = None
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    mq = getattr(app.state, "mq", None)
+    if mq:
+        await mq.close()
 
 
 # Health-check endpoints

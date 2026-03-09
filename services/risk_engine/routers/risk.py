@@ -1,17 +1,19 @@
 # services/risk_engine/routers/risk.py
 
 import asyncio
-from typing import Union, Literal, Optional
+from typing import Any, Union, Literal, Optional
 
 from pydantic import BaseModel
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from aggregator import RiskAggregator
 from config import settings
 from database import get_db
 from models import RiskSnapshot
+from operators import ClassicalOperator, QuantitativeOperator, RiskOperator
 from schemas import (
     AggregatedRisk,
     RiskHistory,
@@ -50,9 +52,126 @@ CURRENT_DEPENDENCY_MATRIX: list[list[float]] = getattr(settings, "DEPENDENCY_MAT
 ])
 CURRENT_DEPENDENCY_MATRIX_VERSION: str = getattr(settings, "DEPENDENCY_MATRIX_VERSION", "v0")
 
+# Weights version — bumped when POST /update_weights is called
+CURRENT_WEIGHTS_VERSION: str = "v1.0"
+
 logger = setup_logging()
 
 router = APIRouter(prefix="/api/v1/risk", tags=["risk"])
+
+# ---------------------------------------------------------------------------
+# Async messaging state
+# ---------------------------------------------------------------------------
+_mq: Any = None  # RabbitMQConnection | None
+
+
+def set_mq(conn: Any) -> None:
+    """Injected by main.py startup after the broker connects."""
+    global _mq
+    _mq = conn
+
+
+def _is_mq_connected() -> bool:
+    return _mq is not None and _mq.is_connected
+
+
+# ---------------------------------------------------------------------------
+# Event-driven sector state cache
+# key: (scenario_id, run_id, sector)  — all strings
+# value: {"risk": float, "operational": bool, "updated_at": int}
+# ---------------------------------------------------------------------------
+_sector_cache: dict[tuple[str, str, str], dict] = {}
+_prev_total_risk: dict[tuple[str, str], float] = {}
+
+
+async def handle_sector_event(envelope: dict) -> None:
+    """Consumer handler for energy/water/transport.state_changed events.
+
+    Updates the in-memory sector cache, then immediately recomputes the
+    integral risk R_t and publishes a ``risk.updated`` event.
+    """
+    scenario_id = str(envelope.get("scenario_id", ""))
+    run_id = str(envelope.get("run_id", ""))
+    sector = str(envelope.get("sector", ""))
+    payload = envelope.get("payload", {})
+
+    if not sector:
+        logger.warning("📭 risk_engine received sector event with no 'sector' field — skipping")
+        return
+
+    # Extract normalised risk from payload (try multiple field names)
+    risk_val = float(
+        payload.get("risk_level")
+        or payload.get("degradation")
+        or (0.0 if payload.get("operational", True) else 1.0)
+    )
+    risk_val = max(0.0, min(1.0, risk_val))
+
+    _sector_cache[(scenario_id, run_id, sector)] = {
+        "risk": risk_val,
+        "operational": bool(payload.get("operational", True)),
+        "updated_at": envelope.get("timestamp_step", 0),
+    }
+    logger.info(
+        "📊 [risk_engine] sector cache updated: %s (%s, %s) risk=%.3f",
+        sector, scenario_id, run_id, risk_val,
+    )
+
+    # Trigger async risk recomputation (fire-and-forget, must not block consumer)
+    asyncio.create_task(_recompute_and_publish(scenario_id, run_id))
+
+
+async def _recompute_and_publish(scenario_id: str, run_id: str) -> None:
+    """Recompute integral risk from cached sector values and publish risk.updated."""
+    cached_e = _sector_cache.get((scenario_id, run_id, "energy"))
+    cached_w = _sector_cache.get((scenario_id, run_id, "water"))
+    cached_t = _sector_cache.get((scenario_id, run_id, "transport"))
+
+    if not all([cached_e, cached_w, cached_t]):
+        return  # not enough cached sectors yet
+
+    x_t = [cached_e["risk"], cached_w["risk"], cached_t["risk"]]
+    u_t = [0.0, 0.0, 0.0]
+    A = CURRENT_DEPENDENCY_MATRIX
+
+    op = QuantitativeOperator()
+    adjusted = op.compute(x_t, u_t, A)
+
+    aggregator = RiskAggregator(WEIGHTS)
+    total_risk = aggregator.aggregate_vector(SECTORS_ORDER, adjusted)
+
+    prev = _prev_total_risk.get((scenario_id, run_id), total_risk)
+    delta_R = total_risk - prev
+    _prev_total_risk[(scenario_id, run_id)] = total_risk
+
+    cascade_indicator = any(v >= 0.8 for i, v in enumerate(adjusted))
+
+    if _is_mq_connected():
+        try:
+            from messaging import publish_event_safe
+            await publish_event_safe(
+                _mq.channel,
+                settings.RABBITMQ_EXCHANGE,
+                "risk.updated",
+                {
+                    "integral_risk": total_risk,
+                    "x_vector": {
+                        "energy": adjusted[0],
+                        "water": adjusted[1],
+                        "transport": adjusted[2],
+                    },
+                    "delta_R": delta_R,
+                    "cascade_indicator": cascade_indicator,
+                    "method": "quantitative",
+                },
+                scenario_id=scenario_id,
+                run_id=run_id,
+                sector="risk",
+                version_A=CURRENT_DEPENDENCY_MATRIX_VERSION,
+                version_w=CURRENT_WEIGHTS_VERSION,
+            )
+        except Exception as exc:
+            logger.warning("📤 risk.updated publish failed: %s", exc)
 
 
 def _validate_matrix_3x3(matrix: list[list[float]]) -> None:
@@ -78,76 +197,6 @@ def _matrix_as_dict(matrix: list[list[float]]) -> dict[str, dict[str, float]]:
             if w != 0.0 and src != dest:
                 out[src][dest] = w
     return out
-
-
-def apply_dependencies_quantitative(energy_risk: float, water_risk: float, transport_risk: float) -> dict[str, float]:
-    """Количественный оператор: x' = clip(x + A x).
-
-    Здесь x = (energy, water, transport) в шкале [0,1].
-    A[i][j] — вклад риска j в риск i.
-    """
-    x = [float(energy_risk), float(water_risk), float(transport_risk)]
-    A = CURRENT_DEPENDENCY_MATRIX
-
-    # y = x + A x
-    y = [0.0, 0.0, 0.0]
-    for i in range(3):
-        ax = 0.0
-        for j in range(3):
-            ax += float(A[i][j]) * x[j]
-        y[i] = x[i] + ax
-
-    # clip to [0,1]
-    for i in range(3):
-        if y[i] < 0.0:
-            y[i] = 0.0
-        elif y[i] > 1.0:
-            y[i] = 1.0
-
-    return {
-        "energy": y[0],
-        "water": y[1],
-        "transport": y[2],
-    }
-
-
-def apply_dependencies_classical(
-    energy_risk: float,
-    water_risk: float,
-    transport_risk: float,
-    threshold: float = 0.5,
-) -> dict[str, float]:
-    """Классический rule-based подход.
-
-    1) Бинаризация рисков: y_i = I(x_i >= threshold).
-    2) Распространение деградаций по A с порогом связности:
-       y_i(t+1) = y_i(t) OR exists j: (y_j(t)=1 AND A[i][j] >= threshold)
-
-    Возвращает бинарные риски, приведённые к {0,1}.
-    """
-    y = [
-        1.0 if float(energy_risk) >= threshold else 0.0,
-        1.0 if float(water_risk) >= threshold else 0.0,
-        1.0 if float(transport_risk) >= threshold else 0.0,
-    ]
-
-    A = CURRENT_DEPENDENCY_MATRIX
-
-    # One-step propagation (достаточно для сценарного детектора каскада)
-    y_next = y.copy()
-    for i in range(3):
-        if y_next[i] >= 1.0:
-            continue
-        for j in range(3):
-            if y[j] >= 1.0 and float(A[i][j]) >= threshold:
-                y_next[i] = 1.0
-                break
-
-    return {
-        "energy": y_next[0],
-        "water": y_next[1],
-        "transport": y_next[2],
-    }
 
 
 # ---------- Вспомогательные функции ----------
@@ -253,40 +302,66 @@ async def calculate_risks(
     if method_norm not in {"classical", "quantitative"}:
         raise HTTPException(status_code=400, detail=f"Unknown method: {method}")
 
-    # Параллельно опрашиваем три сектора
-    energy_risk, water_risk, transport_risk = await asyncio.gather(
-        fetch_sector_risk(settings.ENERGY_SERVICE_URL, "energy", scenario_id=scenario_id, run_id=run_id),
-        fetch_sector_risk(settings.WATER_SERVICE_URL, "water", scenario_id=scenario_id, run_id=run_id),
-        fetch_sector_risk(settings.TRANSPORT_SERVICE_URL, "transport", scenario_id=scenario_id, run_id=run_id),
-    )
+    # ------------------------------------------------------------------
+    # Fast-path: use event-driven sector cache if all three sectors
+    # have been updated via async messaging (avoids HTTP polling).
+    # Falls back to HTTP if any cache entry is missing.
+    # ------------------------------------------------------------------
+    sid = str(scenario_id or "")
+    rid = str(run_id or "")
+    cached_e = _sector_cache.get((sid, rid, "energy"))
+    cached_w = _sector_cache.get((sid, rid, "water"))
+    cached_t = _sector_cache.get((sid, rid, "transport"))
+
+    if cached_e and cached_w and cached_t:
+        energy_risk = cached_e["risk"]
+        water_risk = cached_w["risk"]
+        transport_risk = cached_t["risk"]
+        logger.debug(
+            "📦 [risk_engine] cache fast-path for (%s, %s): e=%.3f w=%.3f t=%.3f",
+            sid, rid, energy_risk, water_risk, transport_risk,
+        )
+    else:
+        # HTTP polling fallback (original behaviour)
+        energy_risk, water_risk, transport_risk = await asyncio.gather(
+            fetch_sector_risk(settings.ENERGY_SERVICE_URL, "energy", scenario_id=scenario_id, run_id=run_id),
+            fetch_sector_risk(settings.WATER_SERVICE_URL, "water", scenario_id=scenario_id, run_id=run_id),
+            fetch_sector_risk(settings.TRANSPORT_SERVICE_URL, "transport", scenario_id=scenario_id, run_id=run_id),
+        )
 
     energy_ok = energy_risk < 0.5
     water_ok = water_risk < 0.5
     transport_ok = transport_risk < 0.5
 
-    # Применяем матрицу межотраслевых зависимостей
-    if method_norm == "classical":
-        sector_risk = apply_dependencies_classical(energy_risk, water_risk, transport_risk)
-    else:
-        sector_risk = apply_dependencies_quantitative(energy_risk, water_risk, transport_risk)
-    adj_energy_risk = sector_risk["energy"]
-    adj_water_risk = sector_risk["water"]
-    adj_transport_risk = sector_risk["transport"]
+    # ------------------------------------------------------------------
+    # Применяем оператор распространения рисков через матрицу зависимостей.
+    # u_t = [0, 0, 0]: в текущем цикле опроса внешние шоки не подаются —
+    # они применяются через вызовы доменных сервисов (/simulate_outage и др.)
+    # ------------------------------------------------------------------
+    A = CURRENT_DEPENDENCY_MATRIX
+    x_t = [energy_risk, water_risk, transport_risk]
+    u_t = [0.0, 0.0, 0.0]
 
-    # Интегральный риск как взвешенная сумма уже скорректированных рисков
+    op: RiskOperator
+    if method_norm == "classical":
+        op = ClassicalOperator(theta=settings.CLASSICAL_THRESHOLD)
+    else:
+        op = QuantitativeOperator()
+
+    adjusted = op.compute(x_t, u_t, A)
+    adj_energy_risk, adj_water_risk, adj_transport_risk = adjusted
+
+    # ------------------------------------------------------------------
+    # Интегральный риск R_t = Agg(x_t, w) — нормализованная взвешенная сумма.
+    # ------------------------------------------------------------------
+    aggregator = RiskAggregator(WEIGHTS)
+    sector_dict = dict(zip(SECTORS_ORDER, adjusted))
+    total_risk = aggregator.aggregate(sector_dict)
+
+    # Сохраняем веса из агрегатора для записи в meta
     w_e = WEIGHTS["energy"]
     w_w = WEIGHTS["water"]
     w_t = WEIGHTS["transport"]
-    w_sum = w_e + w_w + w_t if (w_e + w_w + w_t) > 0 else 1.0
-
-    total_risk = (adj_energy_risk * w_e + adj_water_risk * w_w + adj_transport_risk * w_t) / w_sum
-
-    # Интегральный риск тоже ограничиваем диапазоном [0, 1],
-    # чтобы он не выходил за рамки шкалы и валидировался Pydantic-схемой.
-    if total_risk < 0.0:
-        total_risk = 0.0
-    elif total_risk > 1.0:
-        total_risk = 1.0
 
     logger.info(
         "📊 Calculated risks | energy=%.2f, water=%.2f, transport=%.2f, total=%.2f",
@@ -396,6 +471,8 @@ async def update_weights(payload: WeightUpdate):
     if not settings.ENABLE_DYNAMIC_WEIGHTS:
         raise HTTPException(status_code=403, detail="Dynamic weights update is disabled by configuration")
 
+    global CURRENT_WEIGHTS_VERSION
+
     if payload.energy is not None:
         WEIGHTS["energy"] = payload.energy
     if payload.water is not None:
@@ -407,7 +484,14 @@ async def update_weights(payload: WeightUpdate):
     if total <= 0:
         raise HTTPException(status_code=400, detail="Sum of weights must be > 0")
 
-    return {"weights": WEIGHTS, "sum": total}
+    # Bump weights version for traceability in event envelopes
+    try:
+        num = int(CURRENT_WEIGHTS_VERSION.lstrip("v").split(".")[0])
+        CURRENT_WEIGHTS_VERSION = f"v{num + 1}.0"
+    except Exception:
+        CURRENT_WEIGHTS_VERSION = CURRENT_WEIGHTS_VERSION + "+1"
+
+    return {"weights": WEIGHTS, "sum": total, "version": CURRENT_WEIGHTS_VERSION}
 
 
 class DependencyMatrixUpdate(BaseModel):
@@ -489,3 +573,65 @@ async def get_risk_history(
     dto_items = [RiskSnapshotOut.model_validate(obj) for obj in items]
 
     return RiskHistory(items=dto_items, count=len(dto_items))
+
+
+# ---------------------------------------------------------------------------
+# Admin: dead-letter queue inspection
+# ---------------------------------------------------------------------------
+
+@router.get("/admin/dead-letters", tags=["admin"])
+async def get_dead_letters(
+    count: int = Query(default=20, ge=1, le=100, description="Max messages to retrieve"),
+) -> dict:
+    """Inspect failed messages in the dead-letter queue (non-destructive peek).
+
+    Uses the RabbitMQ Management HTTP API with ``ack_requeue_true`` so that
+    messages are returned to the queue after inspection.  Returns an empty
+    list if the queue does not yet exist or is empty.
+
+    Requires the RabbitMQ management plugin (enabled by default on the
+    ``rabbitmq:3-management`` Docker image).
+    """
+    from messaging import DLQ_NAME  # imported here to keep optional
+
+    mgmt = settings.RABBITMQ_MANAGEMENT_URL.rstrip("/")
+    url = f"{mgmt}/api/queues/%2F/{DLQ_NAME}/get"
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.post(
+                url,
+                json={
+                    "count": count,
+                    "ackmode": "ack_requeue_true",
+                    "encoding": "auto",
+                },
+                auth=("guest", "guest"),
+            )
+
+        if resp.status_code == 200:
+            messages = resp.json()
+            return {
+                "queue": DLQ_NAME,
+                "count": len(messages),
+                "messages": messages,
+            }
+
+        if resp.status_code == 404:
+            return {
+                "queue": DLQ_NAME,
+                "count": 0,
+                "messages": [],
+                "note": "Queue not found (no failed messages yet)",
+            }
+
+        raise HTTPException(
+            status_code=resp.status_code,
+            detail=f"RabbitMQ management API returned {resp.status_code}",
+        )
+
+    except httpx.RequestError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Cannot reach RabbitMQ management API at {mgmt}: {exc}",
+        )

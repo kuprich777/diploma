@@ -56,6 +56,11 @@ class Settings(BaseSettings):
         "v1.0"
     )
 
+    # Порог бинаризации для ClassicalOperator (θ).
+    # Сектор считается отказавшим, если его риск >= CLASSICAL_THRESHOLD.
+    # Ребро матрицы A считается активным, если A[i][j] >= CLASSICAL_THRESHOLD.
+    CLASSICAL_THRESHOLD: float = 0.5
+
     # Разрешить ли динамическое обновление матрицы через API
     ENABLE_DYNAMIC_MATRIX: bool = True
 
@@ -66,6 +71,20 @@ class Settings(BaseSettings):
     # --- Настройки поведения ---
     REQUEST_TIMEOUT: float = 5.0     # таймаут запросов к сервисам
     RETRIES: int = 2                 # количество ретраев при ошибках
+
+    # --- Async messaging (RabbitMQ) ---
+    RABBITMQ_URL: str = os.getenv(
+        "RABBITMQ_URL",
+        "amqp://guest:guest@rabbitmq:5672/"
+    )
+    RABBITMQ_EXCHANGE: str = os.getenv("RABBITMQ_EXCHANGE", "infrastructure_events")
+    RABBITMQ_MANAGEMENT_URL: str = os.getenv(
+        "RABBITMQ_MANAGEMENT_URL",
+        "http://rabbitmq:15672"
+    )
+    ASYNC_MESSAGING_ENABLED: bool = (
+        os.getenv("ASYNC_MESSAGING_ENABLED", "true").lower() == "true"
+    )
 
     # --- Логирование ---
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

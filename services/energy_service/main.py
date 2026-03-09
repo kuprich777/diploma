@@ -8,6 +8,7 @@ from routers import energy as energy_router
 from database import get_db, engine, ensure_schema
 from models import Base, EnergyRecord
 from utils.logging import setup_logging
+from config import settings
 
 from datetime import datetime
 
@@ -69,11 +70,33 @@ Instrumentator().instrument(app).expose(app, include_in_schema=False)
 
 # --- События приложения ---
 @app.on_event("startup")
-def startup_event():
-    """Создание схемы и таблиц при запуске"""
+async def startup_event():
+    """Создание схемы и таблиц при запуске, инициализация async messaging."""
     ensure_schema()
     Base.metadata.create_all(bind=engine)
     logger.info("✅ energy_service started and schema ensured.")
+
+    if settings.ASYNC_MESSAGING_ENABLED:
+        try:
+            from messaging import RabbitMQConnection
+            from routers.energy import set_mq
+            mq = RabbitMQConnection(settings.RABBITMQ_URL)
+            await mq.connect()
+            set_mq(mq)
+            app.state.mq = mq
+            logger.info("🐇 energy_service: async messaging connected")
+        except Exception as exc:
+            logger.warning(
+                "⚠️  RabbitMQ unavailable — energy_service running in sync-only mode: %s", exc
+            )
+            app.state.mq = None
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    mq = getattr(app.state, "mq", None)
+    if mq:
+        await mq.close()
 
 
 # --- Pydantic-схемы (DTO) ---

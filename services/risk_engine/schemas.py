@@ -88,13 +88,17 @@ class RiskRecalcRequest(BaseModel):
     Поле `method` позволяет формально разделять два режима расчёта:
       - quantitative: количественный оператор распространения риска (Ax)
       - classical: rule-based распространение деградаций на бинарных индикаторах
-
-    Можно добавить в будущем поля типа:
-        - override weights
-        - simulate outages
     """
     save: bool = Field(description="Сохранять ли результат в историю RiskSnapshot")
     method: Literal["classical", "quantitative"] = Field(
         default="quantitative",
-        description="Метод расчёта риска: classical | quantitative"
+        description="Метод расчёта риска: classical | quantitative",
+    )
+    scenario_id: Optional[str] = Field(
+        default=None,
+        description="Идентификатор сценария для фильтрации состояния секторов",
+    )
+    run_id: Optional[int] = Field(
+        default=None,
+        description="Номер прогона (run) в рамках сценария",
     )

@@ -119,3 +119,72 @@ LOSS --> REPORTING
 SCENARIO --> REPORTING
 REPORTING --> MONITOR
 MONITOR --> GATEWAY
+
+
+---
+
+## Async Messaging Architecture
+
+Inter-service communication for cross-sector dependency checks and risk
+aggregation is handled asynchronously via **RabbitMQ** (AMQP 0-9-1).
+The shared library lives in `shared/messaging.py` and is volume-mounted
+read-only into each participating container at `/app/messaging.py`.
+
+### Routing key map
+
+| Routing key               | Publisher          | Subscribers                          |
+|---------------------------|--------------------|--------------------------------------|
+| `energy.state_changed`    | energy_service     | water_service, transport_service, risk_engine |
+| `water.state_changed`     | water_service      | risk_engine                          |
+| `transport.state_changed` | transport_service  | risk_engine                          |
+| `risk.updated`            | risk_engine        | (reporting / future consumers)       |
+
+### Exchange topology
+
+```
+Exchange : infrastructure_events   (topic, durable)
+   energy.state_changed  ──►  water_service.energy_events   (durable queue)
+                         ──►  transport_service.energy_events
+                         ──►  risk_engine.energy_events
+   water.state_changed   ──►  risk_engine.water_events
+   transport.state_changed ──► risk_engine.transport_events
+
+Exchange : infrastructure_events.dlx  (fanout, durable)
+   all service queues declare x-dead-letter-exchange → dlx
+   dead letters land in: infrastructure_events.dead_letters
+```
+
+### Message envelope
+
+Every message published by any service carries:
+
+```json
+{
+  "scenario_id":    "S1_energy_outage",
+  "run_id":         "42",
+  "version_A":      "v1.0",
+  "version_w":      "v1.0",
+  "sector":         "energy",
+  "timestamp_step": 1712345678,
+  "payload": { ... domain-specific fields ... }
+}
+```
+
+### Graceful degradation
+
+Set `ASYNC_MESSAGING_ENABLED=false` (per service) to disable the broker
+path.  Water and transport services then fall back to synchronous HTTP
+calls to energy_service.  Risk engine falls back to its original
+parallel HTTP polling of all three sector services.
+
+### Inspecting dead letters
+
+```
+GET http://localhost:8004/api/v1/risk/admin/dead-letters?count=20
+```
+
+Or via the RabbitMQ management UI:
+
+```
+make rabbit   # opens http://localhost:15672  (guest / guest)
+```

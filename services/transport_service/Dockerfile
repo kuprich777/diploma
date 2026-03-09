@@ -16,7 +16,7 @@
     
     # --- Устанавливаем зависимости (кэшируется отдельно) ---
     COPY requirements.txt .
-    RUN pip install --upgrade pip && pip install -r requirements.txt
+    RUN pip install --no-cache-dir --retries 10 --timeout 120 -r requirements.txt
     
     # --- Копируем весь проект ---
     COPY . .

@@ -1,6 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
-from datetime import datetime
+import time
+import hashlib
+import json
+from collections import deque
 
 import httpx
 import random
@@ -25,6 +28,9 @@ logger = setup_logging()
 settings = Settings()
 router = APIRouter(prefix="/api/v1/simulator", tags=["simulator"])
 
+# Baseline vectors x0 cached per experimental key (scenario_id, run_id).
+BASELINE_VECTORS: dict[tuple[str, int], dict[str, float]] = {}
+
 
 # --- Scenario catalog S (control variable of the experiment) ---
 # The catalog is fixed during a series of experiments to ensure comparability.
@@ -33,6 +39,8 @@ SCENARIO_CATALOG: dict[str, dict] = {
         "description": "Отказ энергоснабжения: инициатор energy, outage 30 минут",
         "steps": [
             {"step_index": 1, "sector": "energy", "action": "outage", "params": {"duration": 30, "reason": "scenario"}},
+            {"step_index": 2, "sector": "water", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 30}},
+            {"step_index": 3, "sector": "transport", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 30}},
         ],
     },
     "S2_water_outage": {
@@ -108,6 +116,141 @@ async def fetch_dependency_matrix_meta() -> dict:
         logger.warning(f"⚠️ Failed to fetch dependency matrix meta from {url}: {e}")
         return {}
 
+
+def _dependency_matrix_from_meta(meta: dict | None) -> tuple[list[str], list[list[float]]]:
+    """Return normalized matrix metadata for event propagation.
+
+    Matrix semantics follow risk_engine convention: A[i][j] is src=j -> dest=i.
+    """
+    if not isinstance(meta, dict):
+        return ["energy", "water", "transport"], [[0.0] * 3 for _ in range(3)]
+
+    order = meta.get("sectors_order")
+    matrix = meta.get("matrix")
+
+    if (
+        isinstance(order, list)
+        and len(order) == 3
+        and isinstance(matrix, list)
+        and len(matrix) == 3
+        and all(isinstance(row, list) and len(row) == 3 for row in matrix)
+    ):
+        try:
+            return [str(x) for x in order], [[float(v) for v in row] for row in matrix]
+        except (TypeError, ValueError):
+            pass
+
+    return ["energy", "water", "transport"], [[0.0] * 3 for _ in range(3)]
+
+
+def _should_propagate_action(action: str) -> bool:
+    """Keep queue overhead low: propagate only impactful scenario actions."""
+    return action in {"outage", "dependency_check", "load_increase"}
+
+
+async def _run_interaction_queue(
+    *,
+    scenario_id: str,
+    run_id: int,
+    seed: int,
+    parent_step_index: int,
+    source_sector: str,
+    source_action: str,
+    source_payload: dict,
+    matrix_order: list[str],
+    matrix: list[list[float]],
+) -> list[dict]:
+    """Propagate cross-sector interactions through an async message queue.
+
+    Each message may spawn downstream dependency checks according to matrix weights,
+    with stochastic jitter to keep reactions non-deterministic across runs.
+    """
+    rng = random.Random(seed ^ ((parent_step_index + 1) * 7919))
+    queue = deque(
+        [
+            {
+                "source_sector": source_sector,
+                "depth": 0,
+                "parent_action": source_action,
+                "source_payload": source_payload,
+            }
+        ]
+    )
+
+    idx = {name: i for i, name in enumerate(matrix_order)}
+    max_depth = 1
+    max_messages = 4
+    consumed = 0
+    interaction_logs: list[dict] = []
+
+    while queue and consumed < max_messages:
+        msg = queue.popleft()
+        consumed += 1
+
+        src = msg["source_sector"]
+        if src not in idx:
+            continue
+        src_j = idx[src]
+
+        candidates: list[tuple[float, str, int]] = []
+        for dest in matrix_order:
+            if dest == src or dest not in idx:
+                continue
+            dest_i = idx[dest]
+            base_weight = max(0.0, min(1.0, float(matrix[dest_i][src_j])))
+            if base_weight > 0.0:
+                candidates.append((base_weight, dest, dest_i))
+
+        # Lightweight mode: fanout only to top-1 dependency per message.
+        for base_weight, dest, dest_i in sorted(candidates, key=lambda x: x[0], reverse=True)[:1]:
+            probability = max(0.05, min(0.95, base_weight * rng.uniform(0.9, 1.1)))
+            if rng.random() > probability:
+                continue
+
+            source_duration = int((msg.get("source_payload") or {}).get("duration", 10) or 10)
+            source_degradation = max(
+                0.0,
+                min(1.0, base_weight * rng.uniform(0.85, 1.2) + rng.uniform(0.0, 0.15)),
+            )
+
+            queue_step_index = int(parent_step_index * 100 + consumed * 10 + dest_i + 1)
+            queue_step = ScenarioStep(
+                step_index=queue_step_index,
+                sector=dest,
+                action="dependency_check",
+                params={
+                    "source_sector": src,
+                    "source_duration": source_duration,
+                    "source_degradation": source_degradation,
+                },
+            )
+
+            out = await _apply_step(queue_step, scenario_id, run_id)
+            out["queue_event"] = {
+                "source_sector": src,
+                "target_sector": dest,
+                "matrix_weight": round(base_weight, 4),
+                "trigger_probability": round(probability, 4),
+                "propagation_depth": int(msg.get("depth", 0)),
+                "generated_by": msg.get("parent_action"),
+            }
+            interaction_logs.append(out)
+
+            if int(msg.get("depth", 0)) < max_depth:
+                queue.append(
+                    {
+                        "source_sector": dest,
+                        "depth": int(msg.get("depth", 0)) + 1,
+                        "parent_action": "queue_dependency_check",
+                        "source_payload": {
+                            "duration": source_duration,
+                            "degradation": source_degradation,
+                        },
+                    }
+                )
+
+    return interaction_logs
+
 async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict:
     """Apply one ScenarioStep to a domain microservice.
 
@@ -146,6 +289,37 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
                     continue
             raise HTTPException(status_code=502, detail=f"{sector} service outage failed")
 
+        if action == "dependency_check":
+            source_sector = str(params.get("source_sector", "energy")).strip().lower()
+            if source_sector not in {"energy", "water", "transport"}:
+                raise HTTPException(status_code=400, detail=f"Unsupported source_sector for dependency_check: {source_sector}")
+
+            source_duration = int(params.get("source_duration", 0))
+            source_degradation = float(params.get("source_degradation", 0.0))
+
+            candidates = [
+                _build_url(base, f"/api/v1/{sector}/check_{source_sector}_dependency"),
+                _build_url(base, f"/{sector}/check_{source_sector}_dependency"),
+                _build_url(base, f"/api/v1/check_{source_sector}_dependency"),
+                _build_url(base, f"/check_{source_sector}_dependency"),
+            ]
+
+            for url in candidates:
+                try:
+                    resp = await client.post(
+                        url,
+                        params={
+                            **q,
+                            "source_duration": source_duration,
+                            "source_degradation": source_degradation,
+                        },
+                    )
+                    if resp.status_code < 400:
+                        return resp.json()
+                except httpx.HTTPError:
+                    continue
+            raise HTTPException(status_code=502, detail=f"{sector} service dependency_check failed for source={source_sector}")
+
         if action == "resolve_outage":
             candidates = [
                 _build_url(base, f"/api/v1/{sector}/resolve_outage"),
@@ -172,10 +346,14 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
                 _build_url(base, f"/api/v1/{sector}/update_load"),
                 _build_url(base, f"/{sector}/update_load"),
             ]
-            payload = {"amount": amount}
             for url in candidates:
                 try:
-                    resp = await client.post(url, params=q, json=payload)
+                    if url.endswith("update_load"):
+                        # Fallback for services that only support absolute load update
+                        resp = await client.post(url, params=q, json={"load": amount})
+                    else:
+                        # Primary contract for load_increase: query param amount
+                        resp = await client.post(url, params={**q, "amount": amount})
                     if resp.status_code < 400:
                         return resp.json()
                 except httpx.HTTPError:
@@ -205,6 +383,92 @@ async def _apply_step(step: ScenarioStep, scenario_id: str, run_id: int) -> dict
 
     raise HTTPException(status_code=400, detail=f"Unsupported action: {action}")
 
+
+def _generate_run_id() -> int:
+    """Generate unique run_id for ad-hoc/manual invocations.
+
+    Uses nanosecond clock + random suffix to avoid collisions between close requests.
+    """
+    return int(f"{time.time_ns()}{random.randint(100, 999)}")
+
+
+def _derive_seed(scenario_id: str, run_id: int, explicit_seed: int | None = None) -> int:
+    if explicit_seed is not None:
+        return int(explicit_seed)
+    digest = hashlib.sha256(f"{scenario_id}:{run_id}".encode("utf-8")).hexdigest()
+    return int(digest[:16], 16)
+
+
+def _cache_key_for_run(
+    *,
+    scenario_id: str,
+    method: str,
+    duration: int | None,
+    theta: float,
+    delta_threshold: float,
+    matrix_A_version: str | None,
+    weights_version: str | None,
+    run_id: int,
+    seed: int,
+) -> str:
+    return "|".join(
+        [
+            f"scenario={scenario_id}",
+            f"method={method}",
+            f"duration={duration if duration is not None else 'na'}",
+            f"theta={theta:.6f}",
+            f"delta_threshold={delta_threshold:.6f}",
+            f"A={matrix_A_version or 'na'}",
+            f"w={weights_version or 'na'}",
+            f"run_id={run_id}",
+            f"seed={seed}",
+        ]
+    )
+
+
+def _x0_hash(base_vec: dict[str, float]) -> str:
+    payload = json.dumps(base_vec, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _randomize_steps_for_run(
+    *,
+    steps: list[ScenarioStep],
+    rng: random.Random,
+    stochastic_scale: float,
+) -> tuple[list[ScenarioStep], dict[str, float]]:
+    if stochastic_scale <= 0.0:
+        return steps, {}
+
+    effective: dict[str, float] = {}
+    randomized_steps: list[ScenarioStep] = []
+    for step in steps:
+        params = dict(step.params or {})
+        if step.action in {"outage", "dependency_check"} and "source_duration" in params:
+            src = max(1.0, float(params.get("source_duration", 1.0)))
+            noise = rng.gauss(0.0, stochastic_scale)
+            params["source_duration"] = max(1, int(round(src * (1.0 + noise))))
+            effective[f"step_{step.step_index}_source_duration"] = float(params["source_duration"])
+        if step.action == "outage" and "duration" in params:
+            base_duration = max(1.0, float(params.get("duration", 1.0)))
+            noise = rng.gauss(0.0, stochastic_scale)
+            params["duration"] = max(1, int(round(base_duration * (1.0 + noise))))
+            effective[f"step_{step.step_index}_duration"] = float(params["duration"])
+        if step.action == "load_increase" and "amount" in params:
+            base_amount = max(0.0, float(params.get("amount", 0.0)))
+            noise = rng.gauss(0.0, stochastic_scale)
+            params["amount"] = max(0.0, base_amount * (1.0 + noise))
+            effective[f"step_{step.step_index}_amount"] = float(params["amount"])
+        randomized_steps.append(
+            ScenarioStep(
+                step_index=step.step_index,
+                sector=step.sector,
+                action=step.action,
+                params=params,
+            )
+        )
+    return randomized_steps, effective
+
 @router.get("/catalog", response_model=ScenarioCatalog)
 async def get_scenario_catalog() -> ScenarioCatalog:
     scenarios: list[CatalogScenario] = []
@@ -230,9 +494,9 @@ async def run_scenario(
 ) -> ScenarioRunResult:
     scenario_id = req.scenario_id
 
-    # If run_id is not provided, generate a reproducible-ish id for an interactive run
-    # (Monte-Carlo provides run_id explicitly).
-    run_id: int = int(req.run_id) if req.run_id is not None else int(datetime.utcnow().timestamp())
+    # Never reuse run_id across independent calls: for manual run_scenario
+    # generate a high-entropy identifier.
+    run_id: int = int(req.run_id) if req.run_id is not None else _generate_run_id()
 
     # --- 1. Resolve scenario steps (catalog S or explicit) ---
     if use_catalog and (not req.steps or len(req.steps) == 0):
@@ -243,6 +507,13 @@ async def run_scenario(
         steps = req.steps
 
     steps = sorted(steps, key=lambda s: s.step_index)
+    seed = _derive_seed(scenario_id, run_id, req.seed)
+    rng = random.Random(seed)
+    steps, randomized_params = _randomize_steps_for_run(
+        steps=steps,
+        rng=rng,
+        stochastic_scale=float(req.stochastic_scale),
+    )
 
     # Initiator i0 is defined by the first step's sector
     if not steps:
@@ -261,19 +532,25 @@ async def run_scenario(
     # --- 2. Initialise state x_0 for all sectors if requested ---
     if req.init_all_sectors:
         for sector in ("energy", "water", "transport"):
-            await _init_sector_state(sector, scenario_id, run_id)
+            await _init_sector_state(sector, scenario_id, run_id, force=True)
 
     # --- 3. Read initial state x_0 for both methods ---
     base_cl = await fetch_risk(scenario_id, run_id, method="classical")
     base_q = await fetch_risk(scenario_id, run_id, method="quantitative")
+    base_vec_cl = dict(_sector_risk_vector(base_cl))
+    base_vec_q = dict(_sector_risk_vector(base_q))
+    BASELINE_VECTORS[(scenario_id, run_id)] = dict(base_vec_q)
+    x0_hash = _x0_hash(base_vec_q)
 
     base_total_cl = float(base_cl.get("total_risk", 0.0))
     base_total_q = float(base_q.get("total_risk", 0.0))
+    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
 
     # --- 4. Apply operator F(x, s): sequential execution of steps ---
     # Mathematically: x_T = F(x_0, s)
     # For cascade indicators we track all t <= T, as in formulas I^(cl)(s,r), I^(q)(s,r).
     step_logs: list[dict] = []
+<<<<<<< HEAD
     non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
 
     non_initiator_threshold_classical = 1.0
@@ -285,13 +562,55 @@ async def run_scenario(
     final_cl = base_cl
     final_q = base_q
 
+=======
+    theta_classical = float(req.theta_classical)
+    step_vectors_cl: list[dict[str, float]] = []
+    matrix_order, matrix_A = _dependency_matrix_from_meta(dm_meta)
+>>>>>>> cdx
     for step in steps:
         out = await _apply_step(step, scenario_id, run_id)
+
+        # Methodological rule for classical mode:
+        # y_i,t = I(Δx_i,t >= θ), I_cl = 1 if ∃ t for any non-initiator i != i0.
+        step_cl = await fetch_risk(scenario_id, run_id, method="classical")
+        step_delta_cl = _vector_delta(_sector_risk_vector(step_cl), base_vec_cl)
+        step_vectors_cl.append(_sector_risk_vector(step_cl))
+        step_I_cl = 1 if any(float(step_delta_cl.get(s, 0.0)) >= theta_classical for s in non_initiators) else 0
+
+        out["step_I_cl"] = step_I_cl
+        out["step_delta_x_cl"] = step_delta_cl
         step_logs.append(out)
 
+<<<<<<< HEAD
         # Evaluate state at each t (not only at t=T), consistent with methodology formulas.
         final_cl = await fetch_risk(scenario_id, run_id, method="classical")
         final_q = await fetch_risk(scenario_id, run_id, method="quantitative")
+=======
+        # Message queue propagation: sectors affect each other based on matrix A.
+        # Lightweight: only for impactful actions and with a single post-queue risk read.
+        if _should_propagate_action(step.action):
+            interaction_logs = await _run_interaction_queue(
+                scenario_id=scenario_id,
+                run_id=run_id,
+                seed=seed,
+                parent_step_index=step.step_index,
+                source_sector=step.sector,
+                source_action=step.action,
+                source_payload=step.params or {},
+                matrix_order=matrix_order,
+                matrix=matrix_A,
+            )
+            step_logs.extend(interaction_logs)
+
+            if interaction_logs:
+                step_cl_interaction = await fetch_risk(scenario_id, run_id, method="classical")
+                vec_cl_interaction = _sector_risk_vector(step_cl_interaction)
+                step_vectors_cl.append(vec_cl_interaction)
+
+    # --- 5. Read final state x_T for both operators ---
+    final_cl = await fetch_risk(scenario_id, run_id, method="classical")
+    final_q = await fetch_risk(scenario_id, run_id, method="quantitative")
+>>>>>>> cdx
 
         if any(float(final_cl.get(f"{s}_risk", 0.0)) >= non_initiator_threshold_classical for s in non_initiators):
             classical_cascade_seen = True
@@ -304,21 +623,60 @@ async def run_scenario(
     # --- 5. Final state x_T for both operators ---
     final_total_cl = float(final_cl.get("total_risk", 0.0))
     final_total_q = float(final_q.get("total_risk", 0.0))
+    final_vec_cl = _sector_risk_vector(final_cl)
+    final_vec_q = _sector_risk_vector(final_q)
+    delta_vec_cl = _vector_delta(final_vec_cl, base_vec_cl)
+    delta_vec_q = _vector_delta(final_vec_q, base_vec_q)
 
     delta_cl = final_total_cl - base_total_cl
     delta_q = final_total_q - base_total_q
 
     # --- Cascade indicators (methodology-aligned) ---
+<<<<<<< HEAD
     # I^(cl)(s,r) = 1 if exists non-initiator and exists t <= T with binary risk flag.
     I_cl = 1 if classical_cascade_seen else 0
 
     # I^(q)(s,r) = 1 if exists non-initiator with max_{t<=T}(x_{i,t} - x_{i,0}) >= delta.
     I_q = 1 if any(quantitative_max_delta[s] >= delta_sector_threshold for s in non_initiators) else 0
+=======
+    I_cl = compute_I_cl_over_steps(base_vec_cl, step_vectors_cl, theta_classical, initiator)
+
+    # Quantitative: cascade if any non-initiator increased by at least δ
+    delta_sector_threshold = 0.1
+    I_q = 1 if any(float(delta_vec_q.get(s, 0.0)) >= delta_sector_threshold for s in non_initiators) else 0
+
+    cache_key = _cache_key_for_run(
+        scenario_id=scenario_id,
+        method="both",
+        duration=max((int(st.params.get("duration", 0)) for st in steps if "duration" in (st.params or {})), default=0),
+        theta=theta_classical,
+        delta_threshold=delta_sector_threshold,
+        matrix_A_version=matrix_A_version,
+        weights_version=weights_version,
+        run_id=run_id,
+        seed=seed,
+    )
+    logger.info(
+        "🧪 run diagnostics: scenario_id=%s run_id=%s seed=%s x0_hash=%s cache_key=%s cache_hit=%s randomized_params=%s",
+        scenario_id,
+        run_id,
+        seed,
+        x0_hash,
+        cache_key,
+        False,
+        randomized_params,
+    )
+>>>>>>> cdx
 
     # --- 6. Return both F_cl and F_q results with new fields ---
     return ScenarioRunResult(
         scenario_id=scenario_id,
         run_id=run_id,
+        seed=seed,
+        cache_key=cache_key,
+        cache_hit=False,
+        randomized_params=randomized_params or None,
+        x0_hash=x0_hash,
         initiator=initiator,
         matrix_A_version=matrix_A_version,
         weights_version=weights_version,
@@ -334,6 +692,17 @@ async def run_scenario(
         delta_q=delta_q,
         I_cl=I_cl,
         I_q=I_q,
+        baseline_x0=base_vec_q,
+        before_vec_q=base_vec_q,
+        after_vec_q=final_vec_q,
+        delta_vec_q=delta_vec_q,
+        before_vec_cl=base_vec_cl,
+        after_vec_cl=final_vec_cl,
+        delta_vec_cl=delta_vec_cl,
+        delta_x_q=delta_vec_q,
+        delta_x_cl=delta_vec_cl,
+        theta_classical=theta_classical,
+        delta_sector_threshold=delta_sector_threshold,
     )
 
 
@@ -355,7 +724,107 @@ def _build_url(base: str, path: str) -> str:
     return f"{b}{p}"
 
 
-async def _init_sector_state(sector: str, scenario_id: str, run_id: int) -> None:
+def _sector_risk_vector(risk_payload: dict) -> dict[str, float]:
+    return {
+        "energy": float(risk_payload.get("energy_risk", 0.0)),
+        "water": float(risk_payload.get("water_risk", 0.0)),
+        "transport": float(risk_payload.get("transport_risk", 0.0)),
+    }
+
+
+def outage_impact_from_duration(duration: int, max_duration: int) -> float:
+    """Monotonic outage impact in [0,1] without centering."""
+    if max_duration <= 0:
+        return 0.0
+    return max(0.0, min(1.0, float(duration) / float(max_duration)))
+
+
+def _vector_delta(final_vec: dict[str, float], base_vec: dict[str, float]) -> dict[str, float]:
+    return {
+        "energy": float(final_vec.get("energy", 0.0)) - float(base_vec.get("energy", 0.0)),
+        "water": float(final_vec.get("water", 0.0)) - float(base_vec.get("water", 0.0)),
+        "transport": float(final_vec.get("transport", 0.0)) - float(base_vec.get("transport", 0.0)),
+    }
+
+
+
+
+def compute_I_cl_over_steps(
+    base_vec: dict[str, float],
+    step_vecs: list[dict[str, float]],
+    theta: float,
+    initiator: str,
+) -> int:
+    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
+    for step_vec in step_vecs:
+        delta = _vector_delta(step_vec, base_vec)
+        if any(float(delta.get(s, 0.0)) >= theta for s in non_initiators):
+            return 1
+    return 0
+
+
+def compute_duration_delta_correlation(durations: list[int], deltas: list[float]) -> float | None:
+    if len(durations) < 2 or len(set(durations)) <= 1:
+        return None
+    try:
+        return float(statistics.correlation(durations, deltas))
+    except Exception:
+        return None
+
+
+def _build_mc_steps(req: MonteCarloRequest, duration: int, dependency_multiplier: float = 1.0) -> list[ScenarioStep]:
+    """Build MC steps so each run is executed by the same scenario executor as run_scenario."""
+    initiator_action = getattr(req, "initiator_action", "outage")
+
+    if initiator_action == "outage":
+        outage_duration = max(1, int(round(duration * dependency_multiplier)))
+        if req.sector == "energy":
+            return [
+                ScenarioStep(
+                    step_index=1,
+                    sector="energy",
+                    action="outage",
+                    params={"duration": outage_duration, "reason": "mc_outage"},
+                ),
+                ScenarioStep(
+                    step_index=2,
+                    sector="water",
+                    action="dependency_check",
+                    params={"source_sector": "energy", "source_duration": outage_duration},
+                ),
+                ScenarioStep(
+                    step_index=3,
+                    sector="transport",
+                    action="dependency_check",
+                    params={"source_sector": "energy", "source_duration": outage_duration},
+                ),
+            ]
+
+        return [
+            ScenarioStep(
+                step_index=1,
+                sector=req.sector,
+                action="outage",
+                params={"duration": outage_duration, "reason": "mc_outage"},
+            ),
+        ]
+
+    if initiator_action == "load_increase":
+        amount = float(getattr(req, "load_amount", 0.25))
+        noisy_amount = max(0.0, amount * dependency_multiplier)
+        return [
+            ScenarioStep(
+                step_index=1,
+                sector=req.sector,
+                action="load_increase",
+                params={"amount": noisy_amount},
+            ),
+        ]
+
+    raise HTTPException(status_code=400, detail=f"Unknown initiator_action: {initiator_action}")
+
+
+async def _init_sector_state(sector: str, scenario_id: str, run_id: int, force: bool = False) -> None:
     base = _service_base_for_sector(sector)
     # try common prefixes
     candidates = [
@@ -364,7 +833,7 @@ async def _init_sector_state(sector: str, scenario_id: str, run_id: int) -> None
         _build_url(base, "/api/v1/init"),
         _build_url(base, "/init"),
     ]
-    params = {"scenario_id": scenario_id, "run_id": run_id}
+    params = {"scenario_id": scenario_id, "run_id": run_id, "force": str(force).lower()}
     async with httpx.AsyncClient(timeout=10.0) as client:
         last_exc = None
         for url in candidates:
@@ -457,6 +926,12 @@ async def run_monte_carlo(req: MonteCarloRequest):
     if req.duration_max < req.duration_min:
         raise HTTPException(status_code=400, detail="duration_max must be >= duration_min")
 
+    if req.runs < 100:
+        raise HTTPException(
+            status_code=400,
+            detail="For stable K(N) and quantile comparison use runs >= 100 (recommended 300+)",
+        )
+
     logger.info(
         f"🎲 Monte-Carlo start: scenario_id={req.scenario_id}, mode={req.mode}, sector={req.sector}, runs={req.runs}, "
         f"duration=[{req.duration_min}, {req.duration_max}]"
@@ -474,69 +949,42 @@ async def run_monte_carlo(req: MonteCarloRequest):
     for i in range(1, req.runs + 1):
         # методологически: r = start_run_id..start_run_id+runs-1
         run_id = int(req.start_run_id) + (i - 1)
-        duration = random.randint(req.duration_min, req.duration_max)
+        seed = _derive_seed(req.scenario_id, run_id, req.base_seed + i - 1 if req.base_seed is not None else None)
+        rng = random.Random(seed)
+        duration = rng.randint(req.duration_min, req.duration_max)
+        dependency_multiplier = 1.0
+        if float(getattr(req, "stochastic_scale", 0.0)) > 0.0:
+            noise = rng.gauss(0.0, float(req.stochastic_scale))
+            dependency_multiplier = max(0.0, 1.0 + noise)
 
-        # Real mode (only)
-        # Initialize all sector states
-        await _init_sector_state("energy", req.scenario_id, run_id)
-        await _init_sector_state("water", req.scenario_id, run_id)
-        await _init_sector_state("transport", req.scenario_id, run_id)
+        steps = _build_mc_steps(req, duration, dependency_multiplier=dependency_multiplier)
+        scenario_res = await run_scenario(
+            ScenarioRequest(
+                scenario_id=req.scenario_id,
+                run_id=run_id,
+                seed=seed,
+                method="both",
+                steps=steps,
+                init_all_sectors=True,
+                theta_classical=req.theta_classical,
+                stochastic_scale=req.stochastic_scale,
+            ),
+            use_catalog=False,
+        )
 
-        base_risk_cl = await fetch_risk(req.scenario_id, run_id, method="classical")
-        base_risk_q = await fetch_risk(req.scenario_id, run_id, method="quantitative")
-
-        base_total = float(base_risk_q.get("total_risk", 0.0))
-        base_total_cl = float(base_risk_cl.get("total_risk", 0.0))
-
-        initiator_action = getattr(req, "initiator_action", "outage")
-
-        if initiator_action == "outage":
-            step = ScenarioStep(
-                step_index=1,
-                sector=req.sector,
-                action="outage",
-                params={"duration": duration, "reason": "mc_outage"},
-            )
-            await _apply_step(step, req.scenario_id, run_id)
-
-        elif initiator_action == "load_increase":
-            amount = float(getattr(req, "load_amount", 0.25))
-            step = ScenarioStep(
-                step_index=1,
-                sector=req.sector,
-                action="load_increase",
-                params={"amount": amount},
-            )
-            await _apply_step(step, req.scenario_id, run_id)
-
-        else:
-            raise HTTPException(status_code=400, detail=f"Unknown initiator_action: {initiator_action}")
-
-        after_risk_cl = await fetch_risk(req.scenario_id, run_id, method="classical")
-        after_risk_q = await fetch_risk(req.scenario_id, run_id, method="quantitative")
-
-        after_total = float(after_risk_q.get("total_risk", 0.0))
-        after_total_cl = float(after_risk_cl.get("total_risk", 0.0))
-
-        # --- Cascade indicators ---
-        initiator = req.sector
-        non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
-
-        # Classical: cascade if any non-initiator has binary risk >= threshold (usually 1.0)
-        I_cl = 1 if any(
-            float(after_risk_cl.get(f"{s}_risk", 0.0)) >= req.non_initiator_threshold_classical
-            for s in non_initiators
-        ) else 0
-
-        # Quantitative: cascade if any non-initiator sector risk increased by at least δ
-        I_q = 1 if any(
-            (float(after_risk_q.get(f"{s}_risk", 0.0)) - float(base_risk_q.get(f"{s}_risk", 0.0)))
-            >= req.delta_sector_threshold
-            for s in non_initiators
-        ) else 0
-
-        effective_delta = after_total - base_total
-        after = after_total
+        base_total = float(scenario_res.before)
+        after = float(scenario_res.after)
+        effective_delta = float(scenario_res.delta)
+        base_total_cl = float(scenario_res.method_cl_total_before or 0.0)
+        after_total_cl = float(scenario_res.method_cl_total_after or 0.0)
+        base_vec_q = dict(scenario_res.before_vec_q or {})
+        after_vec_q = dict(scenario_res.after_vec_q or {})
+        delta_vec_q = dict(scenario_res.delta_vec_q or {})
+        base_vec_cl = dict(scenario_res.before_vec_cl or {})
+        after_vec_cl = dict(scenario_res.after_vec_cl or {})
+        delta_vec_cl = dict(scenario_res.delta_vec_cl or {})
+        I_cl = int(scenario_res.I_cl or 0)
+        I_q = int(scenario_res.I_q or 0)
 
         deltas.append(effective_delta)
 
@@ -548,6 +996,19 @@ async def run_monte_carlo(req: MonteCarloRequest):
             I_cl=I_cl,
             I_q=I_q,
             delta_R=effective_delta,
+            before_vec_q=base_vec_q,
+            after_vec_q=after_vec_q,
+            delta_vec_q=delta_vec_q,
+            before_vec_cl=base_vec_cl,
+            after_vec_cl=after_vec_cl,
+            delta_vec_cl=delta_vec_cl,
+            theta_classical=req.theta_classical,
+            delta_sector_threshold=req.delta_sector_threshold,
+            seed=scenario_res.seed,
+            cache_key=scenario_res.cache_key,
+            cache_hit=scenario_res.cache_hit,
+            randomized_params=scenario_res.randomized_params,
+            x0_hash=scenario_res.x0_hash,
         )
 
         runs_data.append(
@@ -595,6 +1056,11 @@ async def run_monte_carlo(req: MonteCarloRequest):
         f"🎲 Monte-Carlo done: meanΔ={mean_delta:.4f}, minΔ={min_delta:.4f}, "
         f"maxΔ={max_delta:.4f}, p95Δ={p95_delta:.4f}"
     )
+
+    std_delta = float(statistics.pstdev(deltas)) if len(deltas) > 1 else 0.0
+    if std_delta == 0.0:
+        logger.warning("⚠️ ΔR has zero variance; check duration influence / saturation")
+    duration_correlation = compute_duration_delta_correlation([r.duration for r in runs_data], deltas)
 
     # --- Experiment Registry export (reporting service) ---
     payload = {
@@ -649,4 +1115,7 @@ async def run_monte_carlo(req: MonteCarloRequest):
         K_q=K_q,
         Delta_percent=Delta_percent,
         runs_data=runs_data,
+        theta_classical=req.theta_classical,
+        delta_sector_threshold=req.delta_sector_threshold,
+        duration_correlation=duration_correlation,
     )

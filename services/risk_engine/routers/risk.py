@@ -153,44 +153,84 @@ def apply_dependencies_classical(
 # ---------- Вспомогательные функции ----------
 
 
-async def fetch_sector_operational(url: str, name: str, scenario_id: Optional[str] = None, run_id: Optional[int] = None) -> bool:
+def _risk_candidates(status_url: str) -> list[str]:
+    """Build candidate risk endpoints for a service from its status URL."""
+    base = status_url.rstrip("/")
+    candidates = []
+    if base.endswith("/status"):
+        candidates.append(base[: -len("/status")] + "/risk/current")
+    if "/api/v1/" in base:
+        prefix = base.split("/api/v1/")[0]
+        tail = base.split("/api/v1/")[1]
+        sector = tail.split("/")[0] if tail else ""
+        if sector:
+            candidates.append(f"{prefix}/api/v1/{sector}/risk/current")
+    return list(dict.fromkeys(candidates))
+
+
+async def fetch_sector_risk(url: str, name: str, scenario_id: Optional[str] = None, run_id: Optional[int] = None) -> float:
+    """Fetch normalized sector risk x_i in [0,1].
+
+    Priority: explicit sector risk endpoint (/risk/current). Fallback: operational flag -> {0,1}.
     """
-    Запрашивает статус сектора по его URL.
-    Ожидаем, что сервис вернёт JSON с полем is_operational или operational.
-    Если запрос не удался — считаем сектор неработоспособным (максимальный риск).
-    """
+    params = {}
+    if scenario_id is not None:
+        params["scenario_id"] = scenario_id
+    if run_id is not None:
+        params["run_id"] = run_id
+
     try:
-        params = {}
-        if scenario_id is not None:
-            params["scenario_id"] = scenario_id
-        if run_id is not None:
-            params["run_id"] = run_id
-
         async with httpx.AsyncClient(timeout=settings.REQUEST_TIMEOUT) as client:
+            for risk_url in _risk_candidates(url):
+                try:
+                    resp = await client.get(risk_url, params=params)
+                    resp.raise_for_status()
+                    data = resp.json()
+                    if "risk" in data:
+                        risk = float(data["risk"])
+                        logger.debug("🔍 Sector %s: direct risk=%.3f", name, risk)
+                        return max(0.0, min(1.0, risk))
+                except (httpx.RequestError, httpx.HTTPStatusError, ValueError, TypeError):
+                    continue
+
+            # Fallback to status endpoint behavior (prefer continuous degradation over binary flag)
             resp = await client.get(url, params=params)
-        resp.raise_for_status()
-        data = resp.json()
+            resp.raise_for_status()
+            data = resp.json()
 
-        # energy_service возвращает is_operational,
-        # water/transport — operational
-        is_op = data.get("is_operational")
-        if is_op is None:
-            is_op = data.get("operational")
+            degradation = data.get("degradation")
+            if degradation is None:
+                degradation = data.get("risk_proxy")
+            if degradation is None and "supply" in data and "demand" in data:
+                demand = float(data.get("demand", 0.0) or 0.0)
+                supply = float(data.get("supply", 0.0) or 0.0)
+                degradation = max(0.0, demand - supply) / max(demand, 1.0)
+            if degradation is None and "load" in data:
+                degradation = float(data.get("load", 0.0) or 0.0)
 
-        is_op = bool(is_op)
-        logger.debug(f"🔍 Sector {name}: operational={is_op}")
-        return is_op
+            if degradation is not None:
+                risk = max(0.0, min(1.0, float(degradation)))
+                logger.debug("🔍 Sector %s: fallback degradation risk=%.3f", name, risk)
+                return risk
+
+            is_op = data.get("is_operational")
+            if is_op is None:
+                is_op = data.get("operational")
+            risk = 0.0 if bool(is_op) else 1.0
+            logger.debug("🔍 Sector %s: fallback binary risk=%.3f", name, risk)
+            return risk
+
     except httpx.RequestError as e:
-        logger.error(f"❌ HTTP error while fetching {name} status: {e}")
-        return False
+        logger.error(f"❌ HTTP error while fetching {name} risk/status: {e}")
+        return 1.0
     except httpx.HTTPStatusError as e:
         logger.warning(
             f"⚠️ {name} service returned HTTP {e.response.status_code} to risk_engine"
         )
-        return False
+        return 1.0
     except Exception as e:
-        logger.error(f"❌ Unexpected error while fetching {name} status: {e}")
-        return False
+        logger.error(f"❌ Unexpected error while fetching {name} risk/status: {e}")
+        return 1.0
 
 
 async def calculate_risks(
@@ -214,15 +254,15 @@ async def calculate_risks(
         raise HTTPException(status_code=400, detail=f"Unknown method: {method}")
 
     # Параллельно опрашиваем три сектора
-    energy_ok, water_ok, transport_ok = await asyncio.gather(
-        fetch_sector_operational(settings.ENERGY_SERVICE_URL, "energy", scenario_id=scenario_id, run_id=run_id),
-        fetch_sector_operational(settings.WATER_SERVICE_URL, "water", scenario_id=scenario_id, run_id=run_id),
-        fetch_sector_operational(settings.TRANSPORT_SERVICE_URL, "transport", scenario_id=scenario_id, run_id=run_id),
+    energy_risk, water_risk, transport_risk = await asyncio.gather(
+        fetch_sector_risk(settings.ENERGY_SERVICE_URL, "energy", scenario_id=scenario_id, run_id=run_id),
+        fetch_sector_risk(settings.WATER_SERVICE_URL, "water", scenario_id=scenario_id, run_id=run_id),
+        fetch_sector_risk(settings.TRANSPORT_SERVICE_URL, "transport", scenario_id=scenario_id, run_id=run_id),
     )
 
-    energy_risk = 0.0 if energy_ok else 1.0
-    water_risk = 0.0 if water_ok else 1.0
-    transport_risk = 0.0 if transport_ok else 1.0
+    energy_ok = energy_risk < 0.5
+    water_ok = water_risk < 0.5
+    transport_ok = transport_risk < 0.5
 
     # Применяем матрицу межотраслевых зависимостей
     if method_norm == "classical":

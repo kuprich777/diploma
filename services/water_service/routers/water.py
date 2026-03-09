@@ -6,13 +6,31 @@ import httpx
 
 from database import get_db
 from models import WaterStatus as WaterStatusModel
-from schemas import WaterStatus, SupplyUpdate, DemandUpdate
+from schemas import WaterStatus, SupplyUpdate, DemandUpdate, WaterRisk
 from utils.logging import setup_logging
 from config import settings
 
 logger = setup_logging()
 
 router = APIRouter(prefix="/api/v1/water", tags=["water"])
+
+
+def clip01(value: float) -> float:
+    return max(0.0, min(1.0, float(value)))
+
+
+def compute_water_degradation(record: WaterStatusModel) -> float:
+    if record is None:
+        return 0.0
+
+    if not bool(record.operational):
+        return 1.0
+
+    if record.supply <= 0:
+        return 1.0
+
+    deficit = max(0.0, float(record.demand) - float(record.supply))
+    return clip01(deficit / max(float(record.demand), 1.0))
 
 
 # ----------------------------
@@ -81,6 +99,7 @@ def to_dto(record: WaterStatusModel) -> WaterStatus:
         operational=record.operational,
         energy_dependent=record.energy_dependent,
         reason=record.reason,
+        degradation=compute_water_degradation(record),
     )
 
 
@@ -153,6 +172,20 @@ async def get_water_status(
     return to_dto(record)
 
 
+
+
+@router.get("/risk/current", response_model=WaterRisk)
+async def get_water_risk(
+    key: tuple[str, int] = Depends(experiment_key),
+    db: Session = Depends(get_db),
+):
+    scenario_id, run_id = key
+    record = latest_status(db, scenario_id, run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="No water status found for given experiment key")
+
+    degradation = compute_water_degradation(record)
+    return WaterRisk(risk=degradation, degradation=degradation)
 @router.post("/adjust_supply")
 async def adjust_supply(
     update: SupplyUpdate,
@@ -235,6 +268,8 @@ async def adjust_demand(
 
 @router.post("/check_energy_dependency")
 async def check_energy_dependency(
+    source_duration: int = Query(default=0, ge=0, description="Длительность outage источника (мин)"),
+    source_degradation: float = Query(default=0.0, ge=0.0, le=1.0, description="Уровень деградации источника"),
     key: tuple[str, int] = Depends(experiment_key),
     trace: tuple[int, str] = Depends(mutation_trace),
     db: Session = Depends(get_db),
@@ -249,21 +284,29 @@ async def check_energy_dependency(
     is_energy_ok = await fetch_energy_operational(scenario_id, run_id)
 
     if not is_energy_ok:
+        source_level = max(float(source_degradation), clip01(float(source_duration) / 30.0))
+        dependency_weight = 0.55
+        impact = clip01(source_level * dependency_weight)
+
+        reduced_supply = max(0.0, float(record.supply) * (1.0 - impact))
+        operational = impact < 0.95
+        reason = f"Energy dependency impact={impact:.2f}"
+
         new_record = WaterStatusModel(
             scenario_id=scenario_id,
             run_id=run_id,
-            supply=record.supply,
+            supply=reduced_supply,
             demand=record.demand,
-            operational=False,
+            operational=operational,
             energy_dependent=True,
-            reason="Energy service outage",
+            reason=reason,
         )
         db.add(new_record)
         db.commit()
         db.refresh(new_record)
 
         logger.warning(
-            f"🚨 [{scenario_id}:{run_id} step={step_index} action={action}] water impacted by energy outage"
+            f"🚨 [{scenario_id}:{run_id} step={step_index} action={action}] water impacted by energy outage: impact={impact:.2f}"
         )
         return {
             "message": "Water sector impacted by energy outage",
@@ -271,8 +314,9 @@ async def check_energy_dependency(
             "run_id": run_id,
             "step_index": step_index,
             "action": action,
-            "operational": False,
+            "operational": operational,
             "reason": new_record.reason,
+            "degradation": compute_water_degradation(new_record),
         }
 
     logger.info(
@@ -286,6 +330,7 @@ async def check_energy_dependency(
         "action": action,
         "operational": record.operational,
         "reason": record.reason,
+        "degradation": compute_water_degradation(record),
     }
 
 

@@ -25,6 +25,18 @@ class WaterStatus(BaseModel):
         default=None,
         description="Причина деградации/аварии, если есть"
     )
+    degradation: float = Field(
+        ge=0.0,
+        le=1.0,
+        default=0.0,
+        description="Нормированная деградация сектора [0..1]"
+    )
+
+
+class WaterRisk(BaseModel):
+    sector: str = Field(default="water", description="Идентификатор сектора")
+    risk: float = Field(ge=0.0, le=1.0, description="Нормированный уровень риска")
+    degradation: float = Field(ge=0.0, le=1.0, description="Нормированная деградация")
 
 
 class SupplyUpdate(BaseModel):

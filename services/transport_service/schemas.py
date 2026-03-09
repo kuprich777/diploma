@@ -10,6 +10,13 @@ class TransportStatus(BaseModel):
     operational: bool = Field(description="Флаг работоспособности транспортной системы")
     energy_dependent: bool = Field(description="Флаг зависимости от энергетического сектора")
     reason: Optional[str] = Field(default=None, description="Причина деградации, если есть")
+    degradation: float = Field(ge=0.0, le=1.0, default=0.0, description="Нормированная деградация [0..1]")
+
+
+class TransportRisk(BaseModel):
+    sector: str = Field(default="transport", description="Идентификатор сектора")
+    risk: float = Field(ge=0.0, le=1.0, description="Нормированный уровень риска")
+    degradation: float = Field(ge=0.0, le=1.0, description="Нормированная деградация")
 
 
 class LoadUpdate(BaseModel):

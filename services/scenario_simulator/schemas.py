@@ -30,7 +30,7 @@ class ScenarioStep(BaseModel):
     sector: Literal["energy", "water", "transport"] = Field(
         description="Сектор, над которым выполняется воздействие"
     )
-    action: Literal["outage", "load_increase", "adjust_production", "adjust_consumption", "resolve_outage"] = Field(
+    action: Literal["outage", "load_increase", "adjust_production", "adjust_consumption", "resolve_outage", "dependency_check"] = Field(
         description="Тип воздействия (действие сценария)"
     )
     params: Dict[str, Any] = Field(
@@ -48,6 +48,11 @@ class ScenarioRequest(BaseModel):
         ge=1,
         description="Номер прогона r. Если не указан, генерируется автоматически в контуре Monte-Carlo или run_scenario"
     )
+    seed: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Явный seed для стохастических компонентов прогона. Если не задан, детерминированно вычисляется из (scenario_id, run_id)."
+    )
     method: Optional[Literal["classical", "quantitative", "both"]] = Field(
         default="both",
         description="Метод расчёта риска: classical, quantitative или оба (для сравнительного эксперимента)"
@@ -60,12 +65,33 @@ class ScenarioRequest(BaseModel):
         default=True,
         description="Инициализировать базовое состояние всех доменных микросервисов перед сценарием"
     )
+    auto_dependency_checks: bool = Field(
+        default=False,
+        description="[DEPRECATED] Автоматический dependency_check отключён; используйте явные шаги action=dependency_check"
+    )
+
+    stochastic_scale: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Опциональный уровень стохастики Monte-Carlo: относительный шум N(0, stochastic_scale) для параметров воздействия. 0.0 = полностью детерминированный прогон."
+    )
+    theta_classical: float = Field(
+        default=0.3,
+        ge=0.0,
+        description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
+    )
 
 
 class ScenarioRunResult(BaseModel):
     # --- идентификаторы экспериментальной единицы ---
     scenario_id: str = Field(description="Идентификатор сценария s ∈ S")
     run_id: int = Field(description="Номер прогона r")
+    seed: Optional[int] = Field(default=None, description="Фактический seed, использованный в данном прогоне")
+    cache_key: Optional[str] = Field(default=None, description="Диагностический ключ кэша результатов прогона")
+    cache_hit: Optional[bool] = Field(default=None, description="Признак попадания в кэш результатов прогона")
+    randomized_params: Optional[Dict[str, Any]] = Field(default=None, description="Фактические стохастические параметры, использованные в прогоне")
+    x0_hash: Optional[str] = Field(default=None, description="Хеш baseline-вектора x0 для диагностики переинициализации")
     initiator: Literal["energy", "water", "transport"] = Field(
         description="Инициирующий сектор i0 (источник сценарного воздействия)"
     )
@@ -88,6 +114,29 @@ class ScenarioRunResult(BaseModel):
     I_cl: Optional[int] = Field(default=None, description="Индикатор каскада по классическому подходу (0/1)")
     I_q: Optional[int] = Field(default=None, description="Индикатор каскада по количественному подходу (0/1)")
 
+    # --- векторные метрики x_i,0 и Δx_i,T ---
+    baseline_x0: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Базовый вектор рисков x_i,0 по секторам для ключа (scenario_id, run_id)",
+    )
+    delta_x_q: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Вектор приращений Δx_i,T в количественном методе",
+    )
+    delta_x_cl: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Вектор приращений Δx_i,T в классическом методе",
+    )
+
+    before_vec_q: Optional[Dict[str, float]] = Field(default=None, description="Вектор рисков до сценария (quantitative)")
+    after_vec_q: Optional[Dict[str, float]] = Field(default=None, description="Вектор рисков после сценария (quantitative)")
+    delta_vec_q: Optional[Dict[str, float]] = Field(default=None, description="Приращение вектора рисков (quantitative)")
+    before_vec_cl: Optional[Dict[str, float]] = Field(default=None, description="Вектор рисков до сценария (classical)")
+    after_vec_cl: Optional[Dict[str, float]] = Field(default=None, description="Вектор рисков после сценария (classical)")
+    delta_vec_cl: Optional[Dict[str, float]] = Field(default=None, description="Приращение вектора рисков (classical)")
+    theta_classical: Optional[float] = Field(default=None)
+    delta_sector_threshold: Optional[float] = Field(default=None)
+
     # --- совместимость со старым интерфейсом (используется в визуализациях) ---
     before: Optional[float] = Field(default=None, description="Интегральный риск до сценария (по умолчанию quantitative)")
     after: Optional[float] = Field(default=None, description="Интегральный риск после сценария (по умолчанию quantitative)")
@@ -107,24 +156,29 @@ class MonteCarloRequest(BaseModel):
         ge=1,
         description="Начальный номер прогона r0. В Monte-Carlo будут использованы run_id = r0..r0+runs-1"
     )
+    base_seed: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Базовый seed для серии Monte-Carlo. Если не задан, seed каждого прогона вычисляется из (scenario_id, run_id)."
+    )
     sector: Literal["energy", "water", "transport"] = Field(
         description="Сектор, над которым проводится Monte-Carlo моделирование"
     )
     runs: int = Field(
-        default=20,
-        ge=1,
-        le=1000,
-        description="Количество прогонов Monte-Carlo"
+        default=100,
+        ge=100,
+        le=2000,
+        description="Количество прогонов Monte-Carlo (для статистической устойчивости K(N): минимум 100, рекомендовано 300+)"
     )
     duration_min: int = Field(
         default=5,
         ge=1,
-        description="Минимальная длительность outage в минутах"
+        description="Минимальная длительность outage в минутах (используется напрямую как интенсивность воздействия без центрирования)"
     )
     duration_max: int = Field(
         default=60,
         ge=1,
-        description="Максимальная длительность outage в минутах"
+        description="Максимальная длительность outage в минутах (монотонно усиливает воздействие)"
     )
     initiator_action: Literal["outage", "load_increase"] = Field(
         default="outage",
@@ -145,11 +199,22 @@ class MonteCarloRequest(BaseModel):
         ge=0.0,
         description="Порог δ для фиксации каскада в количественном подходе: прирост риска сектора-неинициатора ≥ δ"
     )
-    non_initiator_threshold_classical: float = Field(
-        default=1.0,
+    theta_classical: float = Field(
+        default=0.3,
         ge=0.0,
         le=1.0,
-        description="Порог для фиксации каскада в классическом подходе по бинарным рискам (обычно 1.0)"
+        description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
+    )
+    auto_dependency_checks: bool = Field(
+        default=False,
+        description="[DEPRECATED] Автоматический dependency_check отключён; используйте явные шаги action=dependency_check"
+    )
+
+    stochastic_scale: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Опциональный уровень стохастики Monte-Carlo: относительный шум N(0, stochastic_scale) для параметров воздействия. 0.0 = полностью детерминированный прогон."
     )
 
 
@@ -157,6 +222,11 @@ class MonteCarloRun(BaseModel):
     scenario_id: str = Field(description="Идентификатор сценария")
     run_id: int = Field(description="Номер прогона Monte-Carlo")
     run: int = Field(ge=1, description="Порядковый номер прогона внутри Monte-Carlo")
+    seed: Optional[int] = Field(default=None, description="Фактический seed прогона")
+    cache_key: Optional[str] = Field(default=None, description="Диагностический ключ кэша результатов прогона")
+    cache_hit: Optional[bool] = Field(default=None, description="Признак попадания в кэш результатов прогона")
+    randomized_params: Optional[Dict[str, Any]] = Field(default=None, description="Фактические стохастические параметры прогона")
+    x0_hash: Optional[str] = Field(default=None, description="Хеш baseline-вектора x0")
     before: float = Field(description="Интегральный риск до события")
     after: float = Field(description="Интегральный риск после события")
     delta: float = Field(description="Изменение риска Δ")
@@ -171,6 +241,14 @@ class MonteCarloRun(BaseModel):
     I_q: Optional[int] = Field(default=None, description="Индикатор каскада по количественному подходу (0/1)")
 
     delta_R: Optional[float] = Field(default=None, description="ΔR = total_risk(q)_after - total_risk(q)_before")
+    before_vec_q: Optional[Dict[str, float]] = Field(default=None)
+    after_vec_q: Optional[Dict[str, float]] = Field(default=None)
+    delta_vec_q: Optional[Dict[str, float]] = Field(default=None)
+    before_vec_cl: Optional[Dict[str, float]] = Field(default=None)
+    after_vec_cl: Optional[Dict[str, float]] = Field(default=None)
+    delta_vec_cl: Optional[Dict[str, float]] = Field(default=None)
+    theta_classical: Optional[float] = Field(default=None)
+    delta_sector_threshold: Optional[float] = Field(default=None)
 
 
 class MonteCarloResult(BaseModel):
@@ -191,6 +269,9 @@ class MonteCarloResult(BaseModel):
     runs_data: List[MonteCarloRun] = Field(
         description="Подробные результаты каждого прогона Monte-Carlo"
     )
+    theta_classical: Optional[float] = Field(default=None)
+    delta_sector_threshold: Optional[float] = Field(default=None)
+    duration_correlation: Optional[float] = Field(default=None)
 
 
 # --- DTOs for scenario catalog exposure ---

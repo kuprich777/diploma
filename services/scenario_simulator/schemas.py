@@ -79,7 +79,14 @@ class ScenarioRequest(BaseModel):
     theta_classical: float = Field(
         default=0.3,
         ge=0.0,
-        description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
+        description=(
+            "Cascade-detection threshold θ_cascade for the classical method.  "
+            "I_cl = 1 iff ∃ i ≠ i₀, ∃ t : Δx_cl_i,t ≥ θ_cascade.  "
+            "Since ClassicalOperator (in risk_engine) outputs binary {0,1} values, "
+            "Δx_cl_i,t ∈ {-1, 0, 1}; any value in (0,1] gives identical I_cl.  "
+            "DISTINCT from θ_bin=CLASSICAL_THRESHOLD=0.5 in risk_engine, which "
+            "binarises sector risks and activates dependency edges."
+        ),
     )
 
 
@@ -136,6 +143,25 @@ class ScenarioRunResult(BaseModel):
     delta_vec_cl: Optional[Dict[str, float]] = Field(default=None, description="Приращение вектора рисков (classical)")
     theta_classical: Optional[float] = Field(default=None)
     delta_sector_threshold: Optional[float] = Field(default=None)
+
+    # --- classical diagnostics ---
+    cl_activated_sectors: Optional[List[str]] = Field(
+        default=None,
+        description=(
+            "Non-initiating sectors that crossed the cascade-detection threshold θ_cascade "
+            "in the classical method at any step t > 0.  "
+            "Possible values: subsets of {energy, water, transport} \\ {initiator}.  "
+            "Empty list means no cascade detected (I_cl=0).  "
+            "Discrete: since x_cl ∈ {0,1}, activation means the sector went 0→1."
+        ),
+    )
+    cl_first_activation_step: Optional[int] = Field(
+        default=None,
+        description=(
+            "Step index (1-based) at which the first non-initiating sector was activated "
+            "in the classical method.  None when I_cl=0 (no cascade)."
+        ),
+    )
 
     # --- совместимость со старым интерфейсом (используется в визуализациях) ---
     before: Optional[float] = Field(default=None, description="Интегральный риск до сценария (по умолчанию quantitative)")
@@ -226,7 +252,14 @@ class MonteCarloRequest(BaseModel):
         default=0.3,
         ge=0.0,
         le=1.0,
-        description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
+        description=(
+            "Cascade-detection threshold θ_cascade for the classical method.  "
+            "I_cl = 1 iff ∃ i ≠ i₀, ∃ t : Δx_cl_i,t ≥ θ_cascade.  "
+            "Since ClassicalOperator outputs binary {0,1} values, any θ_cascade ∈ (0,1] "
+            "is functionally equivalent.  Sensitivity over a θ_cascade grid is supported "
+            "in validate_cl_sensitivity.py via post-processing of saved run trajectories.  "
+            "DISTINCT from θ_bin=CLASSICAL_THRESHOLD=0.5 in risk_engine (binarisation threshold)."
+        ),
     )
     auto_dependency_checks: bool = Field(
         default=False,
@@ -276,6 +309,19 @@ class MonteCarloRun(BaseModel):
     delta_vec_cl: Optional[Dict[str, float]] = Field(default=None)
     theta_classical: Optional[float] = Field(default=None)
     delta_sector_threshold: Optional[float] = Field(default=None)
+
+    # --- classical diagnostics ---
+    cl_activated_sectors: Optional[List[str]] = Field(
+        default=None,
+        description=(
+            "Non-initiating sectors activated (0→1) in the classical method during this run.  "
+            "Empty list = no cascade (I_cl=0)."
+        ),
+    )
+    cl_first_activation_step: Optional[int] = Field(
+        default=None,
+        description="Step index (1-based) of the first classical cascade activation.  None when I_cl=0.",
+    )
 
     # --- пошаговые траектории рисков x_t ---
     risk_trajectory_q: Optional[List[Dict[str, float]]] = Field(default=None)

@@ -640,7 +640,11 @@ async def run_scenario(
     delta_q = final_total_q - base_total_q
 
     # --- Cascade indicators (methodology-aligned) ---
-    I_cl = compute_I_cl_over_steps(base_vec_cl, step_vectors_cl, theta_classical, initiator)
+    # theta_classical here is θ_cascade (cascade-detection threshold in simulator).
+    # θ_bin = CLASSICAL_THRESHOLD = 0.5 was already applied by risk_engine's
+    # ClassicalOperator, so step_vectors_cl contains binary {0,1} values.
+    cl_diag = _compute_cl_diagnostics(base_vec_cl, step_vectors_cl, theta_classical, initiator)
+    I_cl = cl_diag["I_cl"]
 
     # Quantitative: cascade if any non-initiator increased by at least δ
     delta_sector_threshold = 0.1
@@ -705,6 +709,8 @@ async def run_scenario(
         delta_sector_threshold=delta_sector_threshold,
         risk_trajectory_q=step_vectors_q,
         risk_trajectory_cl=step_vectors_cl,
+        cl_activated_sectors=cl_diag["activated_sectors"],
+        cl_first_activation_step=cl_diag["first_activation_step"],
     )
 
 
@@ -757,12 +763,74 @@ def compute_I_cl_over_steps(
     theta: float,
     initiator: str,
 ) -> int:
+    """Return I_cl (0 or 1) for the classical cascade indicator.
+
+    Thin wrapper around :func:`_compute_cl_diagnostics` kept for backward
+    compatibility with existing callers and test imports.
+    """
+    return _compute_cl_diagnostics(base_vec, step_vecs, theta, initiator)["I_cl"]
+
+
+def _compute_cl_diagnostics(
+    base_vec: dict[str, float],
+    step_vecs: list[dict[str, float]],
+    theta_cascade: float,
+    initiator: str,
+) -> dict:
+    """Compute I_cl and per-step classical diagnostics.
+
+    Methodology note — dual-threshold architecture
+    -----------------------------------------------
+    The classical pipeline uses **two distinct thresholds**:
+
+    1. **θ_bin** (``CLASSICAL_THRESHOLD = 0.5`` in ``risk_engine/config.py``):
+       Applied by ``ClassicalOperator`` inside ``risk_engine`` to binarise each
+       sector's continuous risk value and to activate dependency edges.
+       Result: x_cl_i,t ∈ {0.0, 1.0} for all sectors and all steps.
+
+    2. **θ_cascade** (``theta_classical`` in ``scenario_simulator``, default 0.3):
+       Applied here to the binary delta ``Δx_cl_i,t = x_cl_i,t − x_cl_i,0 ∈ {−1, 0, 1}``.
+       A sector i ≠ i₀ is considered *cascade-activated* iff Δx_cl_i,t ≥ θ_cascade.
+       Because deltas are binary, any θ_cascade ∈ (0, 1] gives the same I_cl outcome;
+       the threshold effectively means "sector went 0 → 1 at least once".
+       Threshold-sensitivity analysis (varying θ_cascade) is therefore only meaningful
+       for calibration documentation, not for changing I_cl outcomes in this model.
+
+    This function is the canonical I_cl computation entry point.
+    ``compute_I_cl_over_steps`` is a thin backward-compatible wrapper.
+
+    Args:
+        base_vec:     Baseline risk vector x_cl_i,0 (binary {0,1} values from classical method).
+        step_vecs:    Per-step risk vectors x_cl_i,t for t = 1..T.
+        theta_cascade: Cascade-detection threshold θ_cascade (see note above).
+        initiator:    The initiating sector i₀ (excluded from cascade check).
+
+    Returns:
+        dict with keys:
+            ``I_cl``                 — 0 or 1
+            ``activated_sectors``    — list of non-initiating sectors that crossed θ_cascade
+            ``first_activation_step``— 1-based step index of first activation, or None
+    """
     non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
-    for step_vec in step_vecs:
+    I_cl = 0
+    activated_sectors: list[str] = []
+    first_activation_step: int | None = None
+
+    for step_idx, step_vec in enumerate(step_vecs, start=1):
         delta = _vector_delta(step_vec, base_vec)
-        if any(float(delta.get(s, 0.0)) >= theta for s in non_initiators):
-            return 1
-    return 0
+        for s in non_initiators:
+            if float(delta.get(s, 0.0)) >= theta_cascade:
+                if s not in activated_sectors:
+                    activated_sectors.append(s)
+                if first_activation_step is None:
+                    first_activation_step = step_idx
+                I_cl = 1
+
+    return {
+        "I_cl": I_cl,
+        "activated_sectors": activated_sectors,
+        "first_activation_step": first_activation_step,
+    }
 
 
 def compute_duration_delta_correlation(durations: list[int], deltas: list[float]) -> float | None:
@@ -1034,6 +1102,8 @@ async def run_monte_carlo(req: MonteCarloRequest):
             x0_hash=scenario_res.x0_hash,
             risk_trajectory_q=list(scenario_res.risk_trajectory_q or []),
             risk_trajectory_cl=list(scenario_res.risk_trajectory_cl or []),
+            cl_activated_sectors=list(scenario_res.cl_activated_sectors or []),
+            cl_first_activation_step=scenario_res.cl_first_activation_step,
         )
 
         runs_data.append(

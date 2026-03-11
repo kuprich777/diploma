@@ -235,11 +235,50 @@ class ClassicalOperator(RiskOperator):
         """Initialise the classical operator.
 
         Args:
-            theta: Binarisation and connectivity threshold θ ∈ (0, 1].
+            theta: Binarisation and connectivity threshold **θ_bin** ∈ (0, 1].
 
-                   * A sector is considered *failed* when its risk ≥ θ.
-                   * A dependency edge A[i][j] is considered *active* when
-                     A[i][j] ≥ θ.
+                   **Role 1 — Sector activation (binarisation)**::
+
+                       ỹ_i = clip(x_i + u_i)
+                       y_i = I(ỹ_i ≥ θ_bin)   →  ∈ {0, 1}
+
+                   A sector is considered *failed* (activated) when its
+                   pre-disturbance-adjusted risk meets or exceeds θ_bin.
+
+                   **Role 2 — Dependency-edge activation**::
+
+                       edge (j → i) is active  iff  A[i][j] ≥ θ_bin
+
+                   Only edges whose weight is at or above the same threshold
+                   participate in the one-step cascade propagation.
+
+                   .. note::
+
+                       This threshold **θ_bin** is set in ``risk_engine`` config
+                       (default ``CLASSICAL_THRESHOLD = 0.5``) and governs
+                       *state binarisation* and *graph topology*.  It is
+                       **distinct** from the cascade-detection threshold
+                       **θ_cascade** (default 0.3) used in ``scenario_simulator``
+                       to decide whether an observed sector-risk increment
+                       constitutes a cascade event (``I_cl = 1``).
+
+                       The two thresholds play complementary roles in the
+                       overall methodology:
+
+                       * ``ClassicalOperator(theta=θ_bin)`` — transforms the
+                         continuous risk vector x_t into a binary {0,1} vector
+                         and propagates failures one step through the dependency
+                         graph.  Source of truth: ``risk_engine/config.py``.
+
+                       * ``theta_cascade`` — applied in
+                         ``scenario_simulator`` to the binary delta
+                         ``Δx_cl_i,t = x_cl_i,t − x_cl_i,0 ∈ {−1, 0, 1}``
+                         to flag a cascade: ``I_cl = 1`` iff
+                         ``∃ i ≠ i₀, ∃ t : Δx_cl_i,t ≥ θ_cascade``.
+                         Because outputs are binary, any ``θ_cascade ∈ (0,1]``
+                         is functionally equivalent to the threshold 0 < θ ≤ 1.
+                         Source of truth: ``scenario_simulator/schemas.py``
+                         field ``theta_classical``.
 
         Raises:
             ValueError: If *theta* is not in the range (0, 1].

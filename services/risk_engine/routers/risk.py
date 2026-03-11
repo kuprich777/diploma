@@ -55,6 +55,29 @@ CURRENT_DEPENDENCY_MATRIX_VERSION: str = getattr(settings, "DEPENDENCY_MATRIX_VE
 # Weights version — bumped when POST /update_weights is called
 CURRENT_WEIGHTS_VERSION: str = "v1.0"
 
+# ---------------------------------------------------------------------------
+# Classical binarisation threshold θ_bin — runtime configurable
+#
+# θ_bin controls TWO things simultaneously inside ClassicalOperator:
+#   1. Sector binarisation: y_i = I(x_i + u_i  ≥ θ_bin)  →  {0, 1}
+#   2. Dependency-edge activation: edge j→i is active iff A[i][j] ≥ θ_bin
+#
+# Because both effects are governed by the same scalar, changing θ_bin
+# simultaneously changes which sectors are classified as "failed" AND which
+# cross-sector propagation paths are open.  This makes θ_bin a joint
+# calibration parameter for the binary topology and the failure threshold.
+#
+# For the default matrix A v1.0 the topology transitions are:
+#   θ_bin ≤ 0.4  →  energy→water AND energy→transport edges active
+#   θ_bin = 0.5  →  only energy→transport edge active  (current default)
+#   θ_bin ≥ 0.6  →  NO edges active from any energy failure
+#
+# This global is loaded from settings on startup and can be overridden
+# in-memory via POST /api/v1/risk/set_classical_threshold for sensitivity
+# experiments.  Lost on container restart.
+# ---------------------------------------------------------------------------
+CURRENT_CLASSICAL_THRESHOLD: float = float(getattr(settings, "CLASSICAL_THRESHOLD", 0.5))
+
 logger = setup_logging()
 
 router = APIRouter(prefix="/api/v1/risk", tags=["risk"])
@@ -344,7 +367,7 @@ async def calculate_risks(
 
     op: RiskOperator
     if method_norm == "classical":
-        op = ClassicalOperator(theta=settings.CLASSICAL_THRESHOLD)
+        op = ClassicalOperator(theta=CURRENT_CLASSICAL_THRESHOLD)
     else:
         op = QuantitativeOperator()
 
@@ -548,6 +571,71 @@ async def update_dependency_matrix(payload: DependencyMatrixUpdate):
         "sectors_order": SECTORS_ORDER,
         "version": CURRENT_DEPENDENCY_MATRIX_VERSION,
         "matrix": CURRENT_DEPENDENCY_MATRIX,
+    }
+
+
+class ClassicalThresholdUpdate(BaseModel):
+    theta_bin: float
+
+
+@router.get("/classical_threshold")
+async def get_classical_threshold():
+    """Return current θ_bin (binarisation + edge-activation threshold for ClassicalOperator).
+
+    Reports both the live in-memory value and the boot-time default from settings.
+    Use POST /set_classical_threshold to change it for sensitivity experiments.
+    """
+    return {
+        "theta_bin": CURRENT_CLASSICAL_THRESHOLD,
+        "theta_bin_default": float(getattr(settings, "CLASSICAL_THRESHOLD", 0.5)),
+        "note": (
+            "θ_bin governs sector binarisation AND dependency-edge activation in ClassicalOperator. "
+            "In-memory override: lost on container restart."
+        ),
+    }
+
+
+@router.post("/set_classical_threshold")
+async def set_classical_threshold(payload: ClassicalThresholdUpdate):
+    """Override θ_bin (CLASSICAL_THRESHOLD) for sensitivity experiments.
+
+    Changes the binarisation and edge-activation threshold used by ClassicalOperator
+    in all subsequent calls to GET /current and POST /recalculate with method=classical.
+
+    **In-memory only** — the original value from settings is restored on container restart.
+    Designed for use by the sensitivity analysis script (validate_bin_sensitivity.py);
+    not intended for permanent configuration changes.
+
+    Args:
+        theta_bin: New θ_bin value ∈ (0, 1].  Note the topological transition points
+                   for matrix A v1.0:
+                     • θ_bin ≤ 0.4: energy→water AND energy→transport edges active
+                     • θ_bin = 0.5: only energy→transport active  (factory default)
+                     • θ_bin ≥ 0.6: no edges active from energy failure
+
+    Returns:
+        Old and new θ_bin values plus active-edge summary for the current matrix.
+    """
+    if not (0.0 < payload.theta_bin <= 1.0):
+        raise HTTPException(status_code=400, detail="theta_bin must be in (0, 1]")
+
+    global CURRENT_CLASSICAL_THRESHOLD
+    old_theta = CURRENT_CLASSICAL_THRESHOLD
+    CURRENT_CLASSICAL_THRESHOLD = float(payload.theta_bin)
+
+    # Summarise active edges under new threshold for caller's convenience
+    active_edges = [
+        {"src": SECTORS_ORDER[j], "dest": SECTORS_ORDER[i], "weight": CURRENT_DEPENDENCY_MATRIX[i][j]}
+        for i in range(len(SECTORS_ORDER))
+        for j in range(len(SECTORS_ORDER))
+        if i != j and float(CURRENT_DEPENDENCY_MATRIX[i][j]) >= CURRENT_CLASSICAL_THRESHOLD
+    ]
+
+    return {
+        "theta_bin_old": old_theta,
+        "theta_bin_new": CURRENT_CLASSICAL_THRESHOLD,
+        "active_edges": active_edges,
+        "note": "In-memory override; lost on container restart.",
     }
 
 

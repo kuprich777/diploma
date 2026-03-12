@@ -82,6 +82,65 @@ class ScenarioRequest(BaseModel):
         description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
     )
 
+    # --- realism extension parameters (all optional, off by default) ---
+    enable_recovery: bool = Field(
+        default=False,
+        description="Enable optional post-shock recovery phase. Computes recovery_trajectory fields; does not alter existing 'after' metric."
+    )
+    recovery_rate: float = Field(
+        default=0.2,
+        ge=0.0,
+        le=1.0,
+        description="Per-step exponential recovery fraction. 0.2 = 20% of remaining risk deficit recovered per step. Model: x_t = x_0 + (x_peak - x_0)*(1-rate)^t."
+    )
+    recovery_horizon: int = Field(
+        default=5,
+        ge=1,
+        le=50,
+        description="Number of recovery steps to simulate (t=1..recovery_horizon)."
+    )
+    propagation_depth: int = Field(
+        default=1,
+        ge=1,
+        le=3,
+        description=(
+            "Max cascade propagation depth in the interaction queue (default=1, preserves current behavior). "
+            "Note: with matrix A v1.0 (only energy→water, energy→transport edges), depth>1 is a no-op "
+            "since water and transport have no outgoing edges."
+        )
+    )
+    heterogeneity_scale: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Sector-level heterogeneity noise std. When >0, each sector receives an independent "
+            "N(0, heterogeneity_scale) noise draw, modelling differential sector resilience. "
+            "0.0 = homogeneous sectors (current behavior)."
+        )
+    )
+    weather_factor: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=10.0,
+        description=(
+            "Exogenous weather severity multiplier applied to outage duration BEFORE stochastic noise. "
+            "1.0 = nominal conditions (default, no effect). >1.0 amplifies outage severity (e.g. Winter Storm Uri context)."
+        )
+    )
+    load_factor: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=10.0,
+        description="Exogenous grid load multiplier on initial shock severity. 1.0 = nominal load (default)."
+    )
+    fuel_stress_factor: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=10.0,
+        description="Exogenous fuel availability stress multiplier. 1.0 = no fuel stress (default)."
+    )
+
 
 class ScenarioRunResult(BaseModel):
     # --- идентификаторы экспериментальной единицы ---
@@ -141,6 +200,42 @@ class ScenarioRunResult(BaseModel):
     before: Optional[float] = Field(default=None, description="Интегральный риск до сценария (по умолчанию quantitative)")
     after: Optional[float] = Field(default=None, description="Интегральный риск после сценария (по умолчанию quantitative)")
     delta: Optional[float] = Field(default=None, description="Изменение риска (по умолчанию quantitative)")
+
+    # --- realism extension: recovery dynamics ---
+    peak_after_q: Optional[float] = Field(
+        default=None,
+        description="Peak total risk (quantitative) immediately post-shock. Equal to method_q_total_after."
+    )
+    peak_after_cl: Optional[float] = Field(
+        default=None,
+        description="Peak total risk (classical) immediately post-shock. Equal to method_cl_total_after."
+    )
+    final_after_recovery_q: Optional[float] = Field(
+        default=None,
+        description="Total risk (quantitative) at t=recovery_horizon after exponential recovery. Only set when enable_recovery=True."
+    )
+    final_after_recovery_cl: Optional[float] = Field(
+        default=None,
+        description="Total risk (classical) at t=recovery_horizon after exponential recovery. Only set when enable_recovery=True."
+    )
+    recovery_trajectory_q: Optional[List[float]] = Field(
+        default=None,
+        description="Total risk (quantitative) at each of t=1..recovery_horizon recovery steps. Only set when enable_recovery=True."
+    )
+    recovery_trajectory_cl: Optional[List[float]] = Field(
+        default=None,
+        description="Total risk (classical) at each of t=1..recovery_horizon recovery steps. Only set when enable_recovery=True."
+    )
+
+    # --- cl diagnostics ---
+    cl_activated_sectors: Optional[List[str]] = Field(
+        default=None,
+        description="Non-initiating sectors that crossed θ_cascade in cl method at any step. Empty list when I_cl=0."
+    )
+    cl_first_activation_step: Optional[int] = Field(
+        default=None,
+        description="Step index (1-based) of first classical cascade activation. None when I_cl=0."
+    )
 
     # --- трассировка выполнения сценария ---
     steps: List[Dict[str, Any]] = Field(description="Логи шагов сценария (ответы доменных микросервисов)")
@@ -217,6 +312,60 @@ class MonteCarloRequest(BaseModel):
         description="Опциональный уровень стохастики Monte-Carlo: относительный шум N(0, stochastic_scale) для параметров воздействия. 0.0 = полностью детерминированный прогон."
     )
 
+    # --- realism extension parameters (all optional, off by default) ---
+    enable_recovery: bool = Field(
+        default=False,
+        description="Enable optional post-shock recovery phase across all MC runs."
+    )
+    recovery_rate: float = Field(
+        default=0.2,
+        ge=0.0,
+        le=1.0,
+        description="Per-step exponential recovery fraction. 0.2 = 20% of remaining deficit recovered per step."
+    )
+    recovery_horizon: int = Field(
+        default=5,
+        ge=1,
+        le=50,
+        description="Number of recovery steps to simulate per run."
+    )
+    propagation_depth: int = Field(
+        default=1,
+        ge=1,
+        le=3,
+        description=(
+            "Max cascade propagation depth in the interaction queue (default=1, current behavior). "
+            "With matrix A v1.0 (only energy→water, energy→transport edges), depth>1 is a no-op."
+        )
+    )
+    heterogeneity_scale: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Sector-level heterogeneity noise std. When >0, each sector receives an independent "
+            "N(0, heterogeneity_scale) noise draw per run. 0.0 = homogeneous sectors (current behavior)."
+        )
+    )
+    weather_factor: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=10.0,
+        description="Exogenous weather severity multiplier applied to outage duration. 1.0 = no effect (default)."
+    )
+    load_factor: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=10.0,
+        description="Exogenous grid load multiplier on initial shock severity. 1.0 = nominal (default)."
+    )
+    fuel_stress_factor: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=10.0,
+        description="Exogenous fuel availability stress multiplier. 1.0 = no stress (default)."
+    )
+
 
 class MonteCarloRun(BaseModel):
     scenario_id: str = Field(description="Идентификатор сценария")
@@ -249,6 +398,28 @@ class MonteCarloRun(BaseModel):
     delta_vec_cl: Optional[Dict[str, float]] = Field(default=None)
     theta_classical: Optional[float] = Field(default=None)
     delta_sector_threshold: Optional[float] = Field(default=None)
+
+    # --- realism extension fields ---
+    peak_after_q: Optional[float] = Field(
+        default=None,
+        description="Peak total risk (quantitative) post-shock = method_q_total_after."
+    )
+    final_after_recovery_q: Optional[float] = Field(
+        default=None,
+        description="Total risk (quantitative) after recovery_horizon steps. Set when enable_recovery=True."
+    )
+    recovery_trajectory_q: Optional[List[float]] = Field(
+        default=None,
+        description="Per-step recovery trajectory for total risk (quantitative). Set when enable_recovery=True."
+    )
+    cl_activated_sectors: Optional[List[str]] = Field(
+        default=None,
+        description="Non-initiating sectors that crossed θ_cascade in cl method at any step."
+    )
+    cl_first_activation_step: Optional[int] = Field(
+        default=None,
+        description="Step index (1-based) of first classical cascade activation. None when I_cl=0."
+    )
 
 
 class MonteCarloResult(BaseModel):

@@ -1,0 +1,46 @@
+{
+  "experiment_timestamp": "2026-03-09T22:30:35.642625Z",
+  "total_runtime_seconds": 355.8,
+  "endpoint": "http://localhost:8005/api/v1/simulator/monte_carlo",
+  "request_payload": {
+    "scenario_id": "S1_energy_outage",
+    "sector": "energy",
+    "runs": 1000,
+    "duration_min": 5,
+    "duration_max": 30,
+    "initiator_action": "outage",
+    "theta_classical": 0.3,
+    "stochastic_scale": 0.3,
+    "mode": "real"
+  },
+  "risk_engine_config": {
+    "theta_bin": 0.5,
+    "theta_bin_default": 0.5
+  },
+  "aggregate_stats": {
+    "runs": 1000,
+    "mean_delta": 0.42063430790414075,
+    "std_delta": 0.196478,
+    "min_delta": 0.022465483234714017,
+    "max_delta": 1.0,
+    "p95_delta": 0.67,
+    "K_q": 0.949,
+    "K_cl": 0.592,
+    "Delta_percent": 60.304054054054056,
+    "duration_correlation": 0.6489387896731709
+  },
+  "research_mode_notes": {
+    "stochastic_scale": 0.3,
+    "stochastic_meaning": "dependency_multiplier ~ max(0, N(1,0.3)) per run",
+    "theta_bin": 0.5,
+    "theta_cascade": 0.3,
+    "duration_range": "[5,30] min \u2014 calibrated, 0% ceiling saturation",
+    "deterministic_ref": "stochastic_scale=0.0 for reproducible unit-test runs",
+    "thesis_note": "stochastic_scale must be stated in methodology section"
+  },
+  "artifact_files": {
+    "full_json": "results/mc_s1_research_1000_full.json",
+    "runs_csv": "results/mc_s1_research_1000_runs.csv",
+    "metadata": "results/mc_s1_research_1000_meta.json"
+  }
+}

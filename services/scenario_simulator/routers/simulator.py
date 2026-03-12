@@ -159,11 +159,16 @@ async def _run_interaction_queue(
     source_payload: dict,
     matrix_order: list[str],
     matrix: list[list[float]],
+    max_depth: int = 1,
 ) -> list[dict]:
     """Propagate cross-sector interactions through an async message queue.
 
     Each message may spawn downstream dependency checks according to matrix weights,
     with stochastic jitter to keep reactions non-deterministic across runs.
+
+    max_depth controls cascade propagation depth (default=1, current behavior).
+    With matrix A v1.0 (only energy→water, energy→transport edges), depth>1 is a
+    no-op since water and transport have no outgoing edges in the dependency matrix.
     """
     rng = random.Random(seed ^ ((parent_step_index + 1) * 7919))
     queue = deque(
@@ -178,7 +183,8 @@ async def _run_interaction_queue(
     )
 
     idx = {name: i for i, name in enumerate(matrix_order)}
-    max_depth = 1
+    # Cap depth at 3 to prevent runaway propagation; depth>1 is inert with current matrix A v1.0.
+    max_depth = max(1, min(3, int(max_depth)))
     max_messages = 4
     consumed = 0
     interaction_logs: list[dict] = []
@@ -225,7 +231,19 @@ async def _run_interaction_queue(
                 },
             )
 
-            out = await _apply_step(queue_step, scenario_id, run_id)
+            try:
+                out = await _apply_step(queue_step, scenario_id, run_id)
+            except Exception as e:
+                # Best-effort propagation: if a depth > 0 dependency_check endpoint does not
+                # exist (e.g., check_water_dependency on energy), log and skip.
+                # Domain services currently only implement check_energy_dependency; second-hop
+                # paths via other sources are unsupported until those endpoints are added.
+                depth = int(msg.get("depth", 0))
+                logger.warning(
+                    "⚠️ interaction queue: step skipped at depth=%d src=%s→dest=%s: %s",
+                    depth, src, dest, e,
+                )
+                continue
             out["queue_event"] = {
                 "source_sector": src,
                 "target_sector": dest,
@@ -436,28 +454,45 @@ def _randomize_steps_for_run(
     steps: list[ScenarioStep],
     rng: random.Random,
     stochastic_scale: float,
+    heterogeneity_scale: float = 0.0,
 ) -> tuple[list[ScenarioStep], dict[str, float]]:
-    if stochastic_scale <= 0.0:
+    """Randomize step parameters with optional sector-level heterogeneity.
+
+    stochastic_scale: shared Gaussian noise applied uniformly (existing behavior).
+    heterogeneity_scale: independent per-sector noise modelling differential resilience.
+      Each sector draws its own N(0, heterogeneity_scale), creating cross-sector variation
+      that is absent when all sectors share the same noise draw. 0.0 = current behavior.
+    """
+    if stochastic_scale <= 0.0 and heterogeneity_scale <= 0.0:
         return steps, {}
+
+    # Pre-draw independent sector-specific noise for heterogeneity extension.
+    # Each sector gets exactly one draw per run (not per step), ensuring consistent
+    # sector-level characteristics within a run while varying across runs.
+    sector_het_noise: dict[str, float] = {}
+    if heterogeneity_scale > 0.0:
+        for s in ("energy", "water", "transport"):
+            sector_het_noise[s] = rng.gauss(0.0, heterogeneity_scale)
 
     effective: dict[str, float] = {}
     randomized_steps: list[ScenarioStep] = []
     for step in steps:
         params = dict(step.params or {})
+        het = sector_het_noise.get(step.sector, 0.0)
         if step.action in {"outage", "dependency_check"} and "source_duration" in params:
             src = max(1.0, float(params.get("source_duration", 1.0)))
-            noise = rng.gauss(0.0, stochastic_scale)
-            params["source_duration"] = max(1, int(round(src * (1.0 + noise))))
+            stoch = rng.gauss(0.0, stochastic_scale) if stochastic_scale > 0.0 else 0.0
+            params["source_duration"] = max(1, int(round(src * (1.0 + stoch + het))))
             effective[f"step_{step.step_index}_source_duration"] = float(params["source_duration"])
         if step.action == "outage" and "duration" in params:
             base_duration = max(1.0, float(params.get("duration", 1.0)))
-            noise = rng.gauss(0.0, stochastic_scale)
-            params["duration"] = max(1, int(round(base_duration * (1.0 + noise))))
+            stoch = rng.gauss(0.0, stochastic_scale) if stochastic_scale > 0.0 else 0.0
+            params["duration"] = max(1, int(round(base_duration * (1.0 + stoch + het))))
             effective[f"step_{step.step_index}_duration"] = float(params["duration"])
         if step.action == "load_increase" and "amount" in params:
             base_amount = max(0.0, float(params.get("amount", 0.0)))
-            noise = rng.gauss(0.0, stochastic_scale)
-            params["amount"] = max(0.0, base_amount * (1.0 + noise))
+            stoch = rng.gauss(0.0, stochastic_scale) if stochastic_scale > 0.0 else 0.0
+            params["amount"] = max(0.0, base_amount * (1.0 + stoch + het))
             effective[f"step_{step.step_index}_amount"] = float(params["amount"])
         randomized_steps.append(
             ScenarioStep(
@@ -509,10 +544,23 @@ async def run_scenario(
     steps = sorted(steps, key=lambda s: s.step_index)
     seed = _derive_seed(scenario_id, run_id, req.seed)
     rng = random.Random(seed)
+
+    # Apply exogenous pre-shock factors BEFORE stochastic randomization.
+    # For the MC path (called from run_monte_carlo): exogenous_factor is already baked
+    # into steps via _build_mc_steps; weather/load/fuel_stress default to 1.0 there.
+    exogenous_factor = (
+        float(getattr(req, "weather_factor", 1.0))
+        * float(getattr(req, "load_factor", 1.0))
+        * float(getattr(req, "fuel_stress_factor", 1.0))
+    )
+    if exogenous_factor != 1.0:
+        steps = _apply_exogenous_factors(steps, exogenous_factor)
+
     steps, randomized_params = _randomize_steps_for_run(
         steps=steps,
         rng=rng,
         stochastic_scale=float(req.stochastic_scale),
+        heterogeneity_scale=float(getattr(req, "heterogeneity_scale", 0.0)),
     )
 
     # Initiator i0 is defined by the first step's sector
@@ -550,23 +598,11 @@ async def run_scenario(
     # Mathematically: x_T = F(x_0, s)
     # For cascade indicators we track all t <= T, as in formulas I^(cl)(s,r), I^(q)(s,r).
     step_logs: list[dict] = []
-<<<<<<< HEAD
-    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
-
-    non_initiator_threshold_classical = 1.0
-    delta_sector_threshold = 0.1
-
-    classical_cascade_seen = False
-    quantitative_max_delta = {s: 0.0 for s in non_initiators}
-
-    final_cl = base_cl
-    final_q = base_q
-
-=======
     theta_classical = float(req.theta_classical)
     step_vectors_cl: list[dict[str, float]] = []
     matrix_order, matrix_A = _dependency_matrix_from_meta(dm_meta)
->>>>>>> cdx
+    propagation_depth = int(getattr(req, "propagation_depth", 1))
+
     for step in steps:
         out = await _apply_step(step, scenario_id, run_id)
 
@@ -581,11 +617,6 @@ async def run_scenario(
         out["step_delta_x_cl"] = step_delta_cl
         step_logs.append(out)
 
-<<<<<<< HEAD
-        # Evaluate state at each t (not only at t=T), consistent with methodology formulas.
-        final_cl = await fetch_risk(scenario_id, run_id, method="classical")
-        final_q = await fetch_risk(scenario_id, run_id, method="quantitative")
-=======
         # Message queue propagation: sectors affect each other based on matrix A.
         # Lightweight: only for impactful actions and with a single post-queue risk read.
         if _should_propagate_action(step.action):
@@ -599,6 +630,7 @@ async def run_scenario(
                 source_payload=step.params or {},
                 matrix_order=matrix_order,
                 matrix=matrix_A,
+                max_depth=propagation_depth,
             )
             step_logs.extend(interaction_logs)
 
@@ -610,17 +642,6 @@ async def run_scenario(
     # --- 5. Read final state x_T for both operators ---
     final_cl = await fetch_risk(scenario_id, run_id, method="classical")
     final_q = await fetch_risk(scenario_id, run_id, method="quantitative")
->>>>>>> cdx
-
-        if any(float(final_cl.get(f"{s}_risk", 0.0)) >= non_initiator_threshold_classical for s in non_initiators):
-            classical_cascade_seen = True
-
-        for s in non_initiators:
-            delta_s = float(final_q.get(f"{s}_risk", 0.0)) - float(base_q.get(f"{s}_risk", 0.0))
-            if delta_s > quantitative_max_delta[s]:
-                quantitative_max_delta[s] = delta_s
-
-    # --- 5. Final state x_T for both operators ---
     final_total_cl = float(final_cl.get("total_risk", 0.0))
     final_total_q = float(final_q.get("total_risk", 0.0))
     final_vec_cl = _sector_risk_vector(final_cl)
@@ -632,14 +653,10 @@ async def run_scenario(
     delta_q = final_total_q - base_total_q
 
     # --- Cascade indicators (methodology-aligned) ---
-<<<<<<< HEAD
-    # I^(cl)(s,r) = 1 if exists non-initiator and exists t <= T with binary risk flag.
-    I_cl = 1 if classical_cascade_seen else 0
-
-    # I^(q)(s,r) = 1 if exists non-initiator with max_{t<=T}(x_{i,t} - x_{i,0}) >= delta.
-    I_q = 1 if any(quantitative_max_delta[s] >= delta_sector_threshold for s in non_initiators) else 0
-=======
-    I_cl = compute_I_cl_over_steps(base_vec_cl, step_vectors_cl, theta_classical, initiator)
+    cl_diag = _compute_cl_diagnostics(base_vec_cl, step_vectors_cl, theta_classical, initiator)
+    I_cl = cl_diag["I_cl"]
+    cl_activated_sectors = cl_diag["activated_sectors"]
+    cl_first_activation_step = cl_diag["first_activation_step"]
 
     # Quantitative: cascade if any non-initiator increased by at least δ
     delta_sector_threshold = 0.1
@@ -666,9 +683,31 @@ async def run_scenario(
         False,
         randomized_params,
     )
->>>>>>> cdx
 
-    # --- 6. Return both F_cl and F_q results with new fields ---
+    # --- 6. Optional recovery phase (extension: enable_recovery) ---
+    # Computes a post-shock recovery trajectory WITHOUT modifying domain state.
+    # The existing 'after' metric is preserved unchanged; new fields are ADDITIVE.
+    # Model: x_t = x_0 + (x_peak - x_0) * (1 - recovery_rate)^t
+    #   t=0: x_peak (post-shock state); t→∞: x_0 (full recovery to baseline).
+    enable_recovery = bool(getattr(req, "enable_recovery", False))
+    recovery_trajectory_q: list[float] | None = None
+    recovery_trajectory_cl: list[float] | None = None
+    final_after_recovery_q: float | None = None
+    final_after_recovery_cl: float | None = None
+
+    if enable_recovery:
+        recovery_rate = float(getattr(req, "recovery_rate", 0.2))
+        recovery_horizon = int(getattr(req, "recovery_horizon", 5))
+        recovery_trajectory_q = []
+        recovery_trajectory_cl = []
+        for t in range(1, recovery_horizon + 1):
+            decay = (1.0 - recovery_rate) ** t
+            recovery_trajectory_q.append(round(base_total_q + (final_total_q - base_total_q) * decay, 6))
+            recovery_trajectory_cl.append(round(base_total_cl + (final_total_cl - base_total_cl) * decay, 6))
+        final_after_recovery_q = recovery_trajectory_q[-1]
+        final_after_recovery_cl = recovery_trajectory_cl[-1]
+
+    # --- 7. Return both F_cl and F_q results with new fields ---
     return ScenarioRunResult(
         scenario_id=scenario_id,
         run_id=run_id,
@@ -692,6 +731,8 @@ async def run_scenario(
         delta_q=delta_q,
         I_cl=I_cl,
         I_q=I_q,
+        cl_activated_sectors=cl_activated_sectors,
+        cl_first_activation_step=cl_first_activation_step,
         baseline_x0=base_vec_q,
         before_vec_q=base_vec_q,
         after_vec_q=final_vec_q,
@@ -703,6 +744,13 @@ async def run_scenario(
         delta_x_cl=delta_vec_cl,
         theta_classical=theta_classical,
         delta_sector_threshold=delta_sector_threshold,
+        # recovery extension fields (None when enable_recovery=False)
+        peak_after_q=final_total_q,
+        peak_after_cl=final_total_cl,
+        final_after_recovery_q=final_after_recovery_q,
+        final_after_recovery_cl=final_after_recovery_cl,
+        recovery_trajectory_q=recovery_trajectory_q,
+        recovery_trajectory_cl=recovery_trajectory_cl,
     )
 
 
@@ -749,18 +797,49 @@ def _vector_delta(final_vec: dict[str, float], base_vec: dict[str, float]) -> di
 
 
 
+def _compute_cl_diagnostics(
+    base_vec: dict[str, float],
+    step_vecs: list[dict[str, float]],
+    theta_cascade: float,
+    initiator: str,
+) -> dict:
+    """Compute classical cascade diagnostics in one pass over all tracked step vectors.
+
+    Returns:
+        {
+            "I_cl": 0 or 1,
+            "activated_sectors": list of non-initiator sector names that breached theta,
+            "first_activation_step": 1-based step index of first breach, or None.
+        }
+    """
+    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
+    I_cl = 0
+    activated_sectors: list[str] = []
+    first_activation_step: int | None = None
+    for step_idx, step_vec in enumerate(step_vecs, start=1):
+        delta = _vector_delta(step_vec, base_vec)
+        for s in non_initiators:
+            if float(delta.get(s, 0.0)) >= theta_cascade:
+                if s not in activated_sectors:
+                    activated_sectors.append(s)
+                if first_activation_step is None:
+                    first_activation_step = step_idx
+                I_cl = 1
+    return {
+        "I_cl": I_cl,
+        "activated_sectors": activated_sectors,
+        "first_activation_step": first_activation_step,
+    }
+
+
 def compute_I_cl_over_steps(
     base_vec: dict[str, float],
     step_vecs: list[dict[str, float]],
     theta: float,
     initiator: str,
 ) -> int:
-    non_initiators = [s for s in ("energy", "water", "transport") if s != initiator]
-    for step_vec in step_vecs:
-        delta = _vector_delta(step_vec, base_vec)
-        if any(float(delta.get(s, 0.0)) >= theta for s in non_initiators):
-            return 1
-    return 0
+    """Backward-compatible wrapper around _compute_cl_diagnostics."""
+    return _compute_cl_diagnostics(base_vec, step_vecs, theta, initiator)["I_cl"]
 
 
 def compute_duration_delta_correlation(durations: list[int], deltas: list[float]) -> float | None:
@@ -772,12 +851,50 @@ def compute_duration_delta_correlation(durations: list[int], deltas: list[float]
         return None
 
 
-def _build_mc_steps(req: MonteCarloRequest, duration: int, dependency_multiplier: float = 1.0) -> list[ScenarioStep]:
-    """Build MC steps so each run is executed by the same scenario executor as run_scenario."""
+def _apply_exogenous_factors(steps: list[ScenarioStep], factor: float) -> list[ScenarioStep]:
+    """Scale outage duration and load amount by a combined exogenous pre-shock factor.
+
+    Applied BEFORE stochastic randomization so that external context (weather severity,
+    grid load, fuel availability) shifts the baseline shock magnitude explicitly and
+    traceably, rather than blending into the stochastic noise term.
+    factor = weather_factor * load_factor * fuel_stress_factor
+    """
+    if factor == 1.0:
+        return steps
+    result: list[ScenarioStep] = []
+    for step in steps:
+        params = dict(step.params or {})
+        if step.action == "outage" and "duration" in params:
+            params["duration"] = max(1, int(round(float(params["duration"]) * factor)))
+        if step.action in {"outage", "dependency_check"} and "source_duration" in params:
+            params["source_duration"] = max(1, int(round(float(params["source_duration"]) * factor)))
+        if step.action == "load_increase" and "amount" in params:
+            params["amount"] = max(0.0, float(params["amount"]) * factor)
+        result.append(ScenarioStep(
+            step_index=step.step_index,
+            sector=step.sector,
+            action=step.action,
+            params=params,
+        ))
+    return result
+
+
+def _build_mc_steps(
+    req: MonteCarloRequest,
+    duration: int,
+    dependency_multiplier: float = 1.0,
+    exogenous_factor: float = 1.0,
+) -> list[ScenarioStep]:
+    """Build MC steps so each run is executed by the same scenario executor as run_scenario.
+
+    exogenous_factor = weather_factor * load_factor * fuel_stress_factor.
+    Applied here (before randomization) so the pre-shock context scales the initiator shock
+    deterministically before stochastic noise is added in run_scenario.
+    """
     initiator_action = getattr(req, "initiator_action", "outage")
 
     if initiator_action == "outage":
-        outage_duration = max(1, int(round(duration * dependency_multiplier)))
+        outage_duration = max(1, int(round(duration * dependency_multiplier * exogenous_factor)))
         if req.sector == "energy":
             return [
                 ScenarioStep(
@@ -957,7 +1074,19 @@ async def run_monte_carlo(req: MonteCarloRequest):
             noise = rng.gauss(0.0, float(req.stochastic_scale))
             dependency_multiplier = max(0.0, 1.0 + noise)
 
-        steps = _build_mc_steps(req, duration, dependency_multiplier=dependency_multiplier)
+        # Compute combined exogenous factor from pre-shock context modifiers.
+        # Applied here (in _build_mc_steps) so the factor is explicit and traceable;
+        # ScenarioRequest receives weather/load/fuel_stress=1.0 to avoid double-application.
+        exogenous_factor = (
+            float(getattr(req, "weather_factor", 1.0))
+            * float(getattr(req, "load_factor", 1.0))
+            * float(getattr(req, "fuel_stress_factor", 1.0))
+        )
+        steps = _build_mc_steps(
+            req, duration,
+            dependency_multiplier=dependency_multiplier,
+            exogenous_factor=exogenous_factor,
+        )
         scenario_res = await run_scenario(
             ScenarioRequest(
                 scenario_id=req.scenario_id,
@@ -968,6 +1097,15 @@ async def run_monte_carlo(req: MonteCarloRequest):
                 init_all_sectors=True,
                 theta_classical=req.theta_classical,
                 stochastic_scale=req.stochastic_scale,
+                propagation_depth=int(getattr(req, "propagation_depth", 1)),
+                enable_recovery=bool(getattr(req, "enable_recovery", False)),
+                recovery_rate=float(getattr(req, "recovery_rate", 0.2)),
+                recovery_horizon=int(getattr(req, "recovery_horizon", 5)),
+                heterogeneity_scale=float(getattr(req, "heterogeneity_scale", 0.0)),
+                # Exogenous factors already baked into steps above; pass defaults here.
+                weather_factor=1.0,
+                load_factor=1.0,
+                fuel_stress_factor=1.0,
             ),
             use_catalog=False,
         )
@@ -1009,6 +1147,12 @@ async def run_monte_carlo(req: MonteCarloRequest):
             cache_hit=scenario_res.cache_hit,
             randomized_params=scenario_res.randomized_params,
             x0_hash=scenario_res.x0_hash,
+            # realism extension fields
+            peak_after_q=scenario_res.peak_after_q,
+            final_after_recovery_q=scenario_res.final_after_recovery_q,
+            recovery_trajectory_q=scenario_res.recovery_trajectory_q,
+            cl_activated_sectors=list(scenario_res.cl_activated_sectors or []),
+            cl_first_activation_step=scenario_res.cl_first_activation_step,
         )
 
         runs_data.append(

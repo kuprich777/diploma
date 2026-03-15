@@ -96,6 +96,44 @@ async def fetch_risk(
         raise HTTPException(status_code=502, detail="Risk engine is unavailable")
 
 
+# --- Helper: override/restore theta_node on risk_engine ---
+
+async def _get_current_theta_node() -> float:
+    """Fetch current theta_bin from risk_engine classical_threshold endpoint."""
+    base = settings.RISK_ENGINE_URL.rstrip("/")
+    if base.endswith("/api/v1"):
+        url = f"{base}/risk/classical_threshold"
+    elif base.endswith("/api/v1/risk"):
+        url = f"{base}/classical_threshold"
+    else:
+        url = f"{base}/api/v1/risk/classical_threshold"
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            return float(resp.json().get("theta_bin", 0.70))
+    except httpx.HTTPError as e:
+        logger.warning("⚠️ Failed to get theta_node from risk_engine: %s", e)
+        return 0.70
+
+
+async def _set_theta_node(theta_bin: float) -> None:
+    """Override theta_bin on risk_engine (in-memory, lost on restart)."""
+    base = settings.RISK_ENGINE_URL.rstrip("/")
+    if base.endswith("/api/v1"):
+        url = f"{base}/risk/set_classical_threshold"
+    elif base.endswith("/api/v1/risk"):
+        url = f"{base}/set_classical_threshold"
+    else:
+        url = f"{base}/api/v1/risk/set_classical_threshold"
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(url, json={"theta_bin": theta_bin})
+            resp.raise_for_status()
+    except httpx.HTTPError as e:
+        logger.warning("⚠️ Failed to set theta_node on risk_engine: %s", e)
+
+
 # --- Helper: fetch dependency matrix meta (version, order) from risk_engine ---
 async def fetch_dependency_matrix_meta() -> dict:
     """Fetch dependency matrix metadata (version, order) from risk_engine."""
@@ -163,12 +201,16 @@ async def _run_interaction_queue(
 ) -> list[dict]:
     """Propagate cross-sector interactions through an async message queue.
 
-    Each message may spawn downstream dependency checks according to matrix weights,
-    with stochastic jitter to keep reactions non-deterministic across runs.
+    All-neighbors fanout: every sector with a nonzero outgoing edge in the matrix
+    receives a dependency_check call. Weight-based attenuation is preserved through
+    the stochastic trigger probability (probability ≈ base_weight).
 
-    max_depth controls cascade propagation depth (default=1, current behavior).
-    With matrix A v1.0 (only energy→water, energy→transport edges), depth>1 is a
-    no-op since water and transport have no outgoing edges in the dependency matrix.
+    max_depth controls cascade propagation depth (default=1, cap=4).
+    With all 6 directed edges of matrix A v1.0 supported by domain service endpoints,
+    cascades can circulate through energy→water→transport→energy and similar paths.
+
+    Stopping rule: max_depth cap + max_messages=32 hard ceiling + stochastic
+    attenuation (low-weight edges are unlikely to trigger at each hop).
     """
     rng = random.Random(seed ^ ((parent_step_index + 1) * 7919))
     queue = deque(
@@ -183,9 +225,12 @@ async def _run_interaction_queue(
     )
 
     idx = {name: i for i, name in enumerate(matrix_order)}
-    # Cap depth at 3 to prevent runaway propagation; depth>1 is inert with current matrix A v1.0.
-    max_depth = max(1, min(3, int(max_depth)))
-    max_messages = 4
+    # Cap depth at 4 to prevent runaway propagation.
+    max_depth = max(1, min(4, int(max_depth)))
+    # Allow enough messages for all-neighbors fanout at every level.
+    # Worst case for n sectors, all-neighbors, depth d: sum(n-1)^k for k=0..d.
+    # For n=3, depth=3: 1 + 2 + 4 + 8 = 15; we use 32 as a safe ceiling.
+    max_messages = 32
     consumed = 0
     interaction_logs: list[dict] = []
 
@@ -207,8 +252,9 @@ async def _run_interaction_queue(
             if base_weight > 0.0:
                 candidates.append((base_weight, dest, dest_i))
 
-        # Lightweight mode: fanout only to top-1 dependency per message.
-        for base_weight, dest, dest_i in sorted(candidates, key=lambda x: x[0], reverse=True)[:1]:
+        # All-neighbors fanout: propagate to every connected sector (nonzero edge weight).
+        # Weight-based attenuation is preserved via the stochastic trigger probability below.
+        for base_weight, dest, dest_i in sorted(candidates, key=lambda x: x[0], reverse=True):
             probability = max(0.05, min(0.95, base_weight * rng.uniform(0.9, 1.1)))
             if rng.random() > probability:
                 continue
@@ -234,10 +280,8 @@ async def _run_interaction_queue(
             try:
                 out = await _apply_step(queue_step, scenario_id, run_id)
             except Exception as e:
-                # Best-effort propagation: if a depth > 0 dependency_check endpoint does not
-                # exist (e.g., check_water_dependency on energy), log and skip.
-                # Domain services currently only implement check_energy_dependency; second-hop
-                # paths via other sources are unsupported until those endpoints are added.
+                # Best-effort propagation: if a dependency_check endpoint is unavailable
+                # (e.g., service down or misconfigured route), log and skip.
                 depth = int(msg.get("depth", 0))
                 logger.warning(
                     "⚠️ interaction queue: step skipped at depth=%d src=%s→dest=%s: %s",
@@ -577,6 +621,14 @@ async def run_scenario(
     # Weights version is not yet versioned in risk_engine; keep as None for now
     weights_version: Optional[str] = None
 
+    # --- Optional theta_node override (save/restore around the run) ---
+    req_theta_node = getattr(req, "theta_node", None)
+    _original_theta_node: Optional[float] = None
+    if req_theta_node is not None:
+        _original_theta_node = await _get_current_theta_node()
+        await _set_theta_node(float(req_theta_node))
+        logger.info("🎯 theta_node overridden: %.3f → %.3f", _original_theta_node, req_theta_node)
+
     # --- 2. Initialise state x_0 for all sectors if requested ---
     if req.init_all_sectors:
         for sector in ("energy", "water", "transport"):
@@ -706,6 +758,11 @@ async def run_scenario(
             recovery_trajectory_cl.append(round(base_total_cl + (final_total_cl - base_total_cl) * decay, 6))
         final_after_recovery_q = recovery_trajectory_q[-1]
         final_after_recovery_cl = recovery_trajectory_cl[-1]
+
+    # --- Restore original theta_node if it was overridden ---
+    if _original_theta_node is not None:
+        await _set_theta_node(_original_theta_node)
+        logger.info("🎯 theta_node restored: %.3f", _original_theta_node)
 
     # --- 7. Return both F_cl and F_q results with new fields ---
     return ScenarioRunResult(
@@ -1060,6 +1117,14 @@ async def run_monte_carlo(req: MonteCarloRequest):
 
     # base_total = None  # will be fetched per run after init
 
+    # --- Optional theta_node override (save/restore around the entire MC batch) ---
+    _mc_req_theta_node = getattr(req, "theta_node", None)
+    _mc_original_theta_node: Optional[float] = None
+    if _mc_req_theta_node is not None:
+        _mc_original_theta_node = await _get_current_theta_node()
+        await _set_theta_node(float(_mc_req_theta_node))
+        logger.info("🎯 MC theta_node overridden: %.3f → %.3f", _mc_original_theta_node, _mc_req_theta_node)
+
     runs_data: list[MonteCarloRun] = []
     deltas: list[float] = []
 
@@ -1171,6 +1236,11 @@ async def run_monte_carlo(req: MonteCarloRequest):
         logger.debug(
             f"🎲 Monte-Carlo run={i}: duration={duration}, before={float(base_total):.3f}, after={float(after):.3f}, Δ={float(effective_delta):.3f}"
         )
+
+    # --- Restore original theta_node if it was overridden ---
+    if _mc_original_theta_node is not None:
+        await _set_theta_node(_mc_original_theta_node)
+        logger.info("🎯 MC theta_node restored: %.3f", _mc_original_theta_node)
 
     if not deltas:
         raise HTTPException(status_code=500, detail="No Monte-Carlo runs executed")

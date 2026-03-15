@@ -79,7 +79,14 @@ class ScenarioRequest(BaseModel):
     theta_classical: float = Field(
         default=0.3,
         ge=0.0,
-        description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
+        le=1.0,
+        description="Cascade detection threshold θ: I_cl=1 if any non-initiator sector Δx_cl ≥ θ at any step."
+    )
+    theta_node: Optional[float] = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Override theta_node (binarisation threshold) for this experiment. If None, uses risk_engine's CURRENT_THETA_BIN."
     )
 
     # --- realism extension parameters (all optional, off by default) ---
@@ -102,11 +109,11 @@ class ScenarioRequest(BaseModel):
     propagation_depth: int = Field(
         default=1,
         ge=1,
-        le=3,
+        le=4,
         description=(
-            "Max cascade propagation depth in the interaction queue (default=1, preserves current behavior). "
-            "Note: with matrix A v1.0 (only energy→water, energy→transport edges), depth>1 is a no-op "
-            "since water and transport have no outgoing edges."
+            "Max cascade propagation depth in the interaction queue (default=1, max=4). "
+            "All 6 directed edges in matrix A v1.0 have corresponding domain service endpoints; "
+            "depth>1 is fully supported (energy, water, transport all have check_*_dependency endpoints)."
         )
     )
     heterogeneity_scale: float = Field(
@@ -300,6 +307,12 @@ class MonteCarloRequest(BaseModel):
         le=1.0,
         description="Порог θ для classical по правилу y_i,t = I(Δx_i,t ≥ θ)"
     )
+    theta_node: Optional[float] = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Override theta_node (binarisation threshold) for this experiment. If None, uses risk_engine's CURRENT_THETA_BIN."
+    )
     auto_dependency_checks: bool = Field(
         default=False,
         description="[DEPRECATED] Автоматический dependency_check отключён; используйте явные шаги action=dependency_check"
@@ -332,10 +345,11 @@ class MonteCarloRequest(BaseModel):
     propagation_depth: int = Field(
         default=1,
         ge=1,
-        le=3,
+        le=4,
         description=(
-            "Max cascade propagation depth in the interaction queue (default=1, current behavior). "
-            "With matrix A v1.0 (only energy→water, energy→transport edges), depth>1 is a no-op."
+            "Max cascade propagation depth in the interaction queue (default=1, max=4). "
+            "All 6 directed edges in matrix A v1.0 have corresponding domain service endpoints; "
+            "depth>1 is fully supported."
         )
     )
     heterogeneity_scale: float = Field(
@@ -398,6 +412,7 @@ class MonteCarloRun(BaseModel):
     delta_vec_cl: Optional[Dict[str, float]] = Field(default=None)
     theta_classical: Optional[float] = Field(default=None)
     delta_sector_threshold: Optional[float] = Field(default=None)
+    theta_node: Optional[float] = Field(default=None, description="theta_node (binarisation threshold) active during this run")
 
     # --- realism extension fields ---
     peak_after_q: Optional[float] = Field(

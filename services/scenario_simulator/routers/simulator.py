@@ -96,6 +96,37 @@ async def fetch_risk(
         raise HTTPException(status_code=502, detail="Risk engine is unavailable")
 
 
+async def fetch_risk_iterative(
+    scenario_id: str | None = None,
+    run_id: int | None = None,
+    max_steps: int = 20,
+    epsilon: float = 0.001,
+) -> dict:
+    """Call GET /current_iterative on risk_engine; returns risk vector + convergence diagnostics."""
+    base = settings.RISK_ENGINE_URL.rstrip("/")
+    if base.endswith("/api/v1"):
+        url = f"{base}/risk/current_iterative"
+    elif base.endswith("/api/v1/risk"):
+        url = f"{base}/current_iterative"
+    else:
+        url = f"{base}/api/v1/risk/current_iterative"
+
+    params: dict = {"max_steps": max_steps, "epsilon": epsilon}
+    if scenario_id is not None:
+        params["scenario_id"] = scenario_id
+    if run_id is not None:
+        params["run_id"] = run_id
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.HTTPError as e:
+        logger.error(f"❌ Failed to fetch iterative risk from {url}: {e}")
+        raise HTTPException(status_code=502, detail="Risk engine iterative endpoint unavailable")
+
+
 # --- Helper: override/restore theta_node on risk_engine ---
 
 async def _get_current_theta_node() -> float:
@@ -694,15 +725,20 @@ async def run_scenario(
     # --- 5. Read final state x_T for both operators ---
     final_cl = await fetch_risk(scenario_id, run_id, method="classical")
     final_q = await fetch_risk(scenario_id, run_id, method="quantitative")
+    final_qi_raw = await fetch_risk_iterative(scenario_id, run_id)
     final_total_cl = float(final_cl.get("total_risk", 0.0))
     final_total_q = float(final_q.get("total_risk", 0.0))
+    final_total_qi = float(final_qi_raw.get("total_risk", 0.0))
     final_vec_cl = _sector_risk_vector(final_cl)
     final_vec_q = _sector_risk_vector(final_q)
+    final_vec_qi = _sector_risk_vector(final_qi_raw)
     delta_vec_cl = _vector_delta(final_vec_cl, base_vec_cl)
     delta_vec_q = _vector_delta(final_vec_q, base_vec_q)
+    delta_vec_qi = _vector_delta(final_vec_qi, base_vec_q)  # same baseline as quantitative
 
     delta_cl = final_total_cl - base_total_cl
     delta_q = final_total_q - base_total_q
+    delta_qi = final_total_qi - base_total_q  # same baseline as quantitative
 
     # --- Cascade indicators (methodology-aligned) ---
     cl_diag = _compute_cl_diagnostics(base_vec_cl, step_vectors_cl, theta_classical, initiator)
@@ -713,6 +749,8 @@ async def run_scenario(
     # Quantitative: cascade if any non-initiator increased by at least δ
     delta_sector_threshold = 0.1
     I_q = 1 if any(float(delta_vec_q.get(s, 0.0)) >= delta_sector_threshold for s in non_initiators) else 0
+    I_qi = 1 if any(float(delta_vec_qi.get(s, 0.0)) >= delta_sector_threshold for s in non_initiators) else 0
+    convergence_steps_val = int(final_qi_raw.get("convergence_steps", 0))
 
     cache_key = _cache_key_for_run(
         scenario_id=scenario_id,
@@ -808,6 +846,15 @@ async def run_scenario(
         final_after_recovery_cl=final_after_recovery_cl,
         recovery_trajectory_q=recovery_trajectory_q,
         recovery_trajectory_cl=recovery_trajectory_cl,
+        # iterative quantitative diagnostics (Sprint 2)
+        method_qi_total_before=base_total_q,
+        method_qi_total_after=final_total_qi,
+        delta_qi=delta_qi,
+        I_qi=I_qi,
+        before_vec_qi=dict(base_vec_q),
+        after_vec_qi=dict(final_vec_qi),
+        delta_vec_qi=dict(delta_vec_qi),
+        convergence_steps=convergence_steps_val,
     )
 
 
@@ -1188,6 +1235,7 @@ async def run_monte_carlo(req: MonteCarloRequest):
         delta_vec_cl = dict(scenario_res.delta_vec_cl or {})
         I_cl = int(scenario_res.I_cl or 0)
         I_q = int(scenario_res.I_q or 0)
+        I_qi = int(scenario_res.I_qi or 0) if scenario_res.I_qi is not None else 0
 
         deltas.append(effective_delta)
 
@@ -1218,6 +1266,15 @@ async def run_monte_carlo(req: MonteCarloRequest):
             recovery_trajectory_q=scenario_res.recovery_trajectory_q,
             cl_activated_sectors=list(scenario_res.cl_activated_sectors or []),
             cl_first_activation_step=scenario_res.cl_first_activation_step,
+            # iterative quantitative diagnostics (Sprint 2)
+            method_qi_total_before=scenario_res.method_qi_total_before,
+            method_qi_total_after=scenario_res.method_qi_total_after,
+            delta_qi=scenario_res.delta_qi,
+            I_qi=I_qi,
+            before_vec_qi=dict(scenario_res.before_vec_qi or {}),
+            after_vec_qi=dict(scenario_res.after_vec_qi or {}),
+            delta_vec_qi=dict(scenario_res.delta_vec_qi or {}),
+            convergence_steps=scenario_res.convergence_steps,
         )
 
         runs_data.append(
@@ -1247,9 +1304,11 @@ async def run_monte_carlo(req: MonteCarloRequest):
 
     icl = [r.I_cl for r in runs_data if r.I_cl is not None]
     iq = [r.I_q for r in runs_data if r.I_q is not None]
+    iqi = [r.I_qi for r in runs_data if r.I_qi is not None]
 
     K_cl = float(statistics.fmean(icl)) if icl else 0.0
     K_q = float(statistics.fmean(iq)) if iq else 0.0
+    K_qi = float(statistics.fmean(iqi)) if iqi else 0.0
 
     # Δ% must be JSON-compliant (no inf/NaN). When K_cl == 0, use an epsilon-denominator.
     eps = 1e-9
@@ -1327,6 +1386,7 @@ async def run_monte_carlo(req: MonteCarloRequest):
         p95_delta=p95_delta,
         K_cl=K_cl,
         K_q=K_q,
+        K_qi=K_qi,
         Delta_percent=Delta_percent,
         runs_data=runs_data,
         theta_classical=req.theta_classical,

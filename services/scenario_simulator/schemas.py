@@ -244,6 +244,16 @@ class ScenarioRunResult(BaseModel):
         description="Step index (1-based) of first classical cascade activation. None when I_cl=0."
     )
 
+    # --- iterative quantitative diagnostics (Sprint 2) ---
+    method_qi_total_before: Optional[float] = Field(default=None, description="total_risk (quantitative iterative) before scenario")
+    method_qi_total_after: Optional[float] = Field(default=None, description="total_risk (quantitative iterative) after scenario")
+    delta_qi: Optional[float] = Field(default=None, description="ΔR (quantitative iterative) = after - before")
+    I_qi: Optional[int] = Field(default=None, description="Cascade indicator for quantitative iterative (0/1)")
+    before_vec_qi: Optional[Dict[str, float]] = Field(default=None, description="Risk vector before (quantitative iterative)")
+    after_vec_qi: Optional[Dict[str, float]] = Field(default=None, description="Risk vector after (quantitative iterative)")
+    delta_vec_qi: Optional[Dict[str, float]] = Field(default=None, description="Delta vector (quantitative iterative)")
+    convergence_steps: Optional[int] = Field(default=None, description="Steps to convergence in iterative quantitative operator")
+
     # --- трассировка выполнения сценария ---
     steps: List[Dict[str, Any]] = Field(description="Логи шагов сценария (ответы доменных микросервисов)")
 
@@ -414,6 +424,16 @@ class MonteCarloRun(BaseModel):
     delta_sector_threshold: Optional[float] = Field(default=None)
     theta_node: Optional[float] = Field(default=None, description="theta_node (binarisation threshold) active during this run")
 
+    # --- iterative quantitative diagnostics (Sprint 2) ---
+    method_qi_total_before: Optional[float] = Field(default=None)
+    method_qi_total_after: Optional[float] = Field(default=None)
+    delta_qi: Optional[float] = Field(default=None)
+    I_qi: Optional[int] = Field(default=None)
+    before_vec_qi: Optional[Dict[str, float]] = Field(default=None)
+    after_vec_qi: Optional[Dict[str, float]] = Field(default=None)
+    delta_vec_qi: Optional[Dict[str, float]] = Field(default=None)
+    convergence_steps: Optional[int] = Field(default=None)
+
     # --- realism extension fields ---
     peak_after_q: Optional[float] = Field(
         default=None,
@@ -450,6 +470,7 @@ class MonteCarloResult(BaseModel):
 
     K_cl: Optional[float] = Field(default=None, description="Полнота выявления каскадов K^(cl) по Monte-Carlo")
     K_q: Optional[float] = Field(default=None, description="Полнота выявления каскадов K^(q) по Monte-Carlo")
+    K_qi: Optional[float] = Field(default=None, description="Cascade detection rate for quantitative iterative")
     Delta_percent: Optional[float] = Field(default=None, description="Относительный прирост (K_q - K_cl)/K_cl * 100%")
 
     runs_data: List[MonteCarloRun] = Field(

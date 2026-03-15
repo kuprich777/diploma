@@ -21,7 +21,7 @@ from schemas import (
 from utils.logging import setup_logging
 
 
-RiskMethod = Literal["classical", "quantitative"]
+RiskMethod = Literal["classical", "quantitative", "quantitative_iterative"]
 
 # -------------------------------------------------------------------
 # Sector weights for the integral (aggregated) risk.
@@ -49,6 +49,12 @@ CURRENT_DEPENDENCY_MATRIX: list[list[float]] = getattr(settings, "DEPENDENCY_MAT
     [0.0, 0.0, 0.0],
 ])
 CURRENT_DEPENDENCY_MATRIX_VERSION: str = getattr(settings, "DEPENDENCY_MATRIX_VERSION", "v0")
+
+# In-memory theta_node (binarisation threshold); initialised from settings.THETA_BIN (default 0.70).
+# Used ONLY for node binarisation: y_i = I(x_i >= theta_node).
+# Classical cascade propagation uses topology only (A[i][j] > 0), not this threshold.
+# Can be overridden at runtime via POST /api/v1/risk/set_classical_threshold.
+CURRENT_THETA_BIN: float = float(getattr(settings, "THETA_BIN", 0.70))
 
 logger = setup_logging()
 
@@ -111,19 +117,72 @@ def apply_dependencies_quantitative(energy_risk: float, water_risk: float, trans
     }
 
 
+def apply_dependencies_quantitative_iterative(
+    energy_risk: float,
+    water_risk: float,
+    transport_risk: float,
+    max_steps: int = 20,
+    epsilon: float = 0.001,
+) -> dict:
+    """Iterative quantitative operator: x(t+1) = clip(x(t) + A·x(t), 0, 1).
+
+    Iterates until convergence (L-inf norm < epsilon) or max_steps reached.
+    Returns final risks plus convergence diagnostics.
+
+    The clipping creates nonlinearity: once a sector saturates at 1.0,
+    further propagation from it is unchanged, creating asymmetric dynamics.
+    """
+    A = CURRENT_DEPENDENCY_MATRIX
+    x = [float(energy_risk), float(water_risk), float(transport_risk)]
+
+    trajectory = [{"energy": x[0], "water": x[1], "transport": x[2]}]
+    diff = 0.0
+
+    for step in range(max_steps):
+        y = [0.0, 0.0, 0.0]
+        for i in range(3):
+            ax = sum(float(A[i][j]) * x[j] for j in range(3))
+            y[i] = max(0.0, min(1.0, x[i] + ax))
+
+        diff = max(abs(y[i] - x[i]) for i in range(3))
+        x = y
+        trajectory.append({"energy": x[0], "water": x[1], "transport": x[2]})
+
+        if diff < epsilon:
+            break
+
+    return {
+        "energy": x[0],
+        "water": x[1],
+        "transport": x[2],
+        "convergence_steps": len(trajectory) - 1,
+        "converged": diff < epsilon,
+        "trajectory": trajectory,
+    }
+
+
 def apply_dependencies_classical(
     energy_risk: float,
     water_risk: float,
     transport_risk: float,
-    threshold: float = 0.5,
+    threshold: float = 0.70,
 ) -> dict[str, float]:
     """Классический rule-based подход.
 
-    1) Бинаризация рисков: y_i = I(x_i >= threshold).
-    2) Распространение деградаций по A с порогом связности:
-       y_i(t+1) = y_i(t) OR exists j: (y_j(t)=1 AND A[i][j] >= threshold)
+    Two-mechanism design (mechanisms deliberately separated):
 
-    Возвращает бинарные риски, приведённые к {0,1}.
+    1) Node binarisation: y_i = I(x_i >= threshold).
+       threshold = theta_node (default 0.70, set via THETA_BIN / CURRENT_THETA_BIN).
+       Chosen to be just above maximum steady-state sector risk (~0.667 for energy),
+       so that pre-shock classical state is NOT saturated.
+
+    2) Cascade propagation: topology-based, NOT threshold-filtered.
+       y_i(t+1) = y_i(t) OR exists j: (y_j(t)=1 AND A[i][j] > 0.0)
+       Every nonzero edge in matrix A is a potential cascade path.
+       Edge existence is a structural property of the dependency graph,
+       independent of the current risk levels.
+
+    Returns binary risks in {0.0, 1.0}.
     """
     y = [
         1.0 if float(energy_risk) >= threshold else 0.0,
@@ -133,13 +192,14 @@ def apply_dependencies_classical(
 
     A = CURRENT_DEPENDENCY_MATRIX
 
-    # One-step propagation (достаточно для сценарного детектора каскада)
+    # One-step topology propagation.
+    # Edge activation criterion: A[i][j] > 0.0 (structural topology, not threshold-filtered).
     y_next = y.copy()
     for i in range(3):
         if y_next[i] >= 1.0:
             continue
         for j in range(3):
-            if y[j] >= 1.0 and float(A[i][j]) >= threshold:
+            if y[j] >= 1.0 and float(A[i][j]) > 0.0:
                 y_next[i] = 1.0
                 break
 
@@ -250,7 +310,7 @@ async def calculate_risks(
 
     # Normalize method defensively (in case of future callers passing raw strings)
     method_norm = str(method).strip().lower()
-    if method_norm not in {"classical", "quantitative"}:
+    if method_norm not in {"classical", "quantitative", "quantitative_iterative"}:
         raise HTTPException(status_code=400, detail=f"Unknown method: {method}")
 
     # Параллельно опрашиваем три сектора
@@ -266,7 +326,17 @@ async def calculate_risks(
 
     # Применяем матрицу межотраслевых зависимостей
     if method_norm == "classical":
-        sector_risk = apply_dependencies_classical(energy_risk, water_risk, transport_risk)
+        sector_risk = apply_dependencies_classical(
+            energy_risk, water_risk, transport_risk,
+            threshold=CURRENT_THETA_BIN,
+        )
+    elif method_norm == "quantitative_iterative":
+        iter_result = apply_dependencies_quantitative_iterative(energy_risk, water_risk, transport_risk)
+        sector_risk = {
+            "energy": iter_result["energy"],
+            "water": iter_result["water"],
+            "transport": iter_result["transport"],
+        }
     else:
         sector_risk = apply_dependencies_quantitative(energy_risk, water_risk, transport_risk)
     adj_energy_risk = sector_risk["energy"]
@@ -372,6 +442,46 @@ async def get_current_risk(
     return result  # type: ignore[return-value]
 
 
+@router.get("/current_iterative")
+async def get_current_risk_iterative(
+    scenario_id: Optional[str] = None,
+    run_id: Optional[int] = None,
+    max_steps: int = 20,
+    epsilon: float = 0.001,
+):
+    """Return quantitative iterative risk with full convergence diagnostics."""
+    energy_risk, water_risk, transport_risk = await asyncio.gather(
+        fetch_sector_risk(settings.ENERGY_SERVICE_URL, "energy", scenario_id=scenario_id, run_id=run_id),
+        fetch_sector_risk(settings.WATER_SERVICE_URL, "water", scenario_id=scenario_id, run_id=run_id),
+        fetch_sector_risk(settings.TRANSPORT_SERVICE_URL, "transport", scenario_id=scenario_id, run_id=run_id),
+    )
+    result = apply_dependencies_quantitative_iterative(
+        energy_risk, water_risk, transport_risk,
+        max_steps=max_steps, epsilon=epsilon,
+    )
+    w_e = WEIGHTS["energy"]
+    w_w = WEIGHTS["water"]
+    w_t = WEIGHTS["transport"]
+    w_sum = w_e + w_w + w_t if (w_e + w_w + w_t) > 0 else 1.0
+    total_risk = (result["energy"] * w_e + result["water"] * w_w + result["transport"] * w_t) / w_sum
+    total_risk = max(0.0, min(1.0, total_risk))
+
+    return {
+        "energy_risk": result["energy"],
+        "water_risk": result["water"],
+        "transport_risk": result["transport"],
+        "total_risk": total_risk,
+        "convergence_steps": result["convergence_steps"],
+        "converged": result["converged"],
+        "trajectory": result["trajectory"],
+        "raw_sector_risk": {
+            "energy": energy_risk,
+            "water": water_risk,
+            "transport": transport_risk,
+        },
+    }
+
+
 @router.post("/recalculate", response_model=Union[AggregatedRisk, RiskSnapshotOut])
 async def recalculate_risk(
     body: RiskRecalcRequest,
@@ -413,6 +523,58 @@ async def update_weights(payload: WeightUpdate):
 class DependencyMatrixUpdate(BaseModel):
     matrix: list[list[float]]
     version: str | None = None
+
+
+@router.get("/classical_threshold")
+async def get_classical_threshold():
+    """Return the active theta_node (binarisation threshold) and classical topology.
+
+    theta_node is used ONLY for node binarisation: y_i = I(x_i >= theta_node).
+    Cascade propagation uses topology only: edges with A[i][j] > 0.0 are always
+    active regardless of the current theta_node value.
+
+    'topology_edges' — all nonzero directed edges in A (always the active cascade paths).
+    'zero_edges'     — structural zeros in A (no dependency, never propagate).
+    """
+    A = CURRENT_DEPENDENCY_MATRIX
+    sectors = SECTORS_ORDER
+    topology_edges = []
+    zero_edges = []
+    for i, dest in enumerate(sectors):
+        for j, src in enumerate(sectors):
+            if i == j:
+                continue
+            v = float(A[i][j])
+            label = f"{dest}<-{src} ({v})"
+            if v > 0.0:
+                topology_edges.append(label)
+            else:
+                zero_edges.append(label)
+    return {
+        "theta_bin": CURRENT_THETA_BIN,
+        "theta_bin_default": float(getattr(settings, "THETA_BIN", 0.70)),
+        "theta_bin_semantics": "node binarisation only — y_i = I(x_i >= theta_bin)",
+        "topology_edges": topology_edges,
+        "zero_edges": zero_edges,
+        "propagation_rule": "topology-based: edge A[i][j] > 0.0 always active",
+        # Legacy field aliases kept for snapshot script compatibility:
+        "active_edges": topology_edges,
+        "inactive_edges": zero_edges,
+    }
+
+
+class ClassicalThresholdUpdate(BaseModel):
+    theta_bin: float
+
+
+@router.post("/set_classical_threshold")
+async def set_classical_threshold(payload: ClassicalThresholdUpdate):
+    """Override theta_bin in-memory (lost on container restart)."""
+    global CURRENT_THETA_BIN
+    if not (0.0 < payload.theta_bin <= 1.0):
+        raise HTTPException(status_code=400, detail="theta_bin must be in (0, 1]")
+    CURRENT_THETA_BIN = payload.theta_bin
+    return {"theta_bin": CURRENT_THETA_BIN}
 
 
 @router.get("/dependency_matrix")

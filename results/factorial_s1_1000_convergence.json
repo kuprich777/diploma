@@ -1,0 +1,17 @@
+{
+  "n": 1000,
+  "mean_convergence_steps": 2.761,
+  "max_convergence_steps": 4,
+  "histogram": {
+    "2": 260,
+    "3": 719,
+    "4": 21
+  },
+  "histogram_pct": {
+    "2": 26.0,
+    "3": 71.9,
+    "4": 2.1
+  },
+  "corr_steps_delta_qi": 0.0,
+  "interpretation": "corr_steps_delta_qi: positive = deeper cascades correlate with more iterations needed"
+}

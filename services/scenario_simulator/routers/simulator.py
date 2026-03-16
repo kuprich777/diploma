@@ -55,6 +55,18 @@ SCENARIO_CATALOG: dict[str, dict] = {
             {"step_index": 1, "sector": "transport", "action": "load_increase", "params": {"amount": 0.25}},
         ],
     },
+    "S1b_energy_partial": {
+        "description": "Partial energy degradation: initiator energy, load_increase calibrated amount=0.01 (K_cl≈0.46, K_q≈0.66)",
+        "steps": [
+            {"step_index": 1, "sector": "energy", "action": "load_increase", "params": {"amount": 0.01}},
+        ],
+    },
+    "S4_water_partial": {
+        "description": "Partial water degradation: initiator water, load_increase calibrated amount=0.70 (K_cl≈0.45, K_q≈0.89)",
+        "steps": [
+            {"step_index": 1, "sector": "water", "action": "load_increase", "params": {"amount": 0.70}},
+        ],
+    },
 }
 
 

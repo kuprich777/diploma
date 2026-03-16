@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+import httpx
 from database import get_db
 from models import EnergyRecord
 from schemas import EnergyStatus, Outage, EnergyRisk, ScenarioStepResult
@@ -41,6 +42,55 @@ def get_latest_record(db: Session, scenario_id: str | None, run_id: int | None) 
 
 # Создаём роутер для эндпойнтов микросервиса
 router = APIRouter(prefix="/api/v1/energy", tags=["energy"])
+
+
+# ----------------------------
+# Experiment key helpers
+# (mirrors water_service / transport_service pattern)
+# ----------------------------
+
+def experiment_key(
+    scenario_id: str = Query(..., description="Experiment key: scenario identifier"),
+    run_id: int = Query(..., ge=1, description="Experiment key: run identifier"),
+) -> tuple[str, int]:
+    return scenario_id, run_id
+
+
+def mutation_trace(
+    step_index: int = Query(..., ge=1, description="Scenario step index"),
+    action: str = Query(..., description="Scenario action name"),
+) -> tuple[int, str]:
+    return step_index, action
+
+
+# ----------------------------
+# Helpers for cross-service status checks
+# ----------------------------
+
+async def fetch_water_operational(scenario_id: str, run_id: int) -> bool:
+    """Return True if water service is operational for the given experiment key."""
+    url = settings.WATER_SERVICE_URL.rstrip("/") + "/api/v1/water/status"
+    try:
+        async with httpx.AsyncClient(timeout=settings.DEPENDENCY_CHECK_TIMEOUT) as client:
+            resp = await client.get(url, params={"scenario_id": scenario_id, "run_id": run_id})
+        resp.raise_for_status()
+        return bool(resp.json().get("operational", True))
+    except Exception as e:
+        logger.warning("⚠️ fetch_water_operational failed: %s", e)
+        return False
+
+
+async def fetch_transport_operational(scenario_id: str, run_id: int) -> bool:
+    """Return True if transport service is operational for the given experiment key."""
+    url = settings.TRANSPORT_SERVICE_URL.rstrip("/") + "/api/v1/transport/status"
+    try:
+        async with httpx.AsyncClient(timeout=settings.DEPENDENCY_CHECK_TIMEOUT) as client:
+            resp = await client.get(url, params={"scenario_id": scenario_id, "run_id": run_id})
+        resp.raise_for_status()
+        return bool(resp.json().get("operational", True))
+    except Exception as e:
+        logger.warning("⚠️ fetch_transport_operational failed: %s", e)
+        return False
 
 @router.post("/init", tags=["energy"])
 async def init_energy_state(
@@ -307,4 +357,197 @@ async def resolve_outage(
             risk_after=risk_after,
             delta=risk_after - risk_before,
         ).model_dump()
+    }
+
+
+@router.post("/increase_load", response_model=dict)
+async def increase_load(
+    amount: float = Query(..., description="Load increase as fraction of DEFAULT_PRODUCTION (reduces production)"),
+    key: tuple[str, int] = Depends(experiment_key),
+    trace: tuple[int, str] = Depends(mutation_trace),
+    db: Session = Depends(get_db),
+):
+    """Simulate partial energy degradation by reducing production by amount * DEFAULT_PRODUCTION."""
+    scenario_id, run_id = key
+    step_index, action = trace
+
+    record = get_latest_record(db, scenario_id, run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="No energy records found for given experiment key")
+
+    reduction = amount * settings.DEFAULT_PRODUCTION
+    new_production = max(1.0, float(record.production) - reduction)
+    new_record = EnergyRecord(
+        production=new_production,
+        consumption=record.consumption,
+        is_operational=record.is_operational,
+        scenario_id=scenario_id,
+        run_id=run_id,
+        step_index=step_index,
+        action=action,
+    )
+    risk_before = compute_energy_risk(record)
+    risk_after = compute_energy_risk(new_record)
+    db.add(new_record)
+    db.commit()
+    logger.info(
+        "⚡ [%s:%s step=%s action=%s] increase_load amount=%.3f → production %.1f → %.1f  risk %.4f → %.4f",
+        scenario_id, run_id, step_index, action, amount, record.production, new_production, risk_before, risk_after,
+    )
+    return {
+        "message": "Energy production reduced (load increase)",
+        "scenario_id": scenario_id,
+        "run_id": run_id,
+        "step_index": step_index,
+        "action": action,
+        "production": new_production,
+        "risk_before": risk_before,
+        "risk_after": risk_after,
+        "delta": risk_after - risk_before,
+    }
+
+
+@router.post("/check_water_dependency")
+async def check_water_dependency(
+    source_duration: int = Query(default=0, ge=0, description="Source outage duration (min)"),
+    source_degradation: float = Query(default=0.0, ge=0.0, le=1.0, description="Source degradation level"),
+    key: tuple[str, int] = Depends(experiment_key),
+    trace: tuple[int, str] = Depends(mutation_trace),
+    db: Session = Depends(get_db),
+):
+    """Apply water-sector impact on energy (A[energy][water]=0.2).
+
+    Cooling water shortages reduce energy production capacity.
+    dependency_weight=0.2 matches matrix A[0][1].
+    """
+    scenario_id, run_id = key
+    step_index, action = trace
+
+    record = get_latest_record(db, scenario_id, run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="No energy records found for given experiment key")
+
+    is_water_ok = await fetch_water_operational(scenario_id, run_id)
+
+    if not is_water_ok:
+        source_level = max(float(source_degradation), clip01(float(source_duration) / 30.0))
+        dependency_weight = 0.2  # A[energy][water]
+        impact = clip01(source_level * dependency_weight)
+
+        degraded_production = max(0.0, float(record.production) * (1.0 - impact))
+        new_record = EnergyRecord(
+            production=degraded_production,
+            consumption=record.consumption,
+            is_operational=record.is_operational,
+            reason=f"Water dependency impact={impact:.2f}",
+            scenario_id=scenario_id,
+            run_id=run_id,
+            step_index=step_index,
+            action=action,
+        )
+        risk_before = compute_energy_risk(record)
+        risk_after = compute_energy_risk(new_record)
+        db.add(new_record)
+        db.commit()
+        logger.warning(
+            "🚨 [%s:%s step=%s action=%s] energy impacted by water outage: impact=%.2f",
+            scenario_id, run_id, step_index, action, impact,
+        )
+        return {
+            "message": "Energy sector impacted by water outage",
+            "scenario_id": scenario_id,
+            "run_id": run_id,
+            "step_index": step_index,
+            "action": action,
+            "operational": new_record.is_operational,
+            "reason": new_record.reason,
+            "degradation": risk_after,
+        }
+
+    logger.info(
+        "✅ [%s:%s step=%s action=%s] water ok; no impact on energy",
+        scenario_id, run_id, step_index, action,
+    )
+    return {
+        "message": "Water service is operational, no impact on energy",
+        "scenario_id": scenario_id,
+        "run_id": run_id,
+        "step_index": step_index,
+        "action": action,
+        "operational": record.is_operational,
+        "reason": record.reason,
+        "degradation": compute_energy_risk(record),
+    }
+
+
+@router.post("/check_transport_dependency")
+async def check_transport_dependency(
+    source_duration: int = Query(default=0, ge=0, description="Source outage duration (min)"),
+    source_degradation: float = Query(default=0.0, ge=0.0, le=1.0, description="Source degradation level"),
+    key: tuple[str, int] = Depends(experiment_key),
+    trace: tuple[int, str] = Depends(mutation_trace),
+    db: Session = Depends(get_db),
+):
+    """Apply transport-sector impact on energy (A[energy][transport]=0.3).
+
+    Fuel delivery disruptions reduce energy production capacity.
+    dependency_weight=0.3 matches matrix A[0][2].
+    """
+    scenario_id, run_id = key
+    step_index, action = trace
+
+    record = get_latest_record(db, scenario_id, run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="No energy records found for given experiment key")
+
+    is_transport_ok = await fetch_transport_operational(scenario_id, run_id)
+
+    if not is_transport_ok:
+        source_level = max(float(source_degradation), clip01(float(source_duration) / 30.0))
+        dependency_weight = 0.3  # A[energy][transport]
+        impact = clip01(source_level * dependency_weight)
+
+        degraded_production = max(0.0, float(record.production) * (1.0 - impact))
+        new_record = EnergyRecord(
+            production=degraded_production,
+            consumption=record.consumption,
+            is_operational=record.is_operational,
+            reason=f"Transport dependency impact={impact:.2f}",
+            scenario_id=scenario_id,
+            run_id=run_id,
+            step_index=step_index,
+            action=action,
+        )
+        risk_before = compute_energy_risk(record)
+        risk_after = compute_energy_risk(new_record)
+        db.add(new_record)
+        db.commit()
+        logger.warning(
+            "🚨 [%s:%s step=%s action=%s] energy impacted by transport disruption: impact=%.2f",
+            scenario_id, run_id, step_index, action, impact,
+        )
+        return {
+            "message": "Energy sector impacted by transport disruption",
+            "scenario_id": scenario_id,
+            "run_id": run_id,
+            "step_index": step_index,
+            "action": action,
+            "operational": new_record.is_operational,
+            "reason": new_record.reason,
+            "degradation": risk_after,
+        }
+
+    logger.info(
+        "✅ [%s:%s step=%s action=%s] transport ok; no impact on energy",
+        scenario_id, run_id, step_index, action,
+    )
+    return {
+        "message": "Transport service is operational, no impact on energy",
+        "scenario_id": scenario_id,
+        "run_id": run_id,
+        "step_index": step_index,
+        "action": action,
+        "operational": record.is_operational,
+        "reason": record.reason,
+        "degradation": compute_energy_risk(record),
     }

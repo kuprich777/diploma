@@ -1,0 +1,6300 @@
+{
+  "scenario_id": "S3_transport_load",
+  "sector": "transport",
+  "runs": 100,
+  "mode": "real",
+  "mean_delta": 0.3633764774811209,
+  "min_delta": 0.09705805504059029,
+  "max_delta": 0.4349062621312558,
+  "p95_delta": 0.3867868048129315,
+  "K_cl": 0.94,
+  "K_q": 0.99,
+  "Delta_percent": 5.319148936170218,
+  "runs_data": [
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 1,
+      "run": 1,
+      "seed": 8890827646628305625,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=1|seed=8890827646628305625",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.1439281066012628
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.7857084079119776,
+      "delta": 0.33904174124531083,
+      "duration": 21,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.7857084079119776,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.33904174124531083,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.8984029020755181,
+        "water": 0.42115749027256766,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.23173623540885135,
+        "water": 0.15449082360590094,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.7857084079119776,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 2,
+      "run": 2,
+      "seed": 15064064706037321761,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=2|seed=15064064706037321761",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3560590247206226
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8220455542710545,
+      "delta": 0.37537888760438776,
+      "duration": 21,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8220455542710545,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37537888760438776,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9589648126739796,
+        "water": 0.4615320973382086,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29229814600731285,
+        "water": 0.19486543067154188,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8220455542710545,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 3,
+      "run": 3,
+      "seed": 5736000442184912993,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=3|seed=5736000442184912993",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.5597867527953211
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8260982211164252,
+      "delta": 0.3794315544497584,
+      "duration": 8,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8260982211164252,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3794315544497584,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9657192574162643,
+        "water": 0.46603506049973176,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29905259074959756,
+        "water": 0.19936839383306504,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8260982211164252,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 4,
+      "run": 4,
+      "seed": 7352399632207347592,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=4|seed=7352399632207347592",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.26397055822091214
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8147512734759361,
+      "delta": 0.36808460680926935,
+      "duration": 17,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8147512734759361,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.36808460680926935,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.946807678015449,
+        "water": 0.45342734089918824,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2801410113487822,
+        "water": 0.18676067423252152,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8147512734759361,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 5,
+      "run": 5,
+      "seed": 16687246383841892249,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=5|seed=16687246383841892249",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.2405924676819306
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8115122583225776,
+      "delta": 0.3648455916559108,
+      "duration": 20,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8115122583225776,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3648455916559108,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9414093194265182,
+        "water": 0.44982843517323434,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.27474265275985144,
+        "water": 0.18316176850656762,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8115122583225776,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 6,
+      "run": 6,
+      "seed": 5722309517077894813,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=6|seed=5722309517077894813",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.19074359867760582
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8013611431329717,
+      "delta": 0.3546944764663049,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8013611431329717,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3546944764663049,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9244907941105085,
+        "water": 0.43854941829589456,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.25782412744384176,
+        "water": 0.17188275162922784,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8013611431329717,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 7,
+      "run": 7,
+      "seed": 14093114895253656616,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=7|seed=14093114895253656616",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.2637174158530667
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8147202083447274,
+      "delta": 0.3680535416780606,
+      "duration": 15,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8147202083447274,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3680535416780606,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9467559027967678,
+        "water": 0.4533928240867341,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.28008923613010106,
+        "water": 0.18672615742006737,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8147202083447274,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 8,
+      "run": 8,
+      "seed": 7099181496046430618,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=8|seed=7099181496046430618",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4202012623992552
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8648179664510312,
+      "delta": 0.4181512997843644,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8648179664510312,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.4181512997843644,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9765268472514355,
+        "water": 0.5806907585015233,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.3098601805847687,
+        "water": 0.3140240918348566,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8648179664510312,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 9,
+      "run": 9,
+      "seed": 16933441105734861115,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=9|seed=16933441105734861115",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.19275014990444037
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8018780664011358,
+      "delta": 0.355211399734469,
+      "duration": 8,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8018780664011358,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.355211399734469,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.925352332890782,
+        "water": 0.43912377748274356,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.25868566622411526,
+        "water": 0.17245711081607684,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8018780664011358,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 10,
+      "run": 10,
+      "seed": 13585426720487505899,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=10|seed=13585426720487505899",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3165079630238269
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8197256630693812,
+      "delta": 0.37305899640271445,
+      "duration": 11,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8197256630693812,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37305899640271445,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9550983273378577,
+        "water": 0.4589544404474607,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.28843166067119097,
+        "water": 0.19228777378079398,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8197256630693812,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 11,
+      "run": 11,
+      "seed": 15366264700698212262,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=11|seed=15366264700698212262",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3192040926916382
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8199155038769763,
+      "delta": 0.37324883721030955,
+      "duration": 8,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8199155038769763,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37324883721030955,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9554147286838495,
+        "water": 0.4591653746781219,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2887480620171827,
+        "water": 0.1924987080114552,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8199155038769763,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 12,
+      "run": 12,
+      "seed": 6256907488579367365,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=12|seed=6256907488579367365",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.2271714468206897
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8092689972545892,
+      "delta": 0.36260233058792246,
+      "duration": 24,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8092689972545892,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.36260233058792246,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9376705509798708,
+        "water": 0.4473359228754694,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2710038843132041,
+        "water": 0.1806692562088027,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8092689972545892,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 13,
+      "run": 13,
+      "seed": 5724359574337817711,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=13|seed=5724359574337817711",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.467837433924248
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8252030439513696,
+      "delta": 0.3785363772847028,
+      "duration": 11,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8252030439513696,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3785363772847028,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9642272954745048,
+        "water": 0.4650404192052255,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29756062880783807,
+        "water": 0.19837375253855877,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8252030439513696,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 14,
+      "run": 14,
+      "seed": 16009105258324448555,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=14|seed=16009105258324448555",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.30499500111737915
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8188530697436276,
+      "delta": 0.3721864030769608,
+      "duration": 28,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8188530697436276,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3721864030769608,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9536440051282682,
+        "water": 0.4579848923077343,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.28697733846160145,
+        "water": 0.1913182256410676,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8188530697436276,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 15,
+      "run": 15,
+      "seed": 13361959329272287971,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=15|seed=13361959329272287971",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.38126828786307737
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8177049943559112,
+      "delta": 0.3710383276892444,
+      "duration": 25,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8177049943559112,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3710383276892444,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9517305461487406,
+        "water": 0.4567092529880493,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2850638794820739,
+        "water": 0.1900425863213826,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8177049943559112,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 16,
+      "run": 16,
+      "seed": 8417414299755024503,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=16|seed=8417414299755024503",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.49573213367593866
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8255681093787599,
+      "delta": 0.37890144271209314,
+      "duration": 8,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8255681093787599,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37890144271209314,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9648357378534886,
+        "water": 0.4654460474578813,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2981690711868219,
+        "water": 0.1987793807912146,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8255681093787599,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 17,
+      "run": 17,
+      "seed": 3036334066948276230,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=17|seed=3036334066948276230",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.631352799729482
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8263943957413666,
+      "delta": 0.37972772907469987,
+      "duration": 5,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8263943957413666,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37972772907469987,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9662128817911666,
+        "water": 0.46636414341633337,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29954621512449986,
+        "water": 0.19969747674966665,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8263943957413666,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 18,
+      "run": 18,
+      "seed": 7150244649693364022,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=18|seed=7150244649693364022",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.19021886645834252
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8071018333394995,
+      "delta": 0.3604351666728327,
+      "duration": 29,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8071018333394995,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3604351666728327,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9340586111213881,
+        "water": 0.4449279629698143,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.26739194445472136,
+        "water": 0.17826129630314758,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8071018333394995,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 19,
+      "run": 19,
+      "seed": 9401572442365823527,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=19|seed=9401572442365823527",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.1128652352757583
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.7702898913658899,
+      "delta": 0.3236232246992231,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 0.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.7702898913658899,
+      "I_cl": 0,
+      "I_q": 1,
+      "delta_R": 0.3236232246992231,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.8727053744987053,
+        "water": 0.4040258052213591,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2060387078320386,
+        "water": 0.1373591385546924,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "delta_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.7702898913658899,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [],
+      "cl_first_activation_step": null
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 20,
+      "run": 20,
+      "seed": 4504664692610417991,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=20|seed=4504664692610417991",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3244977238522242
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8202732681417277,
+      "delta": 0.373606601475061,
+      "duration": 7,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8202732681417277,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.373606601475061,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.956011002458435,
+        "water": 0.4595628905278456,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2893443357917682,
+        "water": 0.19289622386117888,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8202732681417277,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 21,
+      "run": 21,
+      "seed": 13451080246356810447,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=21|seed=13451080246356810447",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.6817447071772479
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8265045233107111,
+      "delta": 0.37983785664404435,
+      "duration": 9,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8265045233107111,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37983785664404435,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9663964277400741,
+        "water": 0.46648650738227165,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2997297610734073,
+        "water": 0.19981984071560493,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8265045233107111,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 22,
+      "run": 22,
+      "seed": 175124498767938981,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=22|seed=175124498767938981",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.23234209393146288
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8101700970615731,
+      "delta": 0.3635034303949063,
+      "duration": 30,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8101700970615731,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3635034303949063,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9391723839915107,
+        "water": 0.4483371448832294,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.27250571732484397,
+        "water": 0.18167047821656268,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8101700970615731,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 23,
+      "run": 23,
+      "seed": 17003949108129404438,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=23|seed=17003949108129404438",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3461316395347862
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8215487589727866,
+      "delta": 0.3748820923061198,
+      "duration": 8,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8215487589727866,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3748820923061198,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9581368205101998,
+        "water": 0.46098010256235544,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29147015384353303,
+        "water": 0.19431343589568872,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8215487589727866,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 24,
+      "run": 24,
+      "seed": 11040116348213503842,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=24|seed=11040116348213503842",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3450435468843781
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8214911585966806,
+      "delta": 0.3748244919300139,
+      "duration": 23,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8214911585966806,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3748244919300139,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9580408198833568,
+        "water": 0.4609161021444601,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29137415321669,
+        "water": 0.1942494354777934,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8214911585966806,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 25,
+      "run": 25,
+      "seed": 4546238076976720157,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=25|seed=4546238076976720157",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4157396864783377
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8241654501523075,
+      "delta": 0.3774987834856407,
+      "duration": 11,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8241654501523075,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3774987834856407,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9624979724760678,
+        "water": 0.4638875372062674,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2958313058094011,
+        "water": 0.1972208705396007,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8241654501523075,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 26,
+      "run": 26,
+      "seed": 4949935012460106905,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=26|seed=4949935012460106905",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3582715136245805
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8815729287979226,
+      "delta": 0.4349062621312558,
+      "duration": 12,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8815729287979226,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.4349062621312558,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.990413578023084,
+        "water": 0.6180249919622964,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.3237469113564173,
+        "water": 0.3513583252956297,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8815729287979226,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 27,
+      "run": 27,
+      "seed": 7640283237503766578,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=27|seed=7640283237503766578",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.10893659657807123
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.7679651159926326,
+      "delta": 0.32129844932596585,
+      "duration": 22,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 0.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.7679651159926326,
+      "I_cl": 0,
+      "I_q": 1,
+      "delta_R": 0.32129844932596585,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.86883074887661,
+        "water": 0.40144272147329557,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2021640822099433,
+        "water": 0.13477605480662885,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "delta_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.7679651159926326,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [],
+      "cl_first_activation_step": null
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 28,
+      "run": 28,
+      "seed": 4401661243634622307,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=28|seed=4401661243634622307",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4949771061448424
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8177049943559112,
+      "delta": 0.3710383276892444,
+      "duration": 5,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8177049943559112,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3710383276892444,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9517305461487406,
+        "water": 0.4567092529880493,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2850638794820739,
+        "water": 0.1900425863213826,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8177049943559112,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 29,
+      "run": 29,
+      "seed": 10518337584195250457,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=29|seed=10518337584195250457",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.30903630596343973
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8191712051641735,
+      "delta": 0.37250453849750675,
+      "duration": 30,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8191712051641735,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37250453849750675,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9541742308291782,
+        "water": 0.45833837610834105,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.28750756416251144,
+        "water": 0.19167170944167433,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8191712051641735,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 30,
+      "run": 30,
+      "seed": 3035379247479952198,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=30|seed=3035379247479952198",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.44933430926339013
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8334534714795983,
+      "delta": 0.3867868048129315,
+      "duration": 19,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8334534714795983,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3867868048129315,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9600192183191023,
+        "water": 0.49815261383985754,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29335255165243557,
+        "water": 0.23148594717319082,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8334534714795983,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 31,
+      "run": 31,
+      "seed": 15326341186512808866,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=31|seed=15326341186512808866",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.43589730430388013
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8246338106243614,
+      "delta": 0.3779671439576946,
+      "duration": 11,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8246338106243614,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3779671439576946,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9632785732628243,
+        "water": 0.46440793773077177,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29661190659615755,
+        "water": 0.19774127106410505,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8246338106243614,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 32,
+      "run": 32,
+      "seed": 7380478080297004380,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=32|seed=7380478080297004380",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.16279327280049535
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.7929324801618314,
+      "delta": 0.3462658134951646,
+      "duration": 22,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.7929324801618314,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3462658134951646,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9104430224919413,
+        "water": 0.42918423721684973,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.24377635582527457,
+        "water": 0.162517570550183,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.7929324801618314,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 33,
+      "run": 33,
+      "seed": 341885810885497397,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=33|seed=341885810885497397",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.13278905799681542
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.780736297298015,
+      "delta": 0.3340696306313482,
+      "duration": 17,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.780736297298015,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3340696306313482,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.8901160510522472,
+        "water": 0.41563292292372045,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.22344938438558049,
+        "water": 0.14896625625705373,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.780736297298015,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 34,
+      "run": 34,
+      "seed": 17103422991207695056,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=34|seed=17103422991207695056",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.2262515235855667
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8091035980560599,
+      "delta": 0.36243693138939315,
+      "duration": 18,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8091035980560599,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.36243693138939315,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9373948856489887,
+        "water": 0.4471521459882147,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2707282189823219,
+        "water": 0.18048547932154796,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8091035980560599,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 35,
+      "run": 35,
+      "seed": 9152197164544394606,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=35|seed=9152197164544394606",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.20571442950853763
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8049726388927758,
+      "delta": 0.35830597222610905,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8049726388927758,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.35830597222610905,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9305099537101817,
+        "water": 0.4425621913623434,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.263843287043515,
+        "water": 0.1758955246956767,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8049726388927758,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 36,
+      "run": 36,
+      "seed": 5795491704971180843,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=36|seed=5795491704971180843",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.44918665818814757
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8248935280170777,
+      "delta": 0.37822686135041095,
+      "duration": 8,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8248935280170777,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37822686135041095,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9637114355840184,
+        "water": 0.46469651261156786,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29704476891735165,
+        "water": 0.19802984594490114,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8248935280170777,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 37,
+      "run": 37,
+      "seed": 2875966844219020543,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=37|seed=2875966844219020543",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3694255502287056
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8226391450954493,
+      "delta": 0.37597247842878256,
+      "duration": 13,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8226391450954493,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37597247842878256,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9599541307146376,
+        "water": 0.4621916426986473,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2932874640479709,
+        "water": 0.1955249760319806,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8226391450954493,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 38,
+      "run": 38,
+      "seed": 9537033078799593423,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=38|seed=9537033078799593423",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.21587669276830035
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8177049943559112,
+      "delta": 0.3710383276892444,
+      "duration": 29,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8177049943559112,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3710383276892444,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9517305461487406,
+        "water": 0.4567092529880493,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2850638794820739,
+        "water": 0.1900425863213826,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8177049943559112,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 39,
+      "run": 39,
+      "seed": 16766224098216360880,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=39|seed=16766224098216360880",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.13756491793814923
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.7829380203491982,
+      "delta": 0.33627135368253147,
+      "duration": 17,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.7829380203491982,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.33627135368253147,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.8937855894708859,
+        "water": 0.4180792818694795,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2271189228042192,
+        "water": 0.1514126152028128,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.7829380203491982,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 40,
+      "run": 40,
+      "seed": 6474050726416507053,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=40|seed=6474050726416507053",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.47619119551360456
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8427949277530931,
+      "delta": 0.3961282610864263,
+      "duration": 11,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8427949277530931,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3961282610864263,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9649357742525206,
+        "water": 0.5227353935069492,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2982691075858539,
+        "water": 0.2560687268402825,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8427949277530931,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 41,
+      "run": 41,
+      "seed": 13548828647178168546,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=41|seed=13548828647178168546",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3343898457910068
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8208917811190284,
+      "delta": 0.3742251144523616,
+      "duration": 14,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8208917811190284,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3742251144523616,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.957041857420603,
+        "water": 0.4602501271692909,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29037519075393625,
+        "water": 0.1935834605026242,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8208917811190284,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 42,
+      "run": 42,
+      "seed": 8102322032445934021,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=42|seed=8102322032445934021",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4058294511231934
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8238970440578479,
+      "delta": 0.37723037739118115,
+      "duration": 28,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8238970440578479,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37723037739118115,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9620506289853021,
+        "water": 0.4635893082124237,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2953839623186354,
+        "water": 0.196922641545757,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8238970440578479,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 43,
+      "run": 43,
+      "seed": 6954951661001857303,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=43|seed=6954951661001857303",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.20253535601175898
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8177049943559112,
+      "delta": 0.3710383276892444,
+      "duration": 21,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8177049943559112,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3710383276892444,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9517305461487406,
+        "water": 0.4567092529880493,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2850638794820739,
+        "water": 0.1900425863213826,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8177049943559112,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 44,
+      "run": 44,
+      "seed": 14710134947916348776,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=44|seed=14710134947916348776",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.008845163376755366
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.543724721707257,
+      "delta": 0.09705805504059029,
+      "duration": 21,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 0.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.543724721707257,
+      "I_cl": 0,
+      "I_q": 1,
+      "delta_R": 0.09705805504059029,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.7162942069780817,
+        "water": 0.401752527785496,
+        "transport": 0.4556042686012518
+      },
+      "delta_vec_q": {
+        "energy": 0.04962754031141492,
+        "water": 0.1350858611188293,
+        "transport": 0.12227093526791843
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "delta_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.543724721707257,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [],
+      "cl_first_activation_step": null
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 45,
+      "run": 45,
+      "seed": 14533527275950514094,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=45|seed=14533527275950514094",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3897670971496906
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8233994976940557,
+      "delta": 0.37673283102738897,
+      "duration": 29,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8233994976940557,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37673283102738897,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9612213850456485,
+        "water": 0.4630364789193212,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29455471837898173,
+        "water": 0.19636981225265449,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8233994976940557,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 46,
+      "run": 46,
+      "seed": 14114700733617504374,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=46|seed=14114700733617504374",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4623201345657407
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.825117582278593,
+      "delta": 0.37845091561192623,
+      "duration": 17,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.825117582278593,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37845091561192623,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9640848593532106,
+        "water": 0.46494546179102936,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2974181926865439,
+        "water": 0.19827879512436264,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.825117582278593,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 47,
+      "run": 47,
+      "seed": 15114467867139512117,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=47|seed=15114467867139512117",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.2130622169145584
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8065517882092859,
+      "delta": 0.3598851215426191,
+      "duration": 18,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8065517882092859,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3598851215426191,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9331418692376986,
+        "water": 0.4443168017140213,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.26647520257103186,
+        "water": 0.1776501350473546,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8065517882092859,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 48,
+      "run": 48,
+      "seed": 9087828319327491264,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=48|seed=9087828319327491264",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4211220779763466
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8243001586021261,
+      "delta": 0.37763349193545936,
+      "duration": 7,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8243001586021261,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37763349193545936,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9627224865590991,
+        "water": 0.4640372132616216,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29605581989243235,
+        "water": 0.1973705465949549,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8243001586021261,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 49,
+      "run": 49,
+      "seed": 13784796035759046326,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=49|seed=13784796035759046326",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.6756712858038304
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8264940712309172,
+      "delta": 0.37982740456425046,
+      "duration": 6,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8264940712309172,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37982740456425046,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9663790076070842,
+        "water": 0.46647489396027836,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29971234094041743,
+        "water": 0.19980822729361164,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8264940712309172,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 50,
+      "run": 50,
+      "seed": 14142361206657072350,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=50|seed=14142361206657072350",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.24710715032552386
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8124944524111806,
+      "delta": 0.3658277857445138,
+      "duration": 10,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8124944524111806,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3658277857445138,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9430463095741899,
+        "water": 0.4509197619383489,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.27637964290752315,
+        "water": 0.18425309527168215,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8124944524111806,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 51,
+      "run": 51,
+      "seed": 16547310904293415223,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=51|seed=16547310904293415223",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.32552516668330594
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8203404777109176,
+      "delta": 0.3736738110442508,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8203404777109176,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3736738110442508,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9561230184070847,
+        "water": 0.45963756782694537,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.28945635174041795,
+        "water": 0.19297090116027865,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8203404777109176,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 52,
+      "run": 52,
+      "seed": 13070184402977852700,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=52|seed=13070184402977852700",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.44348173061168233
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.824786368281702,
+      "delta": 0.3781197016150353,
+      "duration": 26,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.824786368281702,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3781197016150353,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9635328360250589,
+        "water": 0.46457744623892816,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29686616935839216,
+        "water": 0.19791077957226144,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.824786368281702,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 53,
+      "run": 53,
+      "seed": 3377870681463300587,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=53|seed=3377870681463300587",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3082646612611737
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8177049943559112,
+      "delta": 0.3710383276892444,
+      "duration": 17,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8177049943559112,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3710383276892444,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9517305461487406,
+        "water": 0.4567092529880493,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2850638794820739,
+        "water": 0.1900425863213826,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8177049943559112,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 54,
+      "run": 54,
+      "seed": 3946472892230901394,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=54|seed=3946472892230901394",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3025666541187566
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.818655449585391,
+      "delta": 0.3719887829187243,
+      "duration": 20,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.818655449585391,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3719887829187243,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9533146381978739,
+        "water": 0.45776531435413814,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.28664797153120714,
+        "water": 0.19109864768747142,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.818655449585391,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 55,
+      "run": 55,
+      "seed": 7028552605511348582,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=55|seed=7028552605511348582",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.16864095250591132
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.802237593064379,
+      "delta": 0.35557092639771226,
+      "duration": 22,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.802237593064379,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.35557092639771226,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9259515439961872,
+        "water": 0.43952325155301375,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.25928487732952044,
+        "water": 0.17285658488634703,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.802237593064379,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 56,
+      "run": 56,
+      "seed": 12307181361380352301,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=56|seed=12307181361380352301",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.26911315413881565
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8153651624050182,
+      "delta": 0.36869849573835145,
+      "duration": 30,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8153651624050182,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.36869849573835145,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.947830826230586,
+        "water": 0.4541094397092796,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.28116415956391927,
+        "water": 0.18744277304261286,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8153651624050182,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 57,
+      "run": 57,
+      "seed": 9704838868303648438,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=57|seed=9704838868303648438",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4165114968285283
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8177049943559112,
+      "delta": 0.3710383276892444,
+      "duration": 28,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8177049943559112,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3710383276892444,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9517305461487406,
+        "water": 0.4567092529880493,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2850638794820739,
+        "water": 0.1900425863213826,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8177049943559112,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 58,
+      "run": 58,
+      "seed": 3064978711700541878,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=58|seed=3064978711700541878",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.7872486101404165
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8266118881625963,
+      "delta": 0.3799452214959296,
+      "duration": 27,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8266118881625963,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3799452214959296,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9665753691598827,
+        "water": 0.46660580166214405,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.299908702493216,
+        "water": 0.19993913499547733,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8266118881625963,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 59,
+      "run": 59,
+      "seed": 1427140081835728258,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=59|seed=1427140081835728258",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.7136121988841949
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8289430488733183,
+      "delta": 0.3822763822066515,
+      "duration": 7,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8289430488733183,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3822763822066515,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9576453116842181,
+        "water": 0.4862830806654367,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29097864501755133,
+        "water": 0.21961641399876997,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8289430488733183,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 60,
+      "run": 60,
+      "seed": 14629378938094824395,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=60|seed=14629378938094824395",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.22880653237474716
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8095591449618298,
+      "delta": 0.362892478295163,
+      "duration": 23,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8095591449618298,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.362892478295163,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9381541304919385,
+        "water": 0.4476583092168479,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2714874638252718,
+        "water": 0.1809916425501812,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8095591449618298,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 61,
+      "run": 61,
+      "seed": 3370057095382879468,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=61|seed=3370057095382879468",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3572096459220208
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.822099922597588,
+      "delta": 0.37543325593092125,
+      "duration": 30,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.822099922597588,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37543325593092125,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9590554265515356,
+        "water": 0.4615925065899127,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2923887598848689,
+        "water": 0.19492583992324597,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.822099922597588,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 62,
+      "run": 62,
+      "seed": 17883115582044246318,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=62|seed=17883115582044246318",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.44799206031414934
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8248716065420121,
+      "delta": 0.3782049398753453,
+      "duration": 11,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8248716065420121,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3782049398753453,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9636748997922424,
+        "water": 0.46467215541705054,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29700823312557567,
+        "water": 0.19800548875038382,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8248716065420121,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 63,
+      "run": 63,
+      "seed": 6263301735003985734,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=63|seed=6263301735003985734",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.26191893692085294
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.814497158407977,
+      "delta": 0.3678304917413102,
+      "duration": 17,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.814497158407977,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3678304917413102,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9463841529021837,
+        "water": 0.4531449908236781,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.27971748623551695,
+        "water": 0.18647832415701138,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.814497158407977,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 64,
+      "run": 64,
+      "seed": 17783660201457000081,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=64|seed=17783660201457000081",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.38360352774707224
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8231856633342036,
+      "delta": 0.37651899666753685,
+      "duration": 9,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8231856633342036,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37651899666753685,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.960864994445895,
+        "water": 0.46279888518615225,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2941983277792283,
+        "water": 0.19613221851948553,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8231856633342036,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 65,
+      "run": 65,
+      "seed": 13293808346710686042,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=65|seed=13293808346710686042",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.03472055606439119
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.5908180931092939,
+      "delta": 0.14415142644262713,
+      "duration": 19,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 0.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.5908180931092939,
+      "I_cl": 0,
+      "I_q": 0,
+      "delta_R": 0.14415142644262713,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.7567613081933087,
+        "water": 0.32672976101776136,
+        "transport": 0.6336488050888066
+      },
+      "delta_vec_q": {
+        "energy": 0.09009464152664193,
+        "water": 0.06006309435109464,
+        "transport": 0.30031547175547324
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "delta_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.5908180931092939,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [],
+      "cl_first_activation_step": null
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 66,
+      "run": 66,
+      "seed": 8828136742452539615,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=66|seed=8828136742452539615",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3096118703335808
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8573921651214902,
+      "delta": 0.4107254984548234,
+      "duration": 12,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8573921651214902,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.4107254984548234,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9726185307622033,
+        "water": 0.5611491760553631,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.30595186409553654,
+        "water": 0.29448250938869636,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8573921651214902,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 67,
+      "run": 67,
+      "seed": 6341279296879737447,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=67|seed=6341279296879737447",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.40158917060369165
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8237735759508111,
+      "delta": 0.37710690928414436,
+      "duration": 20,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8237735759508111,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37710690928414436,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9618448488069076,
+        "water": 0.46345212142682723,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29517818214024083,
+        "water": 0.19678545476016052,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8237735759508111,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 68,
+      "run": 68,
+      "seed": 2796880666480280477,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=68|seed=2796880666480280477",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.30739451845265964
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8190435548469621,
+      "delta": 0.37237688818029535,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8190435548469621,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37237688818029535,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9539614803004925,
+        "water": 0.4581965424225506,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2872948136338258,
+        "water": 0.19152987575588387,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8190435548469621,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 69,
+      "run": 69,
+      "seed": 13703029104163410303,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=69|seed=13703029104163410303",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.26560551383108183
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.827516467589809,
+      "delta": 0.38084980092314225,
+      "duration": 14,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.827516467589809,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.38084980092314225,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9537527912239759,
+        "water": 0.4867178370007286,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2870861245573092,
+        "water": 0.2200511703340619,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.827516467589809,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 70,
+      "run": 70,
+      "seed": 3458444422037962768,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=70|seed=3458444422037962768",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.32771439552100456
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8204813375789852,
+      "delta": 0.37381467091231846,
+      "duration": 13,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8204813375789852,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37381467091231846,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9563577848538644,
+        "water": 0.45979407879146517,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2896911181871976,
+        "water": 0.19312741212479845,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8204813375789852,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 71,
+      "run": 71,
+      "seed": 9195586368077327883,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=71|seed=9195586368077327883",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.2244195473431374
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8087695162212769,
+      "delta": 0.36210284955461014,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8087695162212769,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.36210284955461014,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.936838082591017,
+        "water": 0.44678094394956686,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.27017141592435023,
+        "water": 0.18011427728290014,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8087695162212769,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 72,
+      "run": 72,
+      "seed": 12431553931124822002,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=72|seed=12431553931124822002",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.39102167180381725
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8234413870289023,
+      "delta": 0.3767747203622356,
+      "duration": 9,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8234413870289023,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3767747203622356,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9612912006037261,
+        "water": 0.4630830226247063,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29462453393705934,
+        "water": 0.19641635595803958,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8234413870289023,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 73,
+      "run": 73,
+      "seed": 14578681191090969637,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=73|seed=14578681191090969637",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.22700435811776234
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.809239071447865,
+      "delta": 0.36257240478119823,
+      "duration": 6,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.809239071447865,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.36257240478119823,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9376206746353306,
+        "water": 0.4473026719791093,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.27095400796866387,
+        "water": 0.18063600531244256,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.809239071447865,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 74,
+      "run": 74,
+      "seed": 1244781795176152607,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=74|seed=1244781795176152607",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3798170885611445
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8230474167545199,
+      "delta": 0.3763807500878531,
+      "duration": 12,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8230474167545199,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3763807500878531,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9606345834797552,
+        "water": 0.4626452778753924,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2939679168130884,
+        "water": 0.19597861120872567,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8230474167545199,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 75,
+      "run": 75,
+      "seed": 5428470119931192713,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=75|seed=5428470119931192713",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3236475978762
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8177049943559112,
+      "delta": 0.3710383276892444,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8177049943559112,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3710383276892444,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9517305461487406,
+        "water": 0.4567092529880493,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2850638794820739,
+        "water": 0.1900425863213826,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8177049943559112,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 76,
+      "run": 76,
+      "seed": 12320210584015313568,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=76|seed=12320210584015313568",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.266263549205666
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8150290105262148,
+      "delta": 0.368362343859548,
+      "duration": 22,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8150290105262148,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.368362343859548,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.947270573099247,
+        "water": 0.45373593762172026,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.28060390643258026,
+        "water": 0.18706927095505355,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8150290105262148,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 77,
+      "run": 77,
+      "seed": 9011100481232643931,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=77|seed=9011100481232643931",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.14102511050687827
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.784466977413318,
+      "delta": 0.3378003107466512,
+      "duration": 14,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.784466977413318,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3378003107466512,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.8963338512444187,
+        "water": 0.4197781230518347,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.22966718457775193,
+        "water": 0.153111456385168,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.784466977413318,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 78,
+      "run": 78,
+      "seed": 7132272864970580114,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=78|seed=7132272864970580114",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.31001522013687743
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8177049943559112,
+      "delta": 0.3710383276892444,
+      "duration": 6,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8177049943559112,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3710383276892444,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9517305461487406,
+        "water": 0.4567092529880493,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2850638794820739,
+        "water": 0.1900425863213826,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8177049943559112,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 79,
+      "run": 79,
+      "seed": 7570320247820597051,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=79|seed=7570320247820597051",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4241002815689433
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8243715526404192,
+      "delta": 0.3777048859737524,
+      "duration": 5,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8243715526404192,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3777048859737524,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9628414766229207,
+        "water": 0.46411653997083613,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.296174809956254,
+        "water": 0.1974498733041694,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8243715526404192,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 80,
+      "run": 80,
+      "seed": 6912133186202259221,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=80|seed=6912133186202259221",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.15000384113676074
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8144572131960508,
+      "delta": 0.36779054652938403,
+      "duration": 25,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8144572131960508,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.36779054652938403,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.916363378037704,
+        "water": 0.4930395399365644,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.24969671137103722,
+        "water": 0.2263728732698977,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8144572131960508,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 81,
+      "run": 81,
+      "seed": 7011206626025804733,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=81|seed=7011206626025804733",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.07232752086076086
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.6985525787369946,
+      "delta": 0.25188591207032784,
+      "duration": 21,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 0.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.6985525787369946,
+      "I_cl": 0,
+      "I_q": 1,
+      "delta_R": 0.25188591207032784,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.8240953617106217,
+        "water": 0.37161913002930336,
+        "transport": 0.8580956501465166
+      },
+      "delta_vec_q": {
+        "energy": 0.15742869504395496,
+        "water": 0.10495246336263664,
+        "transport": 0.5247623168131832
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "delta_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.6985525787369946,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [],
+      "cl_first_activation_step": null
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 82,
+      "run": 82,
+      "seed": 14293243736906690689,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=82|seed=14293243736906690689",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.097403373240672
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8283955489003783,
+      "delta": 0.3817288822337115,
+      "duration": 22,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8283955489003783,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3817288822337115,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9319251256261691,
+        "water": 0.5187516621663685,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2652584589595024,
+        "water": 0.25208499549970176,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8283955489003783,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 2
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 83,
+      "run": 83,
+      "seed": 3228965552339798957,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=83|seed=3228965552339798957",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.38379737987957674
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8231925972183125,
+      "delta": 0.37652593055164574,
+      "duration": 30,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8231925972183125,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37652593055164574,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9608765509194097,
+        "water": 0.4628065895018287,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29420988425274297,
+        "water": 0.19613992283516196,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8231925972183125,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 84,
+      "run": 84,
+      "seed": 8489888865141892216,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=84|seed=8489888865141892216",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.26889675025100807
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8153399787246189,
+      "delta": 0.3686733120579522,
+      "duration": 26,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8153399787246189,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3686733120579522,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9477888534299203,
+        "water": 0.4540814578421691,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2811221867632535,
+        "water": 0.18741479117550236,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8153399787246189,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 85,
+      "run": 85,
+      "seed": 6847496216321507292,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=85|seed=6847496216321507292",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4518758078417658
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8249419006485903,
+      "delta": 0.37827523398192353,
+      "duration": 8,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8249419006485903,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37827523398192353,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9637920566365392,
+        "water": 0.46475025997991504,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2971253899698725,
+        "water": 0.19808359331324832,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8249419006485903,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 86,
+      "run": 86,
+      "seed": 6853721116919065020,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=86|seed=6853721116919065020",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.30791686854633676
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8190844020448549,
+      "delta": 0.3724177353781881,
+      "duration": 29,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8190844020448549,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3724177353781881,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9540295589636468,
+        "water": 0.4582419281979868,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2873628922969801,
+        "water": 0.1915752615313201,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8190844020448549,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 87,
+      "run": 87,
+      "seed": 10682380790361524332,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=87|seed=10682380790361524332",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3071603492483157
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8177049943559112,
+      "delta": 0.3710383276892444,
+      "duration": 5,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8177049943559112,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3710383276892444,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9517305461487406,
+        "water": 0.4567092529880493,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2850638794820739,
+        "water": 0.1900425863213826,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8177049943559112,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 88,
+      "run": 88,
+      "seed": 3634760778312322807,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=88|seed=3634760778312322807",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4293128962590755
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8681028170910949,
+      "delta": 0.42143615042442817,
+      "duration": 27,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8681028170910949,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.42143615042442817,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.985994560447416,
+        "water": 0.5790166430404281,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.3193278937807492,
+        "water": 0.3123499763737614,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8681028170910949,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 89,
+      "run": 89,
+      "seed": 15599441393092841948,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=89|seed=15599441393092841948",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.05624756545407506
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.6575245064976687,
+      "delta": 0.21085783983100193,
+      "duration": 21,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 0.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.6575245064976687,
+      "I_cl": 0,
+      "I_q": 1,
+      "delta_R": 0.21085783983100193,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.7984528165610429,
+        "water": 0.3545240999295842,
+        "transport": 0.7726204996479208
+      },
+      "delta_vec_q": {
+        "energy": 0.1317861498943762,
+        "water": 0.0878574332629175,
+        "transport": 0.4392871663145874
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "delta_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.6575245064976687,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [],
+      "cl_first_activation_step": null
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 90,
+      "run": 90,
+      "seed": 15793723896452033373,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=90|seed=15793723896452033373",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.1815516545225836
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.7988518624513039,
+      "delta": 0.35218519578463714,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.7988518624513039,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.35218519578463714,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9203086596410619,
+        "water": 0.4357613286495969,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.25364199297439516,
+        "water": 0.16909466198293016,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.7988518624513039,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 91,
+      "run": 91,
+      "seed": 9689721048339751950,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=91|seed=9689721048339751950",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.6582817174107006
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8264602669901753,
+      "delta": 0.3797936003235085,
+      "duration": 24,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8264602669901753,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3797936003235085,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9663226672058476,
+        "water": 0.4664373336927873,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29965600053918084,
+        "water": 0.19977066702612056,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8264602669901753,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 92,
+      "run": 92,
+      "seed": 15764053567246779340,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=92|seed=15764053567246779340",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.3841109601721895
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8232037844212279,
+      "delta": 0.3765371177545611,
+      "duration": 29,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8232037844212279,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3765371177545611,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9608951962576021,
+        "water": 0.46281901972729034,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2942285295909354,
+        "water": 0.19615235306062362,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8232037844212279,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 93,
+      "run": 93,
+      "seed": 6047789127205465359,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=93|seed=6047789127205465359",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.4114814076641538
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8240534637019805,
+      "delta": 0.37738679703531375,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8240534637019805,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37738679703531375,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9623113283921898,
+        "water": 0.46376310781701546,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29564466172552306,
+        "water": 0.19709644115034874,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8240534637019805,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 94,
+      "run": 94,
+      "seed": 12950486580316299111,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=94|seed=12950486580316299111",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.43265028576575565
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8245647710196158,
+      "delta": 0.377898104352949,
+      "duration": 5,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8245647710196158,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.377898104352949,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9631635072549152,
+        "water": 0.46433122705883234,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29649684058824843,
+        "water": 0.19766456039216562,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8245647710196158,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 95,
+      "run": 95,
+      "seed": 4631728191499945232,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=95|seed=4631728191499945232",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.36089797235491383
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8222699263837088,
+      "delta": 0.375603259717042,
+      "duration": 23,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8222699263837088,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.375603259717042,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9593387661950701,
+        "water": 0.4617813996856023,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.29267209952840334,
+        "water": 0.19511473301893556,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8222699263837088,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 96,
+      "run": 96,
+      "seed": 5029051501949555396,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=96|seed=5029051501949555396",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.469306410909775
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8252249922943897,
+      "delta": 0.37855832562772296,
+      "duration": 16,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8252249922943897,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.37855832562772296,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9642638760462052,
+        "water": 0.4650648062530257,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2975972093795385,
+        "water": 0.198398139586359,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8252249922943897,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 97,
+      "run": 97,
+      "seed": 5459606772682946712,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=97|seed=5459606772682946712",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.21768116509611746
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8074850840163619,
+      "delta": 0.3608184173496951,
+      "duration": 15,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8074850840163619,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3608184173496951,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9346973622494918,
+        "water": 0.4453537970552168,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2680306955828251,
+        "water": 0.1786871303885501,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8074850840163619,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 98,
+      "run": 98,
+      "seed": 1496592330219819879,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=98|seed=1496592330219819879",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.17277426855399214
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8034268447612742,
+      "delta": 0.35676017809460747,
+      "duration": 27,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8034268447612742,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.35676017809460747,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9279336301576793,
+        "water": 0.4408446423273418,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2612669634910125,
+        "water": 0.17417797566067506,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8034268447612742,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 99,
+      "run": 99,
+      "seed": 11276710964437414624,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=99|seed=11276710964437414624",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.1494363142200041
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.7879644212609327,
+      "delta": 0.3412977545942659,
+      "duration": 19,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.7879644212609327,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.3412977545942659,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9021629243237768,
+        "water": 0.42366417177140675,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.23549625765711002,
+        "water": 0.15699750510474003,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.7879644212609327,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    },
+    {
+      "scenario_id": "S3_transport_load",
+      "run_id": 100,
+      "run": 100,
+      "seed": 17969905077286119396,
+      "cache_key": "scenario=S3_transport_load|method=both|duration=0|theta=0.300000|delta_threshold=0.100000|A=v1.0|w=na|run_id=100|seed=17969905077286119396",
+      "cache_hit": false,
+      "randomized_params": {
+        "step_1_amount": 0.227254016866717
+      },
+      "x0_hash": "5222c37788a096d3910624247b4a1e76a3afcfe0df2ea7ddd6490cebc16a26a9",
+      "before": 0.44666666666666677,
+      "after": 0.8092837666816668,
+      "delta": 0.362617100015,
+      "duration": 23,
+      "method_cl_total_before": 0.0,
+      "method_cl_total_after": 1.0,
+      "method_q_total_before": 0.44666666666666677,
+      "method_q_total_after": 0.8092837666816668,
+      "I_cl": 1,
+      "I_q": 1,
+      "delta_R": 0.362617100015,
+      "before_vec_q": {
+        "energy": 0.6666666666666667,
+        "water": 0.2666666666666667,
+        "transport": 0.33333333333333337
+      },
+      "after_vec_q": {
+        "energy": 0.9376951666916669,
+        "water": 0.44735233335000013,
+        "transport": 1.0
+      },
+      "delta_vec_q": {
+        "energy": 0.2710285000250001,
+        "water": 0.1806856666833334,
+        "transport": 0.6666666666666666
+      },
+      "before_vec_cl": {
+        "energy": 0.0,
+        "water": 0.0,
+        "transport": 0.0
+      },
+      "after_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "delta_vec_cl": {
+        "energy": 1.0,
+        "water": 1.0,
+        "transport": 1.0
+      },
+      "theta_classical": 0.3,
+      "delta_sector_threshold": 0.1,
+      "peak_after_q": 0.8092837666816668,
+      "final_after_recovery_q": null,
+      "recovery_trajectory_q": null,
+      "cl_activated_sectors": [
+        "energy",
+        "water"
+      ],
+      "cl_first_activation_step": 1
+    }
+  ],
+  "theta_classical": 0.3,
+  "delta_sector_threshold": 0.1,
+  "duration_correlation": -0.12559172790604528
+}

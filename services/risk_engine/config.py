@@ -59,6 +59,26 @@ class Settings(BaseSettings):
     # Разрешить ли динамическое обновление матрицы через API
     ENABLE_DYNAMIC_MATRIX: bool = True
 
+    # --- Классический оператор: порог бинаризации узла (theta_node) ---
+    # THETA_BIN is used ONLY for node binarization: y_i = I(x_i >= theta_node).
+    # Classical cascade propagation uses matrix TOPOLOGY only (A[i][j] > 0),
+    # NOT threshold-based edge filtering. This separates the two mechanisms.
+    #
+    # Rationale for 0.70:
+    #   Baseline pre-shock sector risks in S1_energy_outage are approximately:
+    #     energy ≈ 0.667, water ≈ 0.267, transport ≈ 0.333.
+    #   theta_node = 0.70 lies just above the maximum steady-state risk (0.667),
+    #   ensuring pre-shock classical state is {0,0,0} (not saturated).
+    #   After an energy outage, energy risk rises to ~1.0 >> 0.70, triggering
+    #   the classical cascade through all topology-connected sectors.
+    #
+    # Previous value was 0.25 (committed 2026-03-12), which caused pre-shock
+    # saturation: all three sector risks exceeded 0.25 before any shock,
+    # making classical cascade detection degenerate (K_cl=0.0).
+    #
+    # Override via env var THETA_BIN or POST /api/v1/risk/set_classical_threshold.
+    THETA_BIN: float = float(os.getenv("THETA_BIN", "0.70"))
+
     # --- Возможность динамически обновлять веса через API ---
     # Эти параметры используются в /api/v1/risk/update_weights
     ENABLE_DYNAMIC_WEIGHTS: bool = True

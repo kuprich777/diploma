@@ -21,6 +21,7 @@ class Settings(BaseSettings):
         "ENERGY_SERVICE_URL",
         "http://energy_service:8000"
     )
+    WATER_SERVICE_URL: str = os.getenv("WATER_SERVICE_URL", "http://water_service:8000")
 
     # --- Начальные значения транспортной системы ---
     DEFAULT_LOAD: float = 0.0                 # начальная загруженность

@@ -1,0 +1,81 @@
+{
+  "experiment_timestamp": "2026-03-14T07:58:26.135418+00:00",
+  "total_runtime_seconds": 17.45,
+  "endpoint": "http://localhost:8005/api/v1/simulator/monte_carlo",
+  "request_payload": {
+    "scenario_id": "S3_transport_load",
+    "sector": "transport",
+    "runs": 100,
+    "duration_min": 5,
+    "duration_max": 30,
+    "initiator_action": "load_increase",
+    "load_amount": 0.4,
+    "theta_classical": 0.3,
+    "stochastic_scale": 0.3,
+    "mode": "real"
+  },
+  "model_config": {
+    "matrix_snapshot_path": "results/dependency_matrix_live_snapshot.json",
+    "matrix_version": "v1.0",
+    "sectors_order": [
+      "energy",
+      "water",
+      "transport"
+    ],
+    "dependency_matrix": [
+      [
+        0.0,
+        0.2,
+        0.3
+      ],
+      [
+        0.4,
+        0.0,
+        0.2
+      ],
+      [
+        0.5,
+        0.3,
+        0.0
+      ]
+    ],
+    "sector_weights": {
+      "energy": 0.4,
+      "water": 0.3,
+      "transport": 0.3
+    },
+    "theta_bin": 0.7,
+    "theta_cascade": 0.3,
+    "snapshot_source": "live API — DIPLOMA risk_engine",
+    "snapshot_created_at": "2026-03-13T19:45:40.171002+00:00"
+  },
+  "risk_engine_config": {
+    "theta_bin": 0.7,
+    "theta_bin_default": 0.25
+  },
+  "aggregate_stats": {
+    "mean_delta": 0.29920717470112035,
+    "min_delta": 0.05387011361472427,
+    "max_delta": 0.4080439813344594,
+    "p95_delta": 0.3823046603073388,
+    "K_q": 0.95,
+    "K_cl": 0.48,
+    "Delta_percent": 97.91666666666666,
+    "duration_correlation": -0.19528519698387703,
+    "runs": 100
+  },
+  "research_mode_notes": {
+    "stochastic_scale": 0.3,
+    "stochastic_meaning": "dependency_multiplier ~ max(0, N(1, stochastic_scale)) per run",
+    "theta_bin": 0.7,
+    "theta_cascade": 0.3,
+    "duration_range": "[5,30] min",
+    "matrix_version": "v1.0",
+    "reproducibility_note": "model_config block records the exact dependency matrix, sector weights, and thresholds active during this experiment. Full snapshot: results/dependency_matrix_live_snapshot.json"
+  },
+  "artifact_files": {
+    "full_json": "results/sweep_seq_B_load040_full.json",
+    "runs_csv": "results/sweep_seq_B_load040_runs.csv",
+    "metadata": "results/sweep_seq_B_load040_meta.json"
+  }
+}

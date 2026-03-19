@@ -59,6 +59,7 @@ async def fetch_energy_operational(scenario_id: str, run_id: int) -> bool:
     """Fetch energy status for the SAME experiment key."""
     energy_status_url = settings.ENERGY_SERVICE_URL.rstrip("/") + "/api/v1/energy/status"
 
+
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(
@@ -75,6 +76,19 @@ async def fetch_energy_operational(scenario_id: str, run_id: int) -> bool:
         return False
     except httpx.HTTPStatusError as e:
         logger.warning(f"⚠️ Energy Service returned HTTP {e.response.status_code}")
+        return False
+
+
+async def fetch_water_operational(scenario_id: str, run_id: int) -> bool:
+    """Fetch water status for the SAME experiment key."""
+    url = settings.WATER_SERVICE_URL.rstrip("/") + "/api/v1/water/status"
+    try:
+        async with httpx.AsyncClient(timeout=settings.ENERGY_CHECK_TIMEOUT) as client:
+            resp = await client.get(url, params={"scenario_id": scenario_id, "run_id": run_id})
+        resp.raise_for_status()
+        return bool(resp.json().get("operational", True))
+    except Exception as e:
+        logger.warning("⚠️ fetch_water_operational (transport_service) failed: %s", e)
         return False
 
 
@@ -290,6 +304,12 @@ async def check_energy_dependency(
 
     if not is_energy_ok:
         source_level = max(float(source_degradation), clip01(float(source_duration) / 30.0))
+        # Domain-layer physical weight (0.70): reflects how much energy loss increases
+        # transport load (signal disruption, traffic management failures). Intentionally
+        # higher than matrix A[transport][energy]=0.5, which is the abstract risk-propagation
+        # weight used by risk_engine. The two weights serve different modeling layers:
+        # this weight governs physical load increase; A[2][0]=0.5 governs risk vector
+        # propagation. See docs/ARCHITECTURE.md section 9 for a full reconciliation.
         dependency_weight = 0.70
         impact = clip01(source_level * dependency_weight)
 
@@ -328,6 +348,77 @@ async def check_energy_dependency(
     )
     return {
         "message": "Energy service is operational, no impact on transport",
+        "scenario_id": scenario_id,
+        "run_id": run_id,
+        "step_index": step_index,
+        "action": action,
+        "operational": record.operational,
+        "reason": record.reason,
+        "degradation": compute_transport_degradation(record),
+    }
+
+
+@router.post("/check_water_dependency")
+async def check_water_dependency(
+    source_duration: int = Query(default=0, ge=0, description="Source outage duration (min)"),
+    source_degradation: float = Query(default=0.0, ge=0.0, le=1.0, description="Source degradation level"),
+    key: tuple[str, int] = Depends(experiment_key),
+    trace: tuple[int, str] = Depends(mutation_trace),
+    db: Session = Depends(get_db),
+):
+    """Apply water-sector impact on transport (A[transport][water]=0.3).
+
+    Water shortages affect transport operations (vehicle cleaning, cooling systems).
+    dependency_weight=0.3 matches matrix A[2][1].
+    """
+    scenario_id, run_id = key
+    step_index, action = trace
+
+    record = latest_status(db, scenario_id, run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="No transport status found for given experiment key")
+
+    is_water_ok = await fetch_water_operational(scenario_id, run_id)
+
+    if not is_water_ok:
+        source_level = max(float(source_degradation), clip01(float(source_duration) / 30.0))
+        dependency_weight = 0.3  # A[transport][water]
+        impact = clip01(source_level * dependency_weight)
+
+        new_load = clip01(float(record.load) + impact * 0.8)
+        operational = True  # soft impact, stays operational
+        reason = f"Water dependency soft impact={impact:.2f}"
+
+        new_record = TransportStatusModel(
+            scenario_id=scenario_id,
+            run_id=run_id,
+            load=new_load,
+            operational=operational,
+            energy_dependent=record.energy_dependent,
+            reason=reason,
+        )
+        db.add(new_record)
+        db.commit()
+        db.refresh(new_record)
+        logger.warning(
+            f"🚨 [{scenario_id}:{run_id} step={step_index} action={action}] transport impacted by water outage: impact={impact:.2f}"
+        )
+        return {
+            "message": "Transport system impacted by water outage",
+            "scenario_id": scenario_id,
+            "run_id": run_id,
+            "step_index": step_index,
+            "action": action,
+            "operational": operational,
+            "reason": reason,
+            "degradation": compute_transport_degradation(new_record),
+        }
+
+    logger.info(
+        f"✅ [{scenario_id}:{run_id} step={step_index} action={action}] water ok; no impact on transport"
+    )
+    return {
+        "message": "Water service is operational, no impact on transport",
         "scenario_id": scenario_id,
         "run_id": run_id,
         "step_index": step_index,

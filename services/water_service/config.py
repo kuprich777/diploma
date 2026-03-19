@@ -21,6 +21,7 @@ class Settings(BaseSettings):
         "ENERGY_SERVICE_URL",
         "http://energy_service:8000"
     )
+    TRANSPORT_SERVICE_URL: str = os.getenv("TRANSPORT_SERVICE_URL", "http://transport_service:8000")
 
     # --- Начальные параметры водной системы ---
     DEFAULT_SUPPLY: float = 1000.0     # произв. воды (м³/ч)

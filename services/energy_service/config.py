@@ -19,6 +19,13 @@ class Settings(BaseSettings):
         "postgresql://postgres:postgres@db:5432/diploma"
     )
 
+    # --- URLs зависимых сервисов (нужны для check_*_dependency endpoints) ---
+    WATER_SERVICE_URL: str = os.getenv("WATER_SERVICE_URL", "http://water_service:8000")
+    TRANSPORT_SERVICE_URL: str = os.getenv("TRANSPORT_SERVICE_URL", "http://transport_service:8000")
+
+    # --- Таймаут запросов к зависимым сервисам ---
+    DEPENDENCY_CHECK_TIMEOUT: float = 5.0
+
     # --- Начальные параметры модели ---
     DEFAULT_PRODUCTION: float = 1000.0
     DEFAULT_CONSUMPTION: float = 900.0

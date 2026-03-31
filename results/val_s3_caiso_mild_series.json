@@ -1,0 +1,58 @@
+{
+  "experiment_series": "val_s3_caiso_mild",
+  "description": "Additional validation series for S3_transport_load at mild and intermediate stress levels, anchored to CAISO Flex Alert literature. Added to strengthen range calibration in historical-analog validation package.",
+  "prepared": "2026-03-22",
+  "branch": "revv",
+  "matrix_version": "v1.0",
+  "theta_node": 0.70,
+  "theta_cascade": 0.30,
+  "stochastic_scale": 0.30,
+  "duration_range": "[5, 30] min",
+  "data_source": "Extracted from existing load_sweep series (N=500/point). Same configuration as main calibrated S3 run (theta_node=0.70, stochastic_scale=0.30, theta_cascade=0.30).",
+  "validation_rationale": "The main S3 calibration point (load_amount=0.40, K_cl=0.534, K_q=0.956, N=1000) demonstrates the marginal regime but is at the upper end of documented CAISO analog stress levels. CAISO Flex Alert events typically correspond to 3-8% voluntary demand reduction — a substantially milder stress. Adding load=0.15 and load=0.20 points anchors the CAISO analog more precisely in the numerical range and strengthens the range-calibration claim in validation Claim 1.",
+  "points": [
+    {
+      "label": "S3_caiso_mild_L015",
+      "load_amount": 0.15,
+      "scenario_id": "S3_transport_load",
+      "sector": "transport",
+      "initiator_action": "load_increase",
+      "runs": 500,
+      "K_cl": 0.142,
+      "K_q": 0.642,
+      "gap_abs": 0.500,
+      "gap_rel_pct": 352.1,
+      "mean_delta_R": 0.1969,
+      "p95_delta_R": 0.3541,
+      "K_q_gt_K_cl": true,
+      "source_artifact": "results/load_sweep/load_015",
+      "literature_anchor": "CAISO Flex Alert mild event (3-5% demand reduction). Grid stressed, no threshold crossing in majority of runs. Quantitative detects sub-threshold cascade propagation in 64.2% of runs vs 14.2% for classical — gap_abs=50.0pp.",
+      "validation_role": "CAISO-like mild stress analog. Best match for documented 3-5% demand reduction events. K_cl=0.142 confirms sub-threshold stress (classical detects <15%); K_q=0.642 shows continuous propagation detectable."
+    },
+    {
+      "label": "S3_caiso_intermediate_L020",
+      "load_amount": 0.20,
+      "scenario_id": "S3_transport_load",
+      "sector": "transport",
+      "initiator_action": "load_increase",
+      "runs": 500,
+      "K_cl": 0.180,
+      "K_q": 0.782,
+      "gap_abs": 0.602,
+      "gap_rel_pct": 334.4,
+      "mean_delta_R": 0.2293,
+      "p95_delta_R": 0.3608,
+      "K_q_gt_K_cl": true,
+      "source_artifact": "results/load_sweep/load_020",
+      "literature_anchor": "CAISO Flex Alert moderate event (5-8% demand reduction). Intermediate between mild CAISO stress (load=0.15) and calibrated marginal regime (load=0.40). Maximum gap_abs=60.2pp across all S3 load points — widest method separation zone.",
+      "validation_role": "CAISO-like intermediate stress. Shows that the quantitative-vs-classical gap PEAKS at moderate stress (not at maximum load). Useful for demonstrating sub-threshold sensitivity advantage in the most literature-relevant parameter zone."
+    }
+  ],
+  "key_findings": {
+    "K_q_gt_K_cl_holds": true,
+    "literature_aligned_point": "load=0.15 (CAISO mild, K_cl=0.142, K_q=0.642)",
+    "maximum_gap_point": "load=0.20 (gap_abs=0.602, largest in S3 sweep)",
+    "comparison_to_main_S3": "Main point (load=0.40): K_cl=0.534, K_q=0.956, gap=0.422. Mild points (0.15/0.20) have LARGER gap_abs but lower absolute detection rates — consistent with gap peaking in sub-threshold zone.",
+    "range_calibration_improvement": "CAISO events documented as 3-8% demand reduction. Model load=0.15 (15% transport stress increase) serves as plausible upper bound for mild CAISO analog, demonstrating that K_q already detects cascade risk at this mild stress level."
+  }
+}

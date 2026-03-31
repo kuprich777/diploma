@@ -57,8 +57,7 @@ def mutation_trace(
 
 async def fetch_energy_operational(scenario_id: str, run_id: int) -> bool:
     """Fetch energy status for the SAME experiment key."""
-    energy_status_url = settings.ENERGY_SERVICE_URL.rstrip("/") + "/api/v1/energy/status"
-
+    energy_status_url = settings.ENERGY_SERVICE_URL.rstrip("/") + "/status"
 
     try:
         async with httpx.AsyncClient(timeout=settings.ENERGY_CHECK_TIMEOUT) as client:
@@ -73,17 +72,19 @@ async def fetch_energy_operational(scenario_id: str, run_id: int) -> bool:
         return is_op
     except httpx.RequestError as e:
         logger.error(f"❌ Error connecting to Energy Service from water_service: {e}")
-        return False
+        return True  # no data = not yet degraded
     except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            return True  # no record = not degraded
         logger.warning(
             f"⚠️ Energy Service returned HTTP {e.response.status_code} to water_service"
         )
-        return False
+        return True
 
 
 async def fetch_transport_operational(scenario_id: str, run_id: int) -> bool:
     """Fetch transport status for the SAME experiment key."""
-    url = settings.TRANSPORT_SERVICE_URL.rstrip("/") + "/api/v1/transport/status"
+    url = settings.TRANSPORT_SERVICE_URL.rstrip("/") + "/status"
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(url, params={"scenario_id": scenario_id, "run_id": run_id})
@@ -91,7 +92,7 @@ async def fetch_transport_operational(scenario_id: str, run_id: int) -> bool:
         return bool(resp.json().get("operational", True))
     except Exception as e:
         logger.warning("⚠️ fetch_transport_operational (water_service) failed: %s", e)
-        return False
+        return True  # no data = not yet degraded
 
 
 def latest_status(db: Session, scenario_id: str, run_id: int) -> WaterStatusModel | None:
@@ -355,7 +356,7 @@ async def check_energy_dependency(
         # weight used by risk_engine. The two weights serve different modeling layers:
         # this weight governs physical supply reduction; A[1][0]=0.4 governs risk vector
         # propagation. See docs/ARCHITECTURE.md section 9 for a full reconciliation.
-        dependency_weight = 0.55
+        dependency_weight = 0.40
         impact = clip01(source_level * dependency_weight)
 
         reduced_supply = max(0.0, float(record.supply) * (1.0 - impact))

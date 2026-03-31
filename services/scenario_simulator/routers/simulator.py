@@ -67,6 +67,46 @@ SCENARIO_CATALOG: dict[str, dict] = {
             {"step_index": 1, "sector": "water", "action": "load_increase", "params": {"amount": 0.70}},
         ],
     },
+    "REAL_texas_2021": {
+        "description": "Texas 2021 Winter Storm Uri — energy outage (36.8% capacity deficit, effective shock 68%)",
+        "steps": [
+            {"step_index": 1, "sector": "energy", "action": "outage", "params": {"duration": 30, "reason": "winter_storm_uri"}},
+            {"step_index": 2, "sector": "water", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 30}},
+            {"step_index": 3, "sector": "transport", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 30}},
+        ],
+    },
+    "REAL_india_2012": {
+        "description": "India 2012 Northern Grid Collapse — energy outage (48 GW / 82 GW = 58.5%)",
+        "steps": [
+            {"step_index": 1, "sector": "energy", "action": "outage", "params": {"duration": 25, "reason": "northern_grid_collapse"}},
+            {"step_index": 2, "sector": "water", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 25}},
+            {"step_index": 3, "sector": "transport", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 25}},
+        ],
+    },
+    "REAL_europe_2006": {
+        "description": "Europe 2006 UCTE Split — energy imbalance (10 GW / 40 GW = 25%)",
+        "steps": [
+            {"step_index": 1, "sector": "energy", "action": "outage", "params": {"duration": 10, "reason": "ucte_split"}},
+            {"step_index": 2, "sector": "water", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 10}},
+            {"step_index": 3, "sector": "transport", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 10}},
+        ],
+    },
+    "REAL_baltimore_2024": {
+        "description": "Baltimore Key Bridge 2024 — transport freight disruption (30% MSA freight GDP)",
+        "steps": [
+            {"step_index": 1, "sector": "transport", "action": "load_increase", "params": {"amount": 0.30}},
+            {"step_index": 2, "sector": "energy", "action": "dependency_check", "params": {"source_sector": "transport", "source_duration": 15}},
+            {"step_index": 3, "sector": "water", "action": "dependency_check", "params": {"source_sector": "transport", "source_duration": 15}},
+        ],
+    },
+    "REAL_christchurch_2011": {
+        "description": "Christchurch 2011 M6.3 Earthquake — multi-sector: energy outage + water/transport load surge",
+        "steps": [
+            {"step_index": 1, "sector": "energy", "action": "outage", "params": {"duration": 25, "reason": "earthquake_m63"}},
+            {"step_index": 2, "sector": "water", "action": "load_increase", "params": {"amount": 0.70}},
+            {"step_index": 3, "sector": "transport", "action": "load_increase", "params": {"amount": 0.40}},
+        ],
+    },
 }
 
 

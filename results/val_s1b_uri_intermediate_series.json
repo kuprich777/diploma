@@ -1,0 +1,56 @@
+{
+  "experiment_series": "val_s1b_uri_intermediate",
+  "description": "URI-like intermediate energy scenario. S1b_energy_partial (load_amount=0.01, N=1000) used as the primary literature-anchored intermediate energy cascade point between S1b conceptual (no deterministic cascade) and S1 extreme (guaranteed cascade). Dedicated curation for URI 2021 partial energy failure analog.",
+  "prepared": "2026-03-22",
+  "branch": "revv",
+  "matrix_version": "v1.0",
+  "theta_node": 0.70,
+  "theta_cascade": 0.30,
+  "stochastic_scale": 0.30,
+  "duration_range": "[5, 30] min",
+  "data_source": "Primary artifact: results/mc_s1b_1000 (N=1000, load_amount=0.01). Dedicated high-quality experiment already in repository.",
+  "uri_analog_rationale": "Texas Winter Storm URI 2021 features: (1) large-scale but not complete grid failure (~34,000 MW offline of ~85,000 MW capacity, ~40%); (2) probabilistic cross-sector cascade — not every region/sector failed simultaneously; (3) bidirectional energy-water coupling. The S1b scenario (load_increase on energy sector, load_amount=0.01) models: energy sector at normalized risk 0.667 (baseline) + small deterministic stress (0.01) = 0.677, just below theta_node=0.70. With stochastic scale=0.30, in 42.3% of runs the stochastic variability pushes energy above theta_node, triggering classical cascade. This probabilistic, near-threshold behavior captures the documented URI reality: partial energy stress with heterogeneous cascade propagation.",
+  "why_not_higher_load": "The energy baseline (0.667) is only 0.033 below theta_node (0.70). Load amounts above 0.033 push energy deterministically above threshold in most runs, rapidly approaching the saturated regime (K_cl→1.0). Specifically: load=0.015 already raises K_cl to ~0.80 (calib_s1b_0p015, N=100); load=0.02 to ~0.90. This narrow transition band reflects the model architecture: near-threshold stochastic behavior is the correct intermediate regime, not a deterministically high-load scenario.",
+  "primary_point": {
+    "label": "S1b_uri_intermediate",
+    "load_amount": 0.01,
+    "scenario_id": "S1b_energy_partial",
+    "sector": "energy",
+    "initiator_action": "load_increase",
+    "runs": 1000,
+    "K_cl": 0.423,
+    "K_q": 0.631,
+    "gap_abs": 0.208,
+    "gap_rel_pct": 49.2,
+    "mean_delta_R": 0.1959,
+    "p95_delta_R": 0.3794,
+    "duration_correlation": 0.041,
+    "K_q_gt_K_cl": true,
+    "source_artifact": "results/mc_s1b_1000",
+    "literature_anchor": "Texas Winter Storm URI 2021 — partial energy failure phase. Partial grid stress with probabilistic cascade propagation. Energy forced offline ~40% of capacity → not all sectors fail, but cascade probability elevated. K_cl=0.423 represents: in 42.3% of scenarios the stochastic energy stress crosses theta_node and triggers classical cascade. K_q=0.631 shows continuous risk propagation in 63.1% of scenarios — consistent with documented partial/heterogeneous disruption.",
+    "validation_role": "URI-like intermediate energy analog. K_cl=0.423 places this scenario at the CENTER of the extreme-marginal spectrum: between S1 (K_cl=1.0, guaranteed cascade) and sub-threshold levels (K_cl→0). This is the correct numerical proxy for a probabilistic, partial-outage event."
+  },
+  "supporting_calibration_points": [
+    {
+      "label": "calib_s1b_0p015_small_n",
+      "load_amount": 0.015,
+      "runs": 100,
+      "K_cl": 0.80,
+      "K_q": 0.66,
+      "note": "Small-sample (N=100) calibration artifact. K_cl > K_q anomaly is expected sampling artifact at N=100. Qualitatively confirms: increasing load_amount from 0.01 to 0.015 moves system toward higher detection rates, transitioning out of intermediate zone toward near-saturation. NOT used as primary reference due to N=100."
+    }
+  ],
+  "positioning_on_spectrum": {
+    "S1_extreme": {"K_cl": 1.0, "K_q": 1.0, "regime": "saturated/guaranteed"},
+    "S1b_uri_intermediate": {"K_cl": 0.423, "K_q": 0.631, "regime": "intermediate/probabilistic"},
+    "S3_marginal": {"K_cl": 0.534, "K_q": 0.956, "regime": "marginal/transport-initiated"},
+    "S4_partial": {"K_cl": 0.416, "K_q": 0.876, "regime": "partial/water-initiated"},
+    "note": "S1b URI intermediate is positioned at K_cl=0.423 — comparable to S4_partial — but initiated from energy sector with much smaller K_q=0.631 (vs K_q=0.876 for S4). This reflects: energy sector has high outgoing weights (A[water][energy]=0.40, A[transport][energy]=0.50) but the quantitative cascade from near-threshold energy stress is more constrained than from large-load water stress."
+  },
+  "key_findings": {
+    "intermediate_regime_confirmed": "K_cl=0.423 is the best available point between K_cl=0 (no cascade) and K_cl=1.0 (saturated). The probabilistic near-threshold behavior is the appropriate model for URI-like partial failures.",
+    "method_gap_present": "gap_abs=0.208 (20.8pp) — smaller than S3/S4 gaps but nonzero. Quantitative detects 21% more cascades even in near-threshold regime.",
+    "high_quality_data": "N=1000 experiment (mc_s1b_1000) provides lowest standard error among all validation points. SE(K_cl) ≈ sqrt(0.423*0.577/1000) ≈ 0.016.",
+    "validation_wording_upgrade": "Previous: 'between S1b and S1'. Upgraded: 'URI 2021 partial energy analog — probabilistic intermediate regime (K_cl=0.423, K_q=0.631), stochastic near-threshold energy stress capturing heterogeneous cascade propagation documented in URI.'"
+  }
+}

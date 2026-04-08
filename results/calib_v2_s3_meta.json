@@ -1,0 +1,81 @@
+{
+  "experiment_timestamp": "2026-04-05T20:46:47.343379+00:00",
+  "total_runtime_seconds": 17.78,
+  "endpoint": "http://localhost:8005/api/v1/simulator/monte_carlo",
+  "request_payload": {
+    "scenario_id": "S3_transport_load",
+    "sector": "transport",
+    "runs": 100,
+    "duration_min": 5,
+    "duration_max": 30,
+    "initiator_action": "load_increase",
+    "load_amount": 0.4,
+    "theta_classical": 0.3,
+    "stochastic_scale": 0.3,
+    "mode": "real"
+  },
+  "model_config": {
+    "matrix_snapshot_path": "results/dependency_matrix_live_snapshot.json",
+    "matrix_version": "v2.0",
+    "sectors_order": [
+      "energy",
+      "water",
+      "transport"
+    ],
+    "dependency_matrix": [
+      [
+        0.0,
+        0.3246,
+        0.1357
+      ],
+      [
+        0.0824,
+        0.0,
+        0.0199
+      ],
+      [
+        0.5,
+        0.1998,
+        0.0
+      ]
+    ],
+    "sector_weights": {
+      "energy": 0.4,
+      "water": 0.3,
+      "transport": 0.3
+    },
+    "theta_bin": 0.7,
+    "theta_cascade": 0.3,
+    "snapshot_source": "live API — DIPLOMA risk_engine",
+    "snapshot_created_at": "2026-04-05T20:41:05.489621+00:00"
+  },
+  "risk_engine_config": {
+    "theta_bin": 0.7,
+    "theta_bin_default": 0.25
+  },
+  "aggregate_stats": {
+    "mean_delta": 0.21139117105492655,
+    "min_delta": 0.010761044453173774,
+    "max_delta": 0.2561973763713785,
+    "p95_delta": 0.25333381441070135,
+    "K_q": 0.31,
+    "K_cl": 0.41,
+    "Delta_percent": -24.39024390243902,
+    "duration_correlation": -0.23172070502983566,
+    "runs": 100
+  },
+  "research_mode_notes": {
+    "stochastic_scale": 0.3,
+    "stochastic_meaning": "dependency_multiplier ~ max(0, N(1, stochastic_scale)) per run",
+    "theta_bin": 0.7,
+    "theta_cascade": 0.3,
+    "duration_range": "[5,30] min",
+    "matrix_version": "v2.0",
+    "reproducibility_note": "model_config block records the exact dependency matrix, sector weights, and thresholds active during this experiment. Full snapshot: results/dependency_matrix_live_snapshot.json"
+  },
+  "artifact_files": {
+    "full_json": "results/calib_v2_s3_full.json",
+    "runs_csv": "results/calib_v2_s3_runs.csv",
+    "metadata": "results/calib_v2_s3_meta.json"
+  }
+}

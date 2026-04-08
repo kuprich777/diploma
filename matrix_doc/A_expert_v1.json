@@ -1,0 +1,26 @@
+{
+  "sectors_order": [
+    "energy",
+    "water",
+    "transport"
+  ],
+  "version": "v1.0",
+  "source": "Expert elicitation (thesis v1)",
+  "matrix": [
+    [
+      0.0,
+      0.2,
+      0.3
+    ],
+    [
+      0.4,
+      0.0,
+      0.2
+    ],
+    [
+      0.5,
+      0.3,
+      0.0
+    ]
+  ]
+}

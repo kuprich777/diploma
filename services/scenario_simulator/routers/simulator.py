@@ -107,6 +107,14 @@ SCENARIO_CATALOG: dict[str, dict] = {
             {"step_index": 3, "sector": "transport", "action": "load_increase", "params": {"amount": 0.40}},
         ],
     },
+    "S5_combined_hurricane": {
+        "description": "Combined energy+transport shock (Sandy-type hurricane, NYC SIRR 2013): "
+                       "energy load surge +0.15 + transport load surge +0.35",
+        "steps": [
+            {"step_index": 1, "sector": "energy",    "action": "load_increase", "params": {"amount": 0.15}},
+            {"step_index": 2, "sector": "transport", "action": "load_increase", "params": {"amount": 0.35}},
+        ],
+    },
 }
 
 

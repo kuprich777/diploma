@@ -1,6 +1,6 @@
 {
-  "experiment_timestamp": "2026-03-16T00:03:43.973591+00:00",
-  "total_runtime_seconds": 96.79,
+  "experiment_timestamp": "2026-04-06T17:26:04.777521+00:00",
+  "total_runtime_seconds": 268.41,
   "endpoint": "http://localhost:8005/api/v1/simulator/monte_carlo",
   "request_payload": {
     "scenario_id": "S4_water_partial",
@@ -17,7 +17,7 @@
   },
   "model_config": {
     "matrix_snapshot_path": "results/dependency_matrix_live_snapshot.json",
-    "matrix_version": "v1.0",
+    "matrix_version": "v2.0",
     "sectors_order": [
       "energy",
       "water",
@@ -26,17 +26,17 @@
     "dependency_matrix": [
       [
         0.0,
-        0.2,
-        0.3
+        0.3246,
+        0.1357
       ],
       [
-        0.4,
+        0.0824,
         0.0,
-        0.2
+        0.0199
       ],
       [
         0.5,
-        0.3,
+        0.1998,
         0.0
       ]
     ],
@@ -48,21 +48,21 @@
     "theta_bin": 0.7,
     "theta_cascade": 0.3,
     "snapshot_source": "live API — DIPLOMA risk_engine",
-    "snapshot_created_at": "2026-03-13T19:45:40.171002+00:00"
+    "snapshot_created_at": "2026-04-05T20:41:05.489621+00:00"
   },
   "risk_engine_config": {
     "theta_bin": 0.7,
     "theta_bin_default": 0.25
   },
   "aggregate_stats": {
-    "mean_delta": 0.13906253075378658,
+    "mean_delta": 0.07202922585392052,
     "min_delta": 0.0,
-    "max_delta": 0.5533333333333332,
-    "p95_delta": 0.392885885469886,
-    "K_q": 0.436,
-    "K_cl": 0.03,
-    "Delta_percent": 1353.3333333333335,
-    "duration_correlation": -0.17745152120807406,
+    "max_delta": 0.4208965936943684,
+    "p95_delta": 0.20164039593611593,
+    "K_q": 0.126,
+    "K_cl": 0.006,
+    "Delta_percent": 2000.0,
+    "duration_correlation": -0.24581096112066847,
     "runs": 500
   },
   "research_mode_notes": {
@@ -71,7 +71,7 @@
     "theta_bin": 0.7,
     "theta_cascade": 0.3,
     "duration_range": "[5,30] min",
-    "matrix_version": "v1.0",
+    "matrix_version": "v2.0",
     "reproducibility_note": "model_config block records the exact dependency matrix, sector weights, and thresholds active during this experiment. Full snapshot: results/dependency_matrix_live_snapshot.json"
   },
   "artifact_files": {

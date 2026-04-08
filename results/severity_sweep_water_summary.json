@@ -20,116 +20,116 @@
   "theta_node": 0.7,
   "theta_cascade": 0.3,
   "stochastic_scale": 0.3,
-  "matrix_version": "v1.0",
-  "total_runtime_seconds": 1163.0,
+  "matrix_version": "v2.0",
+  "total_runtime_seconds": 2172.5,
   "data": [
     {
       "severity": 0.1,
-      "K_cl": 0.024,
-      "K_q": 0.36,
-      "delta_K": 0.336,
-      "mean_delta": 0.07,
+      "K_cl": 0.0,
+      "K_q": 0.0,
+      "delta_K": 0.0,
+      "mean_delta": 0.0005,
       "runs": 500,
-      "elapsed_s": 97.4
+      "elapsed_s": 222.7
     },
     {
       "severity": 0.15,
-      "K_cl": 0.024,
-      "K_q": 0.362,
-      "delta_K": 0.338,
-      "mean_delta": 0.0768,
+      "K_cl": 0.0,
+      "K_q": 0.0,
+      "delta_K": 0.0,
+      "mean_delta": 0.0061,
       "runs": 500,
-      "elapsed_s": 96.7
+      "elapsed_s": 224.4
     },
     {
       "severity": 0.2,
-      "K_cl": 0.024,
-      "K_q": 0.38,
-      "delta_K": 0.356,
-      "mean_delta": 0.0921,
+      "K_cl": 0.0,
+      "K_q": 0.016,
+      "delta_K": 0.016,
+      "mean_delta": 0.0218,
       "runs": 500,
-      "elapsed_s": 96.9
+      "elapsed_s": 224.9
     },
     {
       "severity": 0.25,
-      "K_cl": 0.024,
-      "K_q": 0.406,
-      "delta_K": 0.382,
-      "mean_delta": 0.114,
+      "K_cl": 0.0,
+      "K_q": 0.048,
+      "delta_K": 0.048,
+      "mean_delta": 0.045,
       "runs": 500,
-      "elapsed_s": 96.9
+      "elapsed_s": 163.7
     },
     {
       "severity": 0.3,
-      "K_cl": 0.03,
-      "K_q": 0.436,
-      "delta_K": 0.406,
-      "mean_delta": 0.1391,
+      "K_cl": 0.006,
+      "K_q": 0.126,
+      "delta_K": 0.12,
+      "mean_delta": 0.072,
       "runs": 500,
-      "elapsed_s": 96.8
+      "elapsed_s": 268.4
     },
     {
       "severity": 0.35,
-      "K_cl": 0.044,
-      "K_q": 0.488,
-      "delta_K": 0.444,
-      "mean_delta": 0.1653,
+      "K_cl": 0.018,
+      "K_q": 0.248,
+      "delta_K": 0.23,
+      "mean_delta": 0.1009,
       "runs": 500,
-      "elapsed_s": 96.7
+      "elapsed_s": 233.0
     },
     {
       "severity": 0.4,
-      "K_cl": 0.072,
-      "K_q": 0.564,
-      "delta_K": 0.492,
-      "mean_delta": 0.1914,
+      "K_cl": 0.044,
+      "K_q": 0.376,
+      "delta_K": 0.332,
+      "mean_delta": 0.1304,
       "runs": 500,
-      "elapsed_s": 96.7
+      "elapsed_s": 199.1
     },
     {
       "severity": 0.45,
-      "K_cl": 0.092,
-      "K_q": 0.642,
-      "delta_K": 0.55,
-      "mean_delta": 0.2168,
+      "K_cl": 0.066,
+      "K_q": 0.496,
+      "delta_K": 0.43,
+      "mean_delta": 0.1596,
       "runs": 500,
-      "elapsed_s": 96.9
+      "elapsed_s": 168.9
     },
     {
       "severity": 0.5,
-      "K_cl": 0.15,
-      "K_q": 0.698,
-      "delta_K": 0.548,
-      "mean_delta": 0.2411,
+      "K_cl": 0.118,
+      "K_q": 0.586,
+      "delta_K": 0.468,
+      "mean_delta": 0.1884,
       "runs": 500,
-      "elapsed_s": 96.8
+      "elapsed_s": 159.6
     },
     {
       "severity": 0.6,
-      "K_cl": 0.286,
-      "K_q": 0.796,
-      "delta_K": 0.51,
-      "mean_delta": 0.2842,
+      "K_cl": 0.252,
+      "K_q": 0.726,
+      "delta_K": 0.474,
+      "mean_delta": 0.2429,
       "runs": 500,
-      "elapsed_s": 96.8
+      "elapsed_s": 102.1
     },
     {
       "severity": 0.7,
-      "K_cl": 0.426,
-      "K_q": 0.878,
-      "delta_K": 0.452,
-      "mean_delta": 0.319,
+      "K_cl": 0.408,
+      "K_q": 0.82,
+      "delta_K": 0.412,
+      "mean_delta": 0.2911,
       "runs": 500,
-      "elapsed_s": 96.8
+      "elapsed_s": 101.3
     },
     {
       "severity": 0.8,
-      "K_cl": 0.546,
-      "K_q": 0.9,
-      "delta_K": 0.354,
-      "mean_delta": 0.3458,
+      "K_cl": 0.536,
+      "K_q": 0.868,
+      "delta_K": 0.332,
+      "mean_delta": 0.3309,
       "runs": 500,
-      "elapsed_s": 96.8
+      "elapsed_s": 103.6
     }
   ]
 }

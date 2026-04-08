@@ -45,15 +45,17 @@ class Settings(BaseSettings):
     # Структура: A[i][j] — влияние сектора j на сектор i
     # Порядок секторов: [energy, water, transport]
     DEPENDENCY_MATRIX: list[list[float]] = [
-        [0.0, 0.2, 0.3],   # energy зависит от water, transport
-        [0.4, 0.0, 0.2],   # water зависит от energy, transport
-        [0.5, 0.3, 0.0],   # transport зависит от energy, water
+        [0.0,    0.3246, 0.1357],  # energy зависит от water(0.3246), transport(0.1357)
+        [0.0824, 0.0,    0.0199],  # water зависит от energy(0.0824), transport(0.0199)
+        [0.5,    0.1998, 0.0   ],  # transport зависит от energy(0.5), water(0.1998)
     ]
+    # A_calibrated_v2.0: OLS по ТЗВ-2019 (Россия), Eurostat (Германия), BEA (США)
+    # Все 3 страны: знаки совпадают 6/6, Spearman ρ=0.962
 
     # Версия матрицы (для воспроизводимости экспериментов)
     DEPENDENCY_MATRIX_VERSION: str = os.getenv(
         "DEPENDENCY_MATRIX_VERSION",
-        "v1.0"
+        "v2.0"
     )
 
     # Разрешить ли динамическое обновление матрицы через API

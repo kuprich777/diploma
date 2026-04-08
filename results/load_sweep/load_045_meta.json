@@ -1,6 +1,6 @@
 {
-  "experiment_timestamp": "2026-03-15T21:38:07.482152+00:00",
-  "total_runtime_seconds": 85.16,
+  "experiment_timestamp": "2026-04-06T00:14:27.462707+00:00",
+  "total_runtime_seconds": 92.75,
   "endpoint": "http://localhost:8005/api/v1/simulator/monte_carlo",
   "request_payload": {
     "scenario_id": "S3_transport_load",
@@ -17,7 +17,7 @@
   },
   "model_config": {
     "matrix_snapshot_path": "results/dependency_matrix_live_snapshot.json",
-    "matrix_version": "v1.0",
+    "matrix_version": "v2.0",
     "sectors_order": [
       "energy",
       "water",
@@ -26,17 +26,17 @@
     "dependency_matrix": [
       [
         0.0,
-        0.2,
-        0.3
+        0.3246,
+        0.1357
       ],
       [
-        0.4,
+        0.0824,
         0.0,
-        0.2
+        0.0199
       ],
       [
         0.5,
-        0.3,
+        0.1998,
         0.0
       ]
     ],
@@ -48,21 +48,21 @@
     "theta_bin": 0.7,
     "theta_cascade": 0.3,
     "snapshot_source": "live API — DIPLOMA risk_engine",
-    "snapshot_created_at": "2026-03-13T19:45:40.171002+00:00"
+    "snapshot_created_at": "2026-04-05T20:41:05.489621+00:00"
   },
   "risk_engine_config": {
     "theta_bin": 0.7,
     "theta_bin_default": 0.25
   },
   "aggregate_stats": {
-    "mean_delta": 0.31585686114362616,
+    "mean_delta": 0.22230919266859905,
     "min_delta": 0.0,
-    "max_delta": 0.434547922050611,
-    "p95_delta": 0.38525098926136203,
-    "K_q": 0.964,
-    "K_cl": 0.612,
-    "Delta_percent": 57.51633986928104,
-    "duration_correlation": -0.2087481521146512,
+    "max_delta": 0.259274766538385,
+    "p95_delta": 0.2555908220668167,
+    "K_q": 0.452,
+    "K_cl": 0.544,
+    "Delta_percent": -16.911764705882355,
+    "duration_correlation": -0.2141332728887571,
     "runs": 500
   },
   "research_mode_notes": {
@@ -71,7 +71,7 @@
     "theta_bin": 0.7,
     "theta_cascade": 0.3,
     "duration_range": "[5,30] min",
-    "matrix_version": "v1.0",
+    "matrix_version": "v2.0",
     "reproducibility_note": "model_config block records the exact dependency matrix, sector weights, and thresholds active during this experiment. Full snapshot: results/dependency_matrix_live_snapshot.json"
   },
   "artifact_files": {

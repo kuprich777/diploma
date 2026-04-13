@@ -45,17 +45,20 @@ class Settings(BaseSettings):
     # Структура: A[i][j] — влияние сектора j на сектор i
     # Порядок секторов: [energy, water, transport]
     DEPENDENCY_MATRIX: list[list[float]] = [
-        [0.0,    0.3246, 0.1357],  # energy зависит от water(0.3246), transport(0.1357)
-        [0.0824, 0.0,    0.0199],  # water зависит от energy(0.0824), transport(0.0199)
-        [0.5,    0.1998, 0.0   ],  # transport зависит от energy(0.5), water(0.1998)
+        [0.0,   0.350, 0.304],  # energy зависит от water(0.350), transport(0.304)
+        [0.006, 0.0,   0.001],  # water зависит от energy(0.006), transport(0.001)
+        [0.500, 0.332, 0.0  ],  # transport зависит от energy(0.500), water(0.332)
     ]
-    # A_calibrated_v2.0: OLS по ТЗВ-2019 (Россия), Eurostat (Германия), BEA (США)
-    # Все 3 страны: знаки совпадают 6/6, Spearman ρ=0.962
+    # A_wiod_v3: WIOD 2016 NIOT (Leontief direct requirements, нулевая диагональ,
+    # rescale max off-diagonal = 0.5). Страны: RUS+DEU+USA, год 2014.
+    # Секторы: Energy=D35, Water=E36, Transport=H49-H53 (агрегат).
+    # Spearman ρ(A_wiod_v3, A_calibrated_v2.0) = 1.000 — одинаковый ранговый порядок.
+    # Источник: matrix_doc/A_calibrated_wiod.json, скрипт matrix_doc/calibrate_wiod.py.
 
     # Версия матрицы (для воспроизводимости экспериментов)
     DEPENDENCY_MATRIX_VERSION: str = os.getenv(
         "DEPENDENCY_MATRIX_VERSION",
-        "v2.0"
+        "v3.0"
     )
 
     # Разрешить ли динамическое обновление матрицы через API
@@ -66,17 +69,18 @@ class Settings(BaseSettings):
     # Classical cascade propagation uses matrix TOPOLOGY only (A[i][j] > 0),
     # NOT threshold-based edge filtering. This separates the two mechanisms.
     #
-    # Rationale for 0.70:
-    #   Baseline pre-shock sector risks in S1_energy_outage are approximately:
-    #     energy ≈ 0.667, water ≈ 0.267, transport ≈ 0.333.
-    #   theta_node = 0.70 lies just above the maximum steady-state risk (0.667),
-    #   ensuring pre-shock classical state is {0,0,0} (not saturated).
-    #   After an energy outage, energy risk rises to ~1.0 >> 0.70, triggering
-    #   the classical cascade through all topology-connected sectors.
+    # Rationale for 0.75 (A_calibrated v2.0 recalibration, 2026-04-09):
+    #   Baseline pre-shock sector risks (A_calibrated v2.0):
+    #     energy ≈ 0.667, water ≈ 0.000, transport ≈ 0.333.
+    #   theta_node = 0.75 is the empirically calibrated optimal:
+    #   - Minimum θ where K_cl > 0 (classical is non-degenerate) AND
+    #     K_q > K_cl (H₁ satisfied) for BOTH S3 (transport) and S4 (water).
+    #   - theta_sweep N=500: at θ=0.70 → S3 K_cl=0.478 > K_q=0.390 (H₁ violated);
+    #     at θ=0.75 → S3 K_cl=0.344 < K_q=0.390 ✓, S4 K_cl=0.344 < K_q=0.796 ✓.
+    #   - For θ∈[0.50..0.65]: K_cl=0 (classical always below baseline, degenerate).
     #
-    # Previous value was 0.25 (committed 2026-03-12), which caused pre-shock
-    # saturation: all three sector risks exceeded 0.25 before any shock,
-    # making classical cascade detection degenerate (K_cl=0.0).
+    # Previous value: 0.70 (set for A_expert v1.0, transport risk 1−e^(−3×0.40)=0.699
+    # is right at threshold → stochastic oscillation causes K_cl >> K_q for S3).
     #
     # Override via env var THETA_BIN or POST /api/v1/risk/set_classical_threshold.
     THETA_BIN: float = float(os.getenv("THETA_BIN", "0.70"))

@@ -7,8 +7,7 @@ from database import Base, INGESTOR_SCHEMA
 
 class RawEvent(Base):
     """
-    Сырой загруженный объект/событие.
-    Его потом будет забирать normalizer.
+    Сырой загруженный объект/событие (legacy schema, kept for DB compatibility).
     """
     __tablename__ = "raw_events"
     scenario_id: Mapped[str] = mapped_column(

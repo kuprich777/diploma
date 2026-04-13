@@ -9,6 +9,8 @@ import httpx
 import random
 import statistics
 import math
+import sys
+import os
 
 from config import Settings
 from utils.logging import setup_logging
@@ -84,11 +86,12 @@ SCENARIO_CATALOG: dict[str, dict] = {
         ],
     },
     "REAL_europe_2006": {
-        "description": "Europe 2006 UCTE Split — energy imbalance (10 GW / 40 GW = 25%)",
+        "name": "Europe Grid Splitting 2006",
+        "description": "UCTE system disturbance 4 Nov 2006: planned line disconnection (Conneforde-Diele) → cascading grid split → 15M customers affected (UCTE Final Report 2007)",
         "steps": [
-            {"step_index": 1, "sector": "energy", "action": "outage", "params": {"duration": 10, "reason": "ucte_split"}},
-            {"step_index": 2, "sector": "water", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 10}},
-            {"step_index": 3, "sector": "transport", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 10}},
+            {"step_index": 1, "sector": "energy", "action": "load_increase", "params": {"amount": 0.05}},
+            {"step_index": 2, "sector": "transport", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 5}},
+            {"step_index": 3, "sector": "water", "action": "dependency_check", "params": {"source_sector": "energy", "source_duration": 5}},
         ],
     },
     "REAL_baltimore_2024": {
@@ -1213,6 +1216,31 @@ async def run_monte_carlo(req: MonteCarloRequest):
             detail="For stable K(N) and quantile comparison use runs >= 100 (recommended 300+)",
         )
 
+    # --- Bayesian matrix: load calibrator once before the loop ---
+    _bayesian_calibrator = None
+    _bayesian_matrix_samples: list[list[list[float]]] = []  # collected per-run samples
+
+    if getattr(req, "bayesian_matrix", False):
+        posterior_path = getattr(req, "bayesian_posterior_path",
+                                  "matrix_doc/A_bayesian_posterior.json")
+        # Make bayesian_calibrator importable.
+        # In container: __file__ = /app/routers/simulator.py → two dirname calls → /app
+        # Volume mount puts matrix_doc/ at /app/matrix_doc (see docker-compose.yml)
+        _repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        _matrix_doc = os.path.join(_repo_root, "matrix_doc")
+        if _matrix_doc not in sys.path:
+            sys.path.insert(0, _matrix_doc)
+        try:
+            from bayesian_calibrator import BayesianCalibrator as _BayesianCalibrator
+            _bayesian_calibrator = _BayesianCalibrator.load_posterior(posterior_path)
+            logger.info("Bayesian matrix enabled — posterior loaded from %s", posterior_path)
+        except Exception as _e:
+            logger.error("Failed to load BayesianCalibrator: %s", _e)
+            raise HTTPException(
+                status_code=500,
+                detail=f"bayesian_matrix=True but failed to load posterior: {_e}"
+            )
+
     logger.info(
         f"🎲 Monte-Carlo start: scenario_id={req.scenario_id}, mode={req.mode}, sector={req.sector}, runs={req.runs}, "
         f"duration=[{req.duration_min}, {req.duration_max}]"
@@ -1259,6 +1287,28 @@ async def run_monte_carlo(req: MonteCarloRequest):
             dependency_multiplier=dependency_multiplier,
             exogenous_factor=exogenous_factor,
         )
+
+        # --- Bayesian matrix: sample A for this run and push to risk_engine ---
+        if _bayesian_calibrator is not None:
+            import numpy as _np
+            _rng_bayes = _np.random.default_rng(seed % (2**32))
+            _A_sample = _bayesian_calibrator.sample_matrix(_rng_bayes)
+            _bayesian_matrix_samples.append(_A_sample.tolist())
+            try:
+                async with httpx.AsyncClient(timeout=5.0) as _hclient:
+                    _resp = await _hclient.post(
+                        f"{settings.RISK_ENGINE_URL}/api/v1/risk/dependency_matrix",
+                        json={
+                            "matrix": _A_sample.tolist(),
+                            "version": f"bayesian_r{run_id}",
+                        },
+                    )
+                    if _resp.status_code not in (200, 201):
+                        logger.warning("Bayesian matrix push failed for run %d: %s",
+                                       run_id, _resp.text)
+            except Exception as _e:
+                logger.warning("Bayesian matrix push error run %d: %s", run_id, _e)
+
         scenario_res = await run_scenario(
             ScenarioRequest(
                 scenario_id=req.scenario_id,
@@ -1435,6 +1485,26 @@ async def run_monte_carlo(req: MonteCarloRequest):
 
     await _post_experiment_registry(payload)
 
+    # --- Bayesian matrix: aggregate per-edge statistics ---
+    _matrix_stats: Optional[dict] = None
+    if _bayesian_matrix_samples:
+        import numpy as _np2
+        _samples_arr = _np2.array(_bayesian_matrix_samples)  # (N, 3, 3)
+        _sectors_lbl = ["energy", "water", "transport"]
+        _matrix_stats = {}
+        for _ii in range(3):
+            for _jj in range(3):
+                if _ii == _jj:
+                    continue
+                _edge = f"{_sectors_lbl[_ii]}<-{_sectors_lbl[_jj]}"
+                _vals = _samples_arr[:, _ii, _jj]
+                _matrix_stats[_edge] = {
+                    "mean": float(_np2.mean(_vals)),
+                    "std":  float(_np2.std(_vals)),
+                    "min":  float(_np2.min(_vals)),
+                    "max":  float(_np2.max(_vals)),
+                }
+
     return MonteCarloResult(
         scenario_id=req.scenario_id,
         mode=req.mode,
@@ -1452,4 +1522,5 @@ async def run_monte_carlo(req: MonteCarloRequest):
         theta_classical=req.theta_classical,
         delta_sector_threshold=req.delta_sector_threshold,
         duration_correlation=duration_correlation,
+        matrix_samples_stats=_matrix_stats,
     )

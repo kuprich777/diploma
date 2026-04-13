@@ -6,3 +6,6 @@ pydantic
 pydantic-settings
 prometheus-fastapi-instrumentator
 python-dotenv
+numpy
+scipy
+pandas

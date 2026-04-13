@@ -1,4 +1,5 @@
-# Полный стенд проекта DIPLOMA
+# Стенд проекта DIPLOMA — newresearch branch
+# Сервисы: db, energy, water, transport, risk_engine, scenario_simulator, optimizer (TODO)
 
 services:
   # ==========================
@@ -12,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-diploma}
     ports:
-      - "5433:5432"   # наружу на 5433
+      - "5433:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
     healthcheck:
@@ -23,7 +24,7 @@ services:
     restart: unless-stopped
 
   # ==========================
-  # ENERGY SERVICE
+  # ENERGY SERVICE  (:8001)
   # ==========================
   energy_service:
     build: ./services/energy_service
@@ -40,7 +41,7 @@ services:
     restart: unless-stopped
 
   # ==========================
-  # WATER SERVICE
+  # WATER SERVICE  (:8002)
   # ==========================
   water_service:
     build: ./services/water_service
@@ -60,7 +61,7 @@ services:
     restart: unless-stopped
 
   # ==========================
-  # TRANSPORT SERVICE
+  # TRANSPORT SERVICE  (:8003)
   # ==========================
   transport_service:
     build: ./services/transport_service
@@ -83,40 +84,8 @@ services:
     restart: unless-stopped
 
   # ==========================
-  # INGESTOR
-  # ==========================
-  ingestor:
-    build: ./services/ingestor
-    container_name: ingestor
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ENV: ${ENV:-dev}
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-
-  # ==========================
-  # NORMALIZER
-  # ==========================
-  normalizer:
-    build: ./services/normalizer
-    container_name: normalizer
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
-      INGESTOR_URL: http://ingestor:8000/api/v1/ingestor
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ENV: ${ENV:-dev}
-    depends_on:
-      db:
-        condition: service_healthy
-      ingestor:
-        condition: service_started
-    restart: unless-stopped
-
-  # ==========================
-  # RISK ENGINE
+  # RISK ENGINE  (:8004)
+  # СДУ-интегратор, матрица A, cascade detection, baselines
   # ==========================
   risk_engine:
     build: ./services/risk_engine
@@ -137,14 +106,13 @@ services:
         condition: service_started
       transport_service:
         condition: service_started
-      normalizer:
-        condition: service_started
     ports:
       - "8004:8000"
     restart: unless-stopped
 
   # ==========================
-  # SCENARIO SIMULATOR
+  # SCENARIO SIMULATOR  (:8005)
+  # MC-оркестрация, СДУ-сценарии
   # ==========================
   scenario_simulator:
     build: ./services/scenario_simulator
@@ -156,6 +124,9 @@ services:
       TRANSPORT_SERVICE_URL: http://transport_service:8000
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENV: ${ENV:-dev}
+    volumes:
+      - ./matrix_doc:/app/matrix_doc:ro
+      - ./data/calibration:/app/data/calibration:ro
     depends_on:
       risk_engine:
         condition: service_started
@@ -164,33 +135,21 @@ services:
     restart: unless-stopped
 
   # ==========================
-  # REPORTING
+  # OPTIMIZER  (:8006)  — TODO
+  # Стохастическая оптимизация min_{ΔA} E[Σ w_j(1−S_j)]
   # ==========================
-  reporting:
-    build: ./services/reporting
-    container_name: reporting
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/diploma
-      RISK_ENGINE_URL: http://risk_engine:8000
-      NORMALIZER_URL: http://normalizer:8000/api/v1/normalizer
-      ENERGY_SERVICE_URL: http://energy_service:8000/api/v1/energy
-      WATER_SERVICE_URL: http://water_service:8000/api/v1/water
-      TRANSPORT_SERVICE_URL: http://transport_service:8000/api/v1/transport
-      SIMULATOR_URL: http://scenario_simulator:8000/api/v1/simulator
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ENV: ${ENV:-dev}
-    depends_on:
-      db:
-        condition: service_healthy
-      risk_engine:
-        condition: service_started
-      normalizer:
-        condition: service_started
-      scenario_simulator:
-        condition: service_started
-    ports:
-      - "8010:8000"
-    restart: unless-stopped
+  # optimizer:
+  #   build: ./services/optimizer
+  #   container_name: optimizer
+  #   environment:
+  #     SCENARIO_SIMULATOR_URL: http://scenario_simulator:8000
+  #     LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  #   depends_on:
+  #     scenario_simulator:
+  #       condition: service_started
+  #   ports:
+  #     - "8006:8000"
+  #   restart: unless-stopped
 
 
 volumes:

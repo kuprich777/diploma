@@ -41,9 +41,10 @@ class Settings(BaseSettings):
         "http://transport_service:8000/api/v1"
     )
 
+    # Reporting service removed in newresearch branch — set to empty to disable
     REPORTING_SERVICE_URL: str = os.getenv(
         "REPORTING_SERVICE_URL",
-        "http://reporting:8000/api/v1/reporting"
+        ""
     )
 
     # --- Параметры моделирования ---

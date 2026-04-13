@@ -390,6 +390,24 @@ class MonteCarloRequest(BaseModel):
         description="Exogenous fuel availability stress multiplier. 1.0 = no stress (default)."
     )
 
+    # --- Bayesian matrix sampling (optional, off by default) ---
+    bayesian_matrix: bool = Field(
+        default=False,
+        description=(
+            "If True, sample the dependency matrix A independently for each MC run "
+            "from the Bayesian posterior N(mu_post, sigma²_post) loaded from "
+            "bayesian_posterior_path. Requires matrix_doc/bayesian_calibrator.py "
+            "to be importable and the posterior JSON to exist."
+        )
+    )
+    bayesian_posterior_path: str = Field(
+        default="matrix_doc/A_bayesian_posterior.json",
+        description=(
+            "Path to the JSON file produced by BayesianCalibrator.save_posterior(). "
+            "Used only when bayesian_matrix=True."
+        )
+    )
+
 
 class MonteCarloRun(BaseModel):
     scenario_id: str = Field(description="Идентификатор сценария")
@@ -479,6 +497,14 @@ class MonteCarloResult(BaseModel):
     theta_classical: Optional[float] = Field(default=None)
     delta_sector_threshold: Optional[float] = Field(default=None)
     duration_correlation: Optional[float] = Field(default=None)
+    matrix_samples_stats: Optional[Dict] = Field(
+        default=None,
+        description=(
+            "Populated when bayesian_matrix=True. "
+            "Per-edge statistics of the sampled A matrices: "
+            "{edge_label: {mean, std, min, max}}."
+        )
+    )
 
 
 # --- DTOs for scenario catalog exposure ---

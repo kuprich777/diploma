@@ -7,17 +7,28 @@ Mathematical model
 ------------------
 SDE dynamics (per node j):
 
-    dx_j(t) = ( Σ_i a_{ij} x_i(t) - ρ_j x_j(t) ) dt
+    dx_j(t) = ( Σ_i a_{ij}(t) x_i(t) - ρ_j x_j(t) ) dt
               + σ_j x_j(t) dW_j(t)
 
 Discretised Euler-Maruyama scheme with reflecting [0,1] boundaries:
 
     x_j^{k+1} = clip_{[0,1]}(
         x_j^k
-        + ( Σ_i a_{ij} x_i^k - ρ_j x_j^k ) * dt
+        + ( Σ_i A(t)[j,i] x_i^k - ρ_j x_j^k ) * dt
         + σ_j * x_j^k * sqrt(dt) * Z_j^k
     )
     Z_j^k ~ N(0,1) i.i.d.
+
+Dynamic dependency matrix (α > 0)
+----------------------------------
+When a supplier node j is overloaded (x_j ≥ C_j), its outgoing links are
+weakened by a degradation factor φ_j ∈ (0, 1]:
+
+    φ_j(t) = exp( −α · max(0, x_j(t) − C_j) / (1 − C_j) )
+
+    A(t)[:, j] = A_static[:, j] · φ_j(t)
+
+At α=0: A(t) = A_static (static matrix, backward-compatible mode).
 
 Cascade indicators (compatible with H₁)
 -----------------------------------------
@@ -27,7 +38,7 @@ Classical:
 Quantitative:
     I_q(s,r)  = 1  iff  ∃ j≠j₀ : max_{t≤T}(x_j(t) - x_j(0)) ≥ δ
 
-References: see docs/MATH_MODEL.md §2.1–2.3
+References: see docs/MATH_MODEL.md §1–3
 """
 
 from __future__ import annotations
@@ -51,7 +62,8 @@ class SDEConfig:
     Attributes
     ----------
     A : (N,N) ndarray
-        Dependency matrix. A[i][j] = influence of j on i. Diagonal = 0.
+        Static dependency matrix. A[i][j] = influence of j on i. Diagonal = 0.
+        At runtime a dynamic version A(t) may be derived from this via alpha.
     sigma : (N,) ndarray
         Volatility of each node.
     rho : (N,) ndarray
@@ -64,14 +76,20 @@ class SDEConfig:
         Number of integration steps.
     delta : float
         Quantitative cascade threshold Δ (default 0.10).
+    alpha : float
+        Supply-chain degradation rate for dynamic A(t). α=0 (default) disables
+        the dynamic matrix, reproducing the static-A behaviour exactly.
+        At α=5 a fully overloaded node (x_j=1) retains only exp(−5) ≈ 0.7%
+        of its outgoing coupling strength.
     """
     A: np.ndarray
     sigma: np.ndarray
     rho: np.ndarray
     C: np.ndarray
-    dt: float = 0.1
-    T_steps: int = 50
-    delta: float = 0.10
+    dt: float     = 0.1
+    T_steps: int  = 50
+    delta: float  = 0.10
+    alpha: float  = 0.0
 
     def __post_init__(self) -> None:
         self.A     = np.array(self.A,     dtype=float)
@@ -85,6 +103,7 @@ class SDEConfig:
         assert self.C.shape     == (N,),    "C must be length N"
         assert self.dt > 0,                 "dt must be positive"
         assert self.T_steps >= 1,           "T_steps must be >= 1"
+        assert self.alpha >= 0.0,           "alpha must be non-negative"
 
 
 # ---------------------------------------------------------------------------
@@ -108,17 +127,63 @@ class SDEIntegrator:
     """
     Integrates the N-node infrastructure SDE system via Euler-Maruyama.
 
+    Supports both static A (alpha=0) and dynamic A(t) (alpha>0).  With alpha>0
+    the coupling strength from overloaded supplier nodes is attenuated on every
+    step via a degradation factor φ_j ∈ (0, 1].
+
     Usage
     -----
-    >>> cfg = SDEConfig(A=A, sigma=sigma, rho=rho, C=C)
+    >>> cfg = SDEConfig(A=A, sigma=sigma, rho=rho, C=C)              # static
+    >>> cfg = SDEConfig(A=A, sigma=sigma, rho=rho, C=C, alpha=5.0)   # dynamic
     >>> integrator = SDEIntegrator(cfg)
     >>> trajectories = integrator.run(x0=x0, shock=u, seed=42)
     >>> result = integrator.detect_cascade(trajectories, initiator=0)
     """
 
     def __init__(self, config: SDEConfig) -> None:
-        self.cfg = config
-        self._N  = config.A.shape[0]
+        self.cfg    = config
+        self._N     = config.A.shape[0]
+        # Expose static matrix and alpha as direct attributes for convenience
+        self.A_static = config.A       # (N, N) — never mutated
+        self.alpha    = config.alpha
+
+    # ------------------------------------------------------------------
+    # Dynamic dependency matrix
+    # ------------------------------------------------------------------
+
+    def _compute_dynamic_A(self, x: np.ndarray) -> np.ndarray:
+        """
+        Compute A(t) = A_static * diag(φ), where each supplier column j is
+        attenuated by the degradation factor φ_j ∈ (0, 1].
+
+        φ_j = exp(−α · max(0, x_j − C_j) / (1 − C_j))
+
+        Properties
+        ----------
+        - x_j < C_j  →  φ_j = 1.0  (no attenuation; node is within capacity)
+        - x_j = C_j  →  φ_j = 1.0  (boundary: no attenuation)
+        - x_j → 1.0  →  φ_j → exp(−α)  (maximum attenuation)
+        - φ_j ∈ (0, 1] always — coupling is weakened but never zeroed
+
+        The multiplier is applied **column-wise** (per supplier j): if node j
+        is overloaded, ALL its outgoing links to every dependent sector i are
+        weakened proportionally, modelling supply-chain disruption.
+
+        Fast path: returns A_static (no copy) when α = 0.
+        """
+        if self.alpha == 0.0:
+            return self.A_static        # fast path — static matrix
+
+        C = self.cfg.C
+        phi = np.ones(self._N)
+        for j in range(self._N):
+            excess = x[j] - C[j]
+            if excess > 0.0:
+                denom  = max(1e-10, 1.0 - C[j])   # guard against C_j == 1
+                phi[j] = np.exp(-self.alpha * excess / denom)
+
+        # Broadcast (N,N) * (1,N) → multiply each column j by phi[j]
+        return self.A_static * phi[np.newaxis, :]
 
     # ------------------------------------------------------------------
     # Single Euler-Maruyama step
@@ -133,6 +198,9 @@ class SDEIntegrator:
         """
         One step of Euler-Maruyama with reflecting [0,1] boundaries.
 
+        Uses A(t) = _compute_dynamic_A(x) at the current state.  When α=0
+        this reduces to the static matrix without any extra computation.
+
         Parameters
         ----------
         x : (N,) current state
@@ -142,8 +210,11 @@ class SDEIntegrator:
         cfg = self.cfg
         dt  = cfg.dt
 
-        # Deterministic drift: Σ_i a_{ij} x_i - ρ_j x_j
-        drift = cfg.A @ x - cfg.rho * x          # shape (N,)
+        # Dynamic dependency matrix (α=0 → A_static, no copy)
+        A_current = self._compute_dynamic_A(x)
+
+        # Deterministic drift: Σ_i A(t)[j,i] x_i - ρ_j x_j
+        drift = A_current @ x - cfg.rho * x      # shape (N,)
 
         # Diffusion: σ_j x_j sqrt(dt) Z_j
         Z = rng.standard_normal(self._N)
@@ -165,6 +236,7 @@ class SDEIntegrator:
         x0: np.ndarray,
         shock: Optional[np.ndarray] = None,
         seed: Optional[int] = None,
+        save_A_history: bool = False,
     ) -> np.ndarray:
         """
         Run T_steps of Euler-Maruyama from x0.
@@ -174,6 +246,10 @@ class SDEIntegrator:
         x0 : (N,) initial state
         shock : (N,) one-time external shock applied at step 0
         seed : integer seed for reproducibility
+        save_A_history : bool
+            If True, store the effective A(t) matrix used at each step.
+            Access via `integrator.A_history` after the run.
+            Default False to save memory in Monte Carlo loops.
 
         Returns
         -------
@@ -185,7 +261,12 @@ class SDEIntegrator:
         traj = np.empty((self.cfg.T_steps + 1, self._N), dtype=float)
         traj[0] = x
 
+        self.A_history: list[np.ndarray] = [] if save_A_history else []
+
         for k in range(self.cfg.T_steps):
+            if save_A_history:
+                self.A_history.append(self._compute_dynamic_A(x).copy())
+
             # Shock only at the first step
             s = shock if k == 0 else None
             x = self.step(x, rng, shock=s)

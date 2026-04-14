@@ -1,0 +1,229 @@
+{
+  "events": {
+    "baltimore_2024": {
+      "name": "Baltimore 2024: обрушение моста FSK",
+      "source": "Dulin et al. 2025, Nature Communications",
+      "model": {
+        "K_cl": 0.625,
+        "K_q": 0.899,
+        "median_final_delta": [
+          0.2376897751820634,
+          -0.0022828554255556466,
+          0.6319044829561656
+        ],
+        "p25_final": [
+          0.13807454877926656,
+          -0.05243719648306536,
+          0.5453756545815756
+        ],
+        "p75_final": [
+          0.33247096947251276,
+          0.057684708834189136,
+          0.667
+        ]
+      },
+      "reality": {
+        "energy": {
+          "delta_approx": 0.05,
+          "degraded": true,
+          "evidence": "Рост нагрузки альтернативных маршрутов угля; 0 отключений ЭС (EIA-417)"
+        },
+        "water": {
+          "delta_approx": 0.0,
+          "degraded": false,
+          "evidence": "Нет перебоев (Maryland DEP)"
+        },
+        "transport": {
+          "delta_approx": 0.3,
+          "degraded": true,
+          "evidence": "30% freight GDP MSA нарушено, 6 недель закрытия порта"
+        }
+      },
+      "comparison": {
+        "cascade_match": true,
+        "sector_matches": {
+          "energy": true,
+          "water": true,
+          "transport": true
+        },
+        "abs_errors": {
+          "energy": 0.1877,
+          "water": 0.0023,
+          "transport": 0.3319
+        }
+      }
+    },
+    "texas_2021": {
+      "name": "Texas 2021: Winter Storm Uri",
+      "source": "FERC/NERC «February 2021 Cold Weather Outages» (Nov 2021)",
+      "model": {
+        "K_cl": 1.0,
+        "K_q": 1.0,
+        "median_final_delta": [
+          0.33299999999999996,
+          -0.012720900914705985,
+          0.667
+        ],
+        "p25_final": [
+          0.28374848714660084,
+          -0.13027694679361018,
+          0.6469506190286338
+        ],
+        "p75_final": [
+          0.33299999999999996,
+          0.12889595789118147,
+          0.667
+        ]
+      },
+      "reality": {
+        "energy": {
+          "delta_approx": 0.7,
+          "degraded": true,
+          "evidence": "4.5 млн без электричества; 36.8% дефицит генерации"
+        },
+        "water": {
+          "delta_approx": 0.3,
+          "degraded": true,
+          "evidence": "30% объектов водоснабжения отключены"
+        },
+        "transport": {
+          "delta_approx": 0.45,
+          "degraded": true,
+          "evidence": "Массовые ДТП, закрытие дорог, коллапс логистики"
+        }
+      },
+      "comparison": {
+        "cascade_match": true,
+        "sector_matches": {
+          "energy": true,
+          "water": false,
+          "transport": true
+        },
+        "abs_errors": {
+          "energy": 0.367,
+          "water": 0.3127,
+          "transport": 0.217
+        }
+      }
+    },
+    "india_2012": {
+      "name": "India 2012: коллапс северной энергосети",
+      "source": "CEA «Grid Disturbance on 30th July and 31st July 2012» (Aug 2012)",
+      "model": {
+        "K_cl": 0.144,
+        "K_q": 1.0,
+        "median_final_delta": [
+          0.8703673897358176,
+          0.4313545392844379,
+          0.7429765828283763
+        ],
+        "p25_final": [
+          0.772082170572748,
+          0.3808045301009239,
+          0.6665299433913542
+        ],
+        "p75_final": [
+          0.967673765066189,
+          0.48160123495785356,
+          0.8335913664064122
+        ]
+      },
+      "reality": {
+        "energy": {
+          "delta_approx": 0.7,
+          "degraded": true,
+          "evidence": "48/82 ГВт = 58.5% мощности; 620 млн затронуты"
+        },
+        "water": {
+          "delta_approx": 0.25,
+          "degraded": true,
+          "evidence": "Перебои водоснабжения: насосы без питания"
+        },
+        "transport": {
+          "delta_approx": 0.4,
+          "degraded": true,
+          "evidence": "Сбой ж/д и метро Delhi/Kolkata"
+        }
+      },
+      "comparison": {
+        "cascade_match": true,
+        "sector_matches": {
+          "energy": true,
+          "water": true,
+          "transport": true
+        },
+        "abs_errors": {
+          "energy": 0.1704,
+          "water": 0.1814,
+          "transport": 0.343
+        }
+      }
+    },
+    "europe_2006": {
+      "name": "UCTE 2006: сбой европейской энергосети",
+      "source": "UCTE «Final Report — System Disturbance on 4 November 2006»",
+      "model": {
+        "K_cl": 0.041,
+        "K_q": 0.999,
+        "median_final_delta": [
+          0.2322091467848008,
+          -0.0029266664649262863,
+          0.35706484824334933
+        ],
+        "p25_final": [
+          0.13728992903984,
+          -0.055359080177809133,
+          0.28432108545179363
+        ],
+        "p75_final": [
+          0.3204420307780731,
+          0.05252848384986347,
+          0.43515778326838017
+        ]
+      },
+      "reality": {
+        "energy": {
+          "delta_approx": 0.15,
+          "degraded": true,
+          "evidence": "15 млн без электричества (кратковременно)"
+        },
+        "water": {
+          "delta_approx": 0.0,
+          "degraded": false,
+          "evidence": "Минимальные перебои"
+        },
+        "transport": {
+          "delta_approx": 0.12,
+          "degraded": true,
+          "evidence": "Сбои светофоров, задержки ж/д"
+        }
+      },
+      "comparison": {
+        "cascade_match": true,
+        "sector_matches": {
+          "energy": true,
+          "water": true,
+          "transport": true
+        },
+        "abs_errors": {
+          "energy": 0.0822,
+          "water": 0.0029,
+          "transport": 0.2371
+        }
+      }
+    }
+  },
+  "summary": {
+    "cascade_accuracy": "4/4",
+    "sector_accuracy": "11/12",
+    "mean_abs_error": 0.203,
+    "misses": [
+      {
+        "event": "texas_2021",
+        "sector": "water",
+        "real_degraded": true,
+        "model_delta": -0.0127
+      }
+    ]
+  }
+}

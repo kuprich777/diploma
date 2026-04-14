@@ -1,0 +1,185 @@
+{
+  "alpha_values": [
+    0,
+    1,
+    2,
+    3,
+    5,
+    8,
+    10,
+    15,
+    20
+  ],
+  "T_steps": 7,
+  "N_runs": 1000,
+  "delta": 0.1,
+  "note": "Marginal regime: T_steps=7, S3 shock=0.25, S4 shock=0.20. Chosen so K_cl(alpha=0) \u2208 [0.5, 0.7] \u2014 the range where supply-chain degradation (alpha>0) has a measurable dampening effect.",
+  "scenarios": {
+    "S3_transport": [
+      {
+        "alpha": 0,
+        "K_cl": 0.594,
+        "K_q": 0.879,
+        "delta_K": 0.285,
+        "mean_delta": 0.2334,
+        "se_cl": 0.0155,
+        "se_q": 0.0103
+      },
+      {
+        "alpha": 1,
+        "K_cl": 0.584,
+        "K_q": 0.891,
+        "delta_K": 0.307,
+        "mean_delta": 0.234,
+        "se_cl": 0.0156,
+        "se_q": 0.0099
+      },
+      {
+        "alpha": 2,
+        "K_cl": 0.584,
+        "K_q": 0.879,
+        "delta_K": 0.295,
+        "mean_delta": 0.2324,
+        "se_cl": 0.0156,
+        "se_q": 0.0103
+      },
+      {
+        "alpha": 3,
+        "K_cl": 0.598,
+        "K_q": 0.886,
+        "delta_K": 0.288,
+        "mean_delta": 0.2362,
+        "se_cl": 0.0155,
+        "se_q": 0.0101
+      },
+      {
+        "alpha": 5,
+        "K_cl": 0.559,
+        "K_q": 0.878,
+        "delta_K": 0.319,
+        "mean_delta": 0.227,
+        "se_cl": 0.0157,
+        "se_q": 0.0103
+      },
+      {
+        "alpha": 8,
+        "K_cl": 0.581,
+        "K_q": 0.87,
+        "delta_K": 0.289,
+        "mean_delta": 0.2289,
+        "se_cl": 0.0156,
+        "se_q": 0.0106
+      },
+      {
+        "alpha": 10,
+        "K_cl": 0.574,
+        "K_q": 0.885,
+        "delta_K": 0.311,
+        "mean_delta": 0.2301,
+        "se_cl": 0.0156,
+        "se_q": 0.0101
+      },
+      {
+        "alpha": 15,
+        "K_cl": 0.604,
+        "K_q": 0.88,
+        "delta_K": 0.276,
+        "mean_delta": 0.2354,
+        "se_cl": 0.0155,
+        "se_q": 0.0103
+      },
+      {
+        "alpha": 20,
+        "K_cl": 0.594,
+        "K_q": 0.888,
+        "delta_K": 0.294,
+        "mean_delta": 0.2336,
+        "se_cl": 0.0155,
+        "se_q": 0.01
+      }
+    ],
+    "S4_water": [
+      {
+        "alpha": 0,
+        "K_cl": 0.592,
+        "K_q": 1.0,
+        "delta_K": 0.408,
+        "mean_delta": 0.4062,
+        "se_cl": 0.0155,
+        "se_q": 0.0
+      },
+      {
+        "alpha": 1,
+        "K_cl": 0.604,
+        "K_q": 1.0,
+        "delta_K": 0.396,
+        "mean_delta": 0.3856,
+        "se_cl": 0.0155,
+        "se_q": 0.0
+      },
+      {
+        "alpha": 2,
+        "K_cl": 0.615,
+        "K_q": 1.0,
+        "delta_K": 0.385,
+        "mean_delta": 0.3764,
+        "se_cl": 0.0154,
+        "se_q": 0.0
+      },
+      {
+        "alpha": 3,
+        "K_cl": 0.591,
+        "K_q": 1.0,
+        "delta_K": 0.409,
+        "mean_delta": 0.3728,
+        "se_cl": 0.0155,
+        "se_q": 0.0
+      },
+      {
+        "alpha": 5,
+        "K_cl": 0.559,
+        "K_q": 1.0,
+        "delta_K": 0.441,
+        "mean_delta": 0.364,
+        "se_cl": 0.0157,
+        "se_q": 0.0
+      },
+      {
+        "alpha": 8,
+        "K_cl": 0.566,
+        "K_q": 1.0,
+        "delta_K": 0.434,
+        "mean_delta": 0.3637,
+        "se_cl": 0.0157,
+        "se_q": 0.0
+      },
+      {
+        "alpha": 10,
+        "K_cl": 0.563,
+        "K_q": 0.998,
+        "delta_K": 0.435,
+        "mean_delta": 0.3625,
+        "se_cl": 0.0157,
+        "se_q": 0.0014
+      },
+      {
+        "alpha": 15,
+        "K_cl": 0.528,
+        "K_q": 0.999,
+        "delta_K": 0.471,
+        "mean_delta": 0.3569,
+        "se_cl": 0.0158,
+        "se_q": 0.001
+      },
+      {
+        "alpha": 20,
+        "K_cl": 0.559,
+        "K_q": 1.0,
+        "delta_K": 0.441,
+        "mean_delta": 0.361,
+        "se_cl": 0.0157,
+        "se_q": 0.0
+      }
+    ]
+  }
+}

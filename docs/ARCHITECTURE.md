@@ -97,6 +97,8 @@ graph TD
 | σ = std(Δlog x) / sqrt(dt) | `scripts/calibrate_sigma.py` | `calibrate_hai_sigma()`, `calibrate_kelmarsh_sigma()` |
 | C_j = q95(x_j/nominal) | `scripts/calibrate_capacity.py` | `calibrate_threshold()` |
 | C_transport = q95(HGV monthly) | `scripts/calibrate_capacity.py` | `calibrate_transport_C_hgv()` |
+| φ_j = exp(−α·max(0,x_j−C_j)/(1−C_j)) | `services/risk_engine/sde_integrator.py` | `SDEIntegrator._compute_dynamic_A()` |
+| A(t) = A_static · diag(φ) | `services/risk_engine/sde_integrator.py` | `SDEIntegrator._compute_dynamic_A()` |
 | Bayesian update (τ_post, μ_post) | `matrix_doc/bayesian_calibrator.py` | `BayesianMatrixCalibrator` |
 | DebtRank | `services/risk_engine/baselines.py` | **TODO** |
 | ICM | `services/risk_engine/baselines.py` | **TODO** |

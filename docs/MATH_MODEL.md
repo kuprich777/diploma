@@ -1,7 +1,13 @@
-# Математическая модель DIPLOMA v2.0
+# Математическая модель DIPLOMA v2.1 (newmain)
 
-> Этот файл описывает **целевую** математическую модель (СДУ + оптимизация).  
-> Реализация: `services/risk_engine/sde_integrator.py`, `scripts/calibrate_*.py`.
+> Источник истины по методологии — [`docs/methodology/METHODOLOGY_FINAL.md`](methodology/METHODOLOGY_FINAL.md).
+> В случае расхождения приоритет у финального документа (формулы 5, 9, 23, 16–18).
+>
+> Этот файл описывает **реально реализованную** математическую модель на ветке `newmain`.
+> Охватывает: СДУ (Эйлер–Маруяма), три каскадных оператора (Classical, IIM iterative, NEVA/NLDR β=2),
+> канонический IIM (Haimes 2005 eq.(11) через A*-преобразование), унифицированный MC harness.
+> Реализация: `services/risk_engine/{sde_integrator.py, cascade_operators.py, iim_canonical.py, mc_harness.py}`,
+> `scripts/calibrate_*.py`, `scripts/matrix_calibration/`, `scripts/validation/`.
 
 ---
 
@@ -91,6 +97,28 @@ $$A(t)_{ij} = A^\text{static}_{ij} \cdot \varphi_j(t) \tag{1b}$$
 
 ## 2. Схема Эйлера–Маруямы
 
+### 2.0. Основной оператор (METHODOLOGY_FINAL.md §3.1, формула 5)
+
+Финальная редакция методологии фиксирует основной оператор в компактной
+безразмерной форме с аддитивным сценарным воздействием $u_t$ и аддитивной
+стохастикой $\boldsymbol\sigma \odot \sqrt{\Delta t}\,\boldsymbol\varepsilon_t$:
+
+$$\boxed{\;x_{t+1} \;=\; \mathrm{clip}_{[0,1]}\!\bigl(\,x_t + u_t + A\,x_t + \boldsymbol\sigma \odot \sqrt{\Delta t}\,\boldsymbol\varepsilon_t\,\bigr),
+\qquad \boldsymbol\varepsilon_t \sim \mathcal N(0, I_n)\;} \tag{5}$$
+
+Проекция $\mathrm{clip}_{[0,1]}$ не является эвристикой, а реализует проекцию Скорохода
+на допустимую область $[0, 1]^n$ (reflected SDE). Согласно Гобе (2001), такая
+проекция сохраняет слабую сходимость первого порядка $O(\Delta t)$ схемы
+Эйлера–Маруямы.
+
+Форма (2) ниже соответствует более ранней редакции с мультипликативной
+диффузией $\sigma_j x_j dW_j$ и линейным членом восстановления $-\rho_j x_j$;
+эквивалентность (2) и (5) при $\rho_j = 0$, log-normal $\sigma$ и абстрагированной
+амплитуде шока — эмпирическая, фиксируется тестом
+`test_compatible_with_old_operator`.
+
+### 2.1. Дискретизация (реализация)
+
 Дискретизация уравнения (1) с шагом $\Delta t$:
 
 $$x_j^{k+1} = \mathrm{clip}_{[0,1]}\!\left(x_j^k + \left(\sum_i a_{ij}\,x_i^k - \rho_j\,x_j^k\right)\Delta t + \sigma_j\,x_j^k\,\sqrt{\Delta t}\,Z_j^k\right) \tag{2}$$
@@ -159,6 +187,66 @@ $$\sum_{i,j} c_{ij}\,|\Delta A_{ij}| \leq B, \quad A + \Delta A \geq 0, \quad \r
 
 ---
 
+## 4a. Extended operator with recovery (METHODOLOGY_FINAL.md §10.2)
+
+Расширенный оператор добавляет релаксационный член, моделирующий восстановление
+секторов к стационарному baseline $x_0^{\text{baseline}}$:
+
+$$x_{t+1} = \mathrm{clip}_{[0,1]}\!\Bigl(x_t + u_t + A\,x_t - \boldsymbol\kappa \odot (x_t - x_0^{\text{baseline}}) + \boldsymbol\sigma \odot \sqrt{\Delta t}\,\boldsymbol\varepsilon_t\Bigr) \tag{23}$$
+
+где $\boldsymbol\kappa = (\kappa_e, \kappa_w, \kappa_\tau) \in [0, 1]^3$ — вектор
+коэффициентов восстановления («доля деградации, устраняемая за один шаг $\Delta t$»).
+
+**Обратная совместимость.** При $\boldsymbol\kappa = 0$ формула (23) в точности совпадает
+с основным оператором (5); все результаты основной серии сохраняются как частный случай.
+
+**Условие устойчивости.** $\rho(A - \mathrm{diag}(\boldsymbol\kappa)) < 1$. Для текущей
+калибровки $\rho(A_{\text{wiod\_v3}}) = 0{,}46$ условие выполняется для любого
+$\boldsymbol\kappa \in [0, 1]^3$.
+
+**Интегральная метрика устойчивости Bruneau (формула 24):**
+
+$$\mathcal{R}_i(s) = 1 - \frac{1}{T}\sum_{t=0}^{T} (x_{i,t} - x_{i,0}^{\text{baseline}})^{+}, \qquad \mathcal{R}_i \in [0, 1] \tag{24}$$
+
+**Время возвращения в окрестность стационара (формула 25):**
+
+$$\tau_i^{\text{rec}} = \min\{t > t_{\text{end}}(u) : x_{i,t} \leq x_{i,0}^{\text{baseline}} + \varepsilon_{\text{rec}}\}, \qquad \varepsilon_{\text{rec}} = 0{,}02 \tag{25}$$
+
+**Реализация:** `services/risk_engine/operators/recovery.py` — **TODO** (Серия 5).
+Sensitivity-анализ: $\kappa \in \{0;\, 0{,}1;\, 0{,}2;\, 0{,}3\}$ единообразно по секторам.
+
+---
+
+## 4b. Канонический DebtRank $K^{(DR)}$ (METHODOLOGY_FINAL.md §10.1)
+
+Канонический оператор DebtRank в редакции Battiston et al. 2012, адаптированный
+для инфраструктуры по линии Li et al. 2021. Реализует state machine с тремя
+состояниями $\{N, O, F\}$ и абсорбирующим $F$:
+
+1. **Правило перехода.** $F$ — абсорбирующее. $O \to F$ за один шаг. $N \to O$ при
+   $h_i(t) \geq C_i$.
+2. **Распространение дистресса.** Только узлы в состоянии $O$ передают дистресс:
+
+$$h_i(t+1) = \min\!\Bigl\{1,\; h_i(t) + \sum_{j:\,s_j(t) = O} a_{ij}\,h_j(t)\Bigr\}, \qquad s_i(t) \neq F \tag{DR.1}$$
+
+$$h_i(t+1) = h_i(t), \qquad s_i(t) = F \tag{DR.2}$$
+
+3. **Инициализация.** $h(0) = x_0 + u$, $s(0)$ — по правилу перехода от состояния
+   $N$ с $h(0)$.
+
+**Метрика-индикатор (формула 22 METHODOLOGY_FINAL.md):**
+
+$$I_i^{(DR)}(s, r) = \mathbf{1}\{s_i(T) = F\} \lor \mathbf{1}\{h_i(T) \geq C_i\}$$
+
+**Назначение.** $K^{(DR)}$ — дополнительный baseline помимо threshold-cascade
+$K^{(\text{cl})}$, применяется в расширенной серии 4 для проверки гипотезы
+$H_1^{(DR)}$ (формула 22).
+
+**Реализация:** `services/risk_engine/operators/k_dr.py` — **TODO**. Детерминирован
+по построению; стохастический фон не используется.
+
+---
+
 ## 5. Калибровка параметров
 
 | Параметр | Метод | Источник данных | Результат | Файл |
@@ -170,35 +258,205 @@ $$\sum_{i,j} c_{ij}\,|\Delta A_{ij}| \leq B, \quad A + \Delta A \geq 0, \quad \r
 | $C_\text{water}$ | $q_{0.95}(x/x_\text{nom})$ | HAI 21.03, нормальный режим | 0.646 | `data/calibration/capacity_thresholds.json` |
 | $C_\text{transport}$ | $q_{0.95}(\text{ежемесячные HGV})$ | DfT Road Safety 2020–2024 | 0.928 | `data/calibration/capacity_thresholds.json` |
 | $a_{ij}$ | Леонтьев: $a_{ij} = X_{ij}/q_j$ | WIOD 2016 NIOT, RUS+DEU+USA, 2014 | 3×3 матрица | `data/calibration/A_leontief.json` |
-| $\rho_j$ | — | Не калиброван | $\rho = 0$ | hardcode (TODO) |
+| $\rho_j$ | Этап 4-ter рекалибровка | Диагностика `results/diagnostics/rho_sweep.md` | $\rho_A = 0.5$, $\rho_\text{rec} = 0.3$, $T_\text{steps}=50$ | `docs/methodology/calibration_rationale.md` |
+| $x_j$ (Gross Output) | WIOD NIOT GO/TOT row | NIOT RUS+DEU+USA, 2014 | energy=246777, water=12950, transport=564730 | `data/calibration/wiod_sector_outputs.json` |
+| $A^\star$ (Haimes) | $A^\star_{ij} = A_{ij}\cdot x_j/x_i$ | — | 3×3, $\rho(A^\star)=0.3955$ | `data/calibration/A_star_iim_canonical.json` |
 
 **Примечание по $\sigma$:** калиброванные значения — в единицах $\text{ч}^{-1/2}$. При использовании в СДУ с безразмерным $\Delta t$ необходим перевод: $\sigma_\text{model} = \sigma_\text{calibrated} \cdot \sqrt{\Delta t_\text{hours}}$.
 
+Значения $\sigma$ в таблице выше относятся к **исторической** (v1) процедуре на прямой
+subsampled RV (Zhang 2005). Итоговая редакция методологии требует двухшаговой
+процедуры ARIMA + Newey—West с последующей безразмерной нормировкой (раздел 5a).
+
 ---
 
-## 6. Базовые методы (Baselines)
+## 5a. Калибровка $\sigma$ по METHODOLOGY_FINAL.md §5.2 (двухшаговая схема)
 
-### 6.1. DebtRank (Battiston et al., 2012)
+Финальная методология заменяет прямую оценку волатильности на двухшаговую процедуру
+и добавляет acceptance-критерий через отношение сигнал/шум.
 
-Итеративное распространение «дистресса»:
+### Шаг 1. ARIMA pre-filtering
 
-$$h_i(t+1) = \min\!\left(1,\; h_i(t) + \sum_{j:\, h_j(t)<1} a_{ji}\,h_j(t)\right) \tag{10}$$
+По ряду $\log x(t)$ оценивается AR($p$)-модель (порядок $p$ по критерию BIC);
+остатки $\hat\varepsilon_t$ сохраняются как инновации с ожидаемым $\mathrm{ACF}(1) \approx 0$.
 
-$$R = \sum_i h_i(\infty) \cdot v_i \tag{11}$$
+### Шаг 2. HAC-оценка Newey—West
 
-где $v_i$ — экономический вес сектора $i$, $h_i(0) = \mathbf{1}[i = j_0]$.
+На инновациях применяется оценка с lag-bandwidth $L = \lfloor 4(n/100)^{2/9} \rfloor$:
 
-**Реализация:** `services/risk_engine/baselines.py` — **TODO**.
+$$\widehat{\sigma_j^2}^{\text{NW}} = \hat\gamma_0 + 2\sum_{\ell=1}^{L}\!\Bigl(1 - \frac{\ell}{L+1}\Bigr)\,\hat\gamma_\ell \tag{17}$$
 
-### 6.2. Independent Cascade Model (ICM)
+### Безразмерная нормировка
 
-Шок инициатора $j_0$: $j_0$ становится «активным» с вероятностью 1.  
-Каждый сосед $i$ активируется с вероятностью $p_{ij_0} = f(a_{ij_0})$ независимо.  
-Итоговый ущерб: доля активированных узлов.
+Для согласованности масштабов с порогом $\delta = 0{,}10$ применяется:
 
-$$K_\text{ICM}(j_0) = \mathbb{E}\!\left[\frac{|\text{activated}|}{N}\right] \tag{12}$$
+$$\sigma_j^{\text{dim}} = \frac{\sigma_j^{\text{raw}}}{1 - C_j} \tag{16}$$
 
-**Реализация:** `services/risk_engine/baselines.py` — **TODO**.
+### Контроль SNR (acceptance-критерий)
+
+$$\mathrm{SNR}_j = \frac{\delta}{\sigma_j^{\text{dim}}\,\sqrt{\Delta t}} \geq 1 \tag{18}$$
+
+При $\mathrm{SNR}_j < 1$ метрика $K^{(q)}$ работает в режиме инфляции срабатываний;
+это зарегистрировано как критерий приёмки.
+
+### Таблица калибровочных значений (по §5.2 METHODOLOGY_FINAL.md)
+
+| Сектор | $\sigma_j^{\text{raw}}$ [ч$^{-1/2}$] | $C_j$ | $\sigma_j^{\text{dim}}$ | $\mathrm{SNR}_j$ |
+|---|---|---|---|---|
+| energy | <!-- TODO: value from calibrate_sigma.py (two-step ARIMA + NW) --> | $0{,}883$ | <!-- TODO --> | <!-- TODO --> |
+| water | <!-- TODO: value from calibrate_sigma.py (two-step ARIMA + NW) --> | $0{,}646$ | <!-- TODO --> | <!-- TODO --> |
+| transport | $0{,}000$ | $0{,}928$ | $0{,}000$ | — (детерминирован) |
+
+*Таблица калибровки волатильности в безразмерной шкале. Значения «TODO» — по итогам
+финализации `scripts/calibrate_sigma.py` (реализация — отдельная задача).*
+
+Транспортный сектор моделируется как детерминированный ($\sigma_\tau = 0$) ввиду
+отсутствия открытых высокочастотных операционных рядов: DfT Road Safety содержит
+ежемесячные счёты ДТП — частота, недостаточная для оценки $\sigma$ на шаге
+$\Delta t = 1$ ч. Экспертное назначение $\sigma_\tau$ внесло бы калибровочный
+артефакт в ключевой сектор (METHODOLOGY_FINAL.md §5.2, §12.6).
+
+### Pre-registered порог $\theta_{\text{node}}$ (формула 9)
+
+Порог бинаризации классического оператора фиксируется предрегистрированным правилом:
+
+$$\theta_{\text{node}} := \max_{j \in \{e, w, \tau\}} x_{j,0}^{\text{baseline}} + \Delta_{\text{margin}}, \qquad \Delta_{\text{margin}} \geq 0{,}05 \tag{9}$$
+
+Для текущей калибровки $x_0^{\text{baseline}} = (0{,}667;\, 0{,}000;\, 0{,}333)$ формула (9)
+даёт $\theta_{\text{node}} \geq 0{,}72$. В расчётах основной серии зафиксировано
+$\theta_{\text{node}} = 0{,}70$ из условия $x_{e,0}^{\text{baseline}} = 0{,}667 < \theta_{\text{node}}$;
+устойчивость основного вывода $H_1$ подтверждена sensitivity-анализом с плато
+$K^{(q)}_\tau \in [0{,}876;\, 0{,}878]$ при $\theta_{\text{node}} \in [0{,}40;\, 0{,}90]$
+(Серия 2, Таблица 3.4 ВКР).
+
+NERC EOP-011 Level 2 Emergency Alert приводится как **исторический референс** для
+пороговых моделей энергосистем, но не является источником значения $\theta_{\text{node}}$:
+единообразное применение ко всем трём секторам $\{e, w, \tau\}$ требует привязки к
+данным калибровки, а не к отраслевому нормативу.
+
+---
+
+## 6. Каскадные операторы (cascade_operators.py)
+
+В соответствии с позиционированием работы как **синтеза трёх линий**
+(Леонтьев / Ринальди / Баттистон, METHODOLOGY_FINAL.md §1) основной метод —
+стохастический оператор (5), а для сравнительных серий реализована
+семья из трёх операторов: линейный бинарный классический, линейный
+непрерывный (IIM iterative) и нелинейный насыщающийся (NEVA/NLDR β=2).
+Семья соответствует трём поколениям моделей каскадного распространения риска.
+
+Канонический DebtRank $K^{(DR)}$ со state machine $\{N, O, F\}$
+(§10.1 METHODOLOGY_FINAL.md, раздел 4b выше) предусмотрен как дополнительный
+baseline в расширенной Серии 4, **не** как основной оператор работы.
+
+Реализация: `services/risk_engine/cascade_operators.py`.
+Unit-тесты: `tests/test_cascade_operators.py`.
+
+### 6.1. Classical (бинарный порог)
+
+$$x_i(t+1) = \mathrm{clip}_{[0,1]}\!\left(x_i(t) + \sum_j A_{ij}\,\mathbf{1}[x_j(t) \geq \theta]\right) \tag{10}$$
+
+Реализация: `ClassicalOperator`. Использует порог $\theta$ (по умолчанию 0.5) —
+сектор $j$ передаёт вклад только после бинарного превышения.
+
+### 6.2. IIM iterative (линейный непрерывный, Haimes 2005)
+
+$$q(t+1) = \mathrm{clip}_{[0,1]}\!\left(A^\star q(t) + c^\star\right) \tag{11}$$
+
+где $A^\star$ — преобразованная матрица (§ 6.4), $c^\star$ — вектор внешнего спроса-шока.
+При сходимости $q^\ast = (I - A^\star)^{-1}\,c^\star$.
+
+Реализация: `IIMOperator`.
+
+### 6.3. NEVA / NLDR (Barucca et al. 2020, β=2)
+
+$$x_i(t+1) = \mathrm{clip}_{[0,1]}\!\left(x_i(0) + \sum_j A_{ij}\,\bigl(1 - (1 - x_j(t))^\beta\bigr)\right) \tag{12}$$
+
+Реализация: `NevaOperator` (поддерживает $\beta \geq 1$, по умолчанию $\beta=2$).
+Non-Linear DebtRank (NLDR): функция передачи $g_\beta(x) = 1 - (1-x)^\beta$
+монотонно насыщается при $x \to 1$. $\beta=1$ → линейный DebtRank; $\beta=2$ → квадратичное
+подавление малых сигналов (используется в NEVA).
+
+---
+
+## 6.4. IIM canonical (Haimes 2005 Part I eq. 11) — закрытая форма
+
+Каноническая форма IIM использует преобразование матрицы коэффициентов Леонтьева $A$
+в «intermediate-transactions intensity matrix» $A^\star$:
+
+$$A^\star_{ij} = A_{ij} \cdot \frac{x_j}{x_i} \tag{13}$$
+
+где $x_j$ — валовой выпуск (Gross Output) сектора $j$ (WIOD NIOT, колонка GO/TOT).
+Это диагональное подобие $A^\star = D^{-1} A D$, $D = \mathrm{diag}(x)$, поэтому
+спектральный радиус инвариантен: $\rho(A^\star) = \rho(A)$.
+
+**Закрытая форма:**
+
+$$q^\ast = (I - A^\star)^{-1}\,c^\star \tag{14}$$
+
+где $c^\star$ — вектор нарушения (degraded demand), $q^\ast_i \in [0, 1]$ —
+установившаяся «инoperability» сектора $i$.
+
+Реализация: `services/risk_engine/iim_canonical.py` (`IIMCanonical.predict()`).
+Артефакт: `data/calibration/A_star_iim_canonical.json` ($\rho(A^\star) = 0.3955$,
+$x_\text{energy}=246\,777$, $x_\text{water}=12\,950$, $x_\text{transport}=564\,730$,
+WIOD 2014, DEU+USA; RUS исключена для воды из-за $\text{GO}=0$).
+
+**Скрипты:** `scripts/matrix_calibration/extract_sector_outputs.py` (извлечение $x_j$),
+`scripts/matrix_calibration/apply_haimes_transformation.py` (построение $A^\star$).
+
+---
+
+## 6.5. Унифицированный MC harness
+
+Для честного сравнения всех операторов на едином стохастическом фоне реализован
+**единый MC harness** (`services/risk_engine/mc_harness.py`):
+
+- `run_sde_once()` — одна траектория СДУ (Эйлер–Маруяма)
+- `run_iim_once()` — одна траектория IIM iterative ($q(t+1) = \mathrm{clip}(A^\star q + c^\star)$)
+- `run_neva_once()` — одна траектория NEVA/NLDR ($\beta=2$)
+
+Все три функции принимают одинаковый `seed` и тот же массив $\sigma$-шума
+(логарифмический, мультипликативный), что обеспечивает парное сравнение
+траекторий методов на идентичных реализациях случайности.
+
+**Драйверы:** `scripts/run_operator_comparison.py` (Этап 3),
+`scripts/run_stage4_mc.py` (Этап 4: 15 сценариев × 3 оператора, N≥10³),
+`scripts/validation/mae_comparison.py` (Этап 4-quint: IIM canonical vs NLDR).
+
+---
+
+## 6.6. Этап 4-quint: MAE IIM canonical vs NLDR
+
+**Задача:** сравнить качество прогноза интенсивности деградации секторов двумя
+детерминированными моделями на 4 исторических каскадах.
+
+**Модели:**
+
+- IIM canonical: $q = (I - A^\star)^{-1}\,c^\star$ (eq. 14)
+- NLDR β=2: eq. (12), до сходимости
+
+**События:** EUROPE_2006 (UCTE), TEXAS_2021 (FERC/NERC), INDIA_2012 (CEA), BALTIMORE_2024
+(Dulin et al., Nat. Comm. 2025). Ground truth — иерархия: первичная (`cascade_events.yaml`
+из регуляторных отчётов) → вторичная (`results/validation_real_events.json::reality.delta_approx`).
+
+**Метрика:** MAE по не-инициатор секторам (LOO-эквивалентная агрегация).
+
+**Результаты (`results/mae_comparison.json`):**
+
+| Модель | MAE (общий) | MAE (out-of-sample) |
+|--------|:-----------:|:-------------------:|
+| IIM canonical | — | **0.1777** |
+| NLDR β=2 | — | 0.2668 |
+
+$\Delta = -50.2\%$ (IIM точнее NLDR). Исходная гипотеза H₁ (NLDR ≥25% точнее IIM) **не подтверждена**.
+
+**Интерпретация:** при $\rho(A^\star) = 0.3955 \ll 1$ линейное затухание IIM даёт
+консистентные умеренные прогнозы, тогда как нелинейная насыщающая функция NLDR $\beta=2$
+переоценивает высокие значения (saturation bias при $x \to 1$ для сильносвязанных секторов).
+Это — содержательный фундаментальный результат, а не аномалия.
+
+Методология полностью описана в `docs/methodology/stage4_quint_iim_vs_nldr.md`.
 
 ---
 

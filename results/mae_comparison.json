@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "method_iim": "Canonical IIM, Haimes 2005 Part I eq.(11); q=(I-A*)^-1 c*",
+  "method_nldr": "NLDR / NEVA stage-4-ter MC, median_final_delta per sector",
+  "ground_truth_primary_source": "data/empirical_cascades/historical_dataset/cascade_events.yaml",
+  "ground_truth_secondary_source": "results/validation_real_events.json::events[*].reality.delta_approx",
+  "mae_iim_oos": 0.17765552663451603,
+  "mae_nldr_oos": 0.2667520210429269,
+  "delta_fraction": -0.5015126525824648,
+  "delta_percent": -50.15126525824648,
+  "h1_threshold_percent": 25.0,
+  "h1_status": "NOT_CONFIRMED",
+  "bias": {
+    "iim": {
+      "energy": 0.1973336639428489,
+      "water": -0.18188355217826907,
+      "transport": -0.12164092201347271
+    },
+    "nldr": {
+      "energy": 0.18768977518206342,
+      "water": -0.14664397088018752,
+      "transport": 0.3323471436905752
+    }
+  },
+  "per_event": [
+    {
+      "event_id": "EUROPE_2006",
+      "initiator": "energy",
+      "amplitude": 0.15,
+      "amplitude_source": "secondary",
+      "ground_truth": {
+        "energy": 0.15,
+        "water": 0.0,
+        "transport": 0.12
+      },
+      "ground_truth_source": {
+        "energy": "secondary",
+        "water": "secondary",
+        "transport": "secondary"
+      },
+      "iim_pred": {
+        "energy": 0.1775005099744429,
+        "water": 0.021993511074152275,
+        "transport": 0.03894973403457518
+      },
+      "nldr_pred": {
+        "energy": 0.2322091467848008,
+        "water": -0.0029266664649262863,
+        "transport": 0.35706484824334933
+      },
+      "iim_abs_err": {
+        "water": 0.021993511074152275,
+        "transport": 0.0810502659654248
+      },
+      "nldr_abs_err": {
+        "water": 0.0029266664649262863,
+        "transport": 0.23706484824334934
+      },
+      "mae_iim": 0.05152188851978854,
+      "mae_nldr": 0.11999575735413781
+    },
+    {
+      "event_id": "TEXAS_2021",
+      "initiator": "energy",
+      "amplitude": 0.71,
+      "amplitude_source": "primary",
+      "ground_truth": {
+        "energy": 0.7,
+        "water": 0.75,
+        "transport": 0.25
+      },
+      "ground_truth_source": {
+        "energy": "secondary",
+        "water": "primary",
+        "transport": "primary"
+      },
+      "iim_pred": {
+        "energy": 0.8401690805456963,
+        "water": 0.10410261908432077,
+        "transport": 0.18436207443032251
+      },
+      "nldr_pred": {
+        "energy": 0.33299999999999996,
+        "water": -0.012720900914705985,
+        "transport": 0.667
+      },
+      "iim_abs_err": {
+        "water": 0.6458973809156793,
+        "transport": 0.06563792556967749
+      },
+      "nldr_abs_err": {
+        "water": 0.762720900914706,
+        "transport": 0.41700000000000004
+      },
+      "mae_iim": 0.3557676532426784,
+      "mae_nldr": 0.589860450457353
+    },
+    {
+      "event_id": "INDIA_2012",
+      "initiator": "energy",
+      "amplitude": 0.7,
+      "amplitude_source": "secondary",
+      "ground_truth": {
+        "energy": 0.7,
+        "water": 0.25,
+        "transport": 0.4
+      },
+      "ground_truth_source": {
+        "energy": "secondary",
+        "water": "secondary",
+        "transport": "secondary"
+      },
+      "iim_pred": {
+        "energy": 0.8283357132140667,
+        "water": 0.10263638501271062,
+        "transport": 0.1817654254946842
+      },
+      "nldr_pred": {
+        "energy": 0.8703673897358176,
+        "water": 0.4313545392844379,
+        "transport": 0.7429765828283763
+      },
+      "iim_abs_err": {
+        "water": 0.1473636149872894,
+        "transport": 0.21823457450531583
+      },
+      "nldr_abs_err": {
+        "water": 0.1813545392844379,
+        "transport": 0.3429765828283763
+      },
+      "mae_iim": 0.18279909474630263,
+      "mae_nldr": 0.2621655610564071
+    },
+    {
+      "event_id": "BALTIMORE_2024",
+      "initiator": "transport",
+      "amplitude": 0.3,
+      "amplitude_source": "secondary",
+      "ground_truth": {
+        "energy": 0.05,
+        "water": 0.0,
+        "transport": 0.3
+      },
+      "ground_truth_source": {
+        "energy": "secondary",
+        "water": "secondary",
+        "transport": "secondary"
+      },
+      "iim_pred": {
+        "energy": 0.24733366394284892,
+        "water": 0.04373327611574008,
+        "transport": 0.35437316969933325
+      },
+      "nldr_pred": {
+        "energy": 0.2376897751820634,
+        "water": -0.0022828554255556466,
+        "transport": 0.6319044829561656
+      },
+      "iim_abs_err": {
+        "energy": 0.1973336639428489,
+        "water": 0.04373327611574008
+      },
+      "nldr_abs_err": {
+        "energy": 0.18768977518206342,
+        "water": 0.0022828554255556466
+      },
+      "mae_iim": 0.12053347002929449,
+      "mae_nldr": 0.09498631530380953
+    }
+  ]
+}

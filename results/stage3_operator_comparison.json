@@ -1,0 +1,323 @@
+{
+  "matrix": [
+    [
+      0.0,
+      0.47499999999999987,
+      0.47499999999999987
+    ],
+    [
+      0.5541666666666666,
+      0.0,
+      0.47499999999999987
+    ],
+    [
+      0.39583333333333326,
+      0.47499999999999987,
+      0.0
+    ]
+  ],
+  "capacity_C": [
+    0.75,
+    0.75,
+    0.75
+  ],
+  "delta": 0.1,
+  "n_steps": 50,
+  "sectors": [
+    "energy",
+    "water",
+    "transport"
+  ],
+  "scenarios": {
+    "S_energy_mild": {
+      "initiator": "energy",
+      "x0": [
+        0.3,
+        0.1,
+        0.1
+      ],
+      "operators": {
+        "classical": {
+          "final_state": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 4
+        },
+        "iim": {
+          "final_state": [
+            0.013499118469598649,
+            0.01424906949568765,
+            0.012749167443509705
+          ],
+          "max_delta_off_initiator": 0.21374999999999997,
+          "I_cl": 0,
+          "I_q": 1,
+          "converged": false,
+          "n_steps_to_convergence": 50
+        },
+        "neva_beta1": {
+          "final_state": [
+            1.0,
+            1.0,
+            0.9708333333333331
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 8
+        },
+        "neva_beta2": {
+          "final_state": [
+            1.0,
+            1.0,
+            0.9708333333333331
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 5
+        }
+      }
+    },
+    "S_energy_severe": {
+      "initiator": "energy",
+      "x0": [
+        0.7,
+        0.1,
+        0.1
+      ],
+      "operators": {
+        "classical": {
+          "final_state": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 4
+        },
+        "iim": {
+          "final_state": [
+            0.024298413245277543,
+            0.02564832509223797,
+            0.022948501398317292
+          ],
+          "max_delta_off_initiator": 0.43541666666666656,
+          "I_cl": 0,
+          "I_q": 1,
+          "converged": false,
+          "n_steps_to_convergence": 50
+        },
+        "neva_beta1": {
+          "final_state": [
+            1.0,
+            1.0,
+            0.9708333333333331
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 6
+        },
+        "neva_beta2": {
+          "final_state": [
+            1.0,
+            1.0,
+            0.9708333333333331
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 4
+        }
+      }
+    },
+    "S_transport_mild": {
+      "initiator": "transport",
+      "x0": [
+        0.1,
+        0.1,
+        0.3
+      ],
+      "operators": {
+        "classical": {
+          "final_state": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 4
+        },
+        "iim": {
+          "final_state": [
+            0.01349911846959868,
+            0.014249069495687418,
+            0.012749167443509913
+          ],
+          "max_delta_off_initiator": 0.19791666666666663,
+          "I_cl": 0,
+          "I_q": 1,
+          "converged": false,
+          "n_steps_to_convergence": 50
+        },
+        "neva_beta1": {
+          "final_state": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 8
+        },
+        "neva_beta2": {
+          "final_state": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 4
+        }
+      }
+    },
+    "S_transport_severe": {
+      "initiator": "transport",
+      "x0": [
+        0.1,
+        0.1,
+        0.7
+      ],
+      "operators": {
+        "classical": {
+          "final_state": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 3
+        },
+        "iim": {
+          "final_state": [
+            0.024298413245277626,
+            0.02564832509223726,
+            0.022948501398317906
+          ],
+          "max_delta_off_initiator": 0.3879166666666666,
+          "I_cl": 0,
+          "I_q": 1,
+          "converged": false,
+          "n_steps_to_convergence": 50
+        },
+        "neva_beta1": {
+          "final_state": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 5
+        },
+        "neva_beta2": {
+          "final_state": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 4
+        }
+      }
+    },
+    "S_water_mild": {
+      "initiator": "water",
+      "x0": [
+        0.1,
+        0.3,
+        0.1
+      ],
+      "operators": {
+        "classical": {
+          "final_state": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 4
+        },
+        "iim": {
+          "final_state": [
+            0.013499118469598675,
+            0.014249069495687383,
+            0.012749167443509938
+          ],
+          "max_delta_off_initiator": 0.18999999999999995,
+          "I_cl": 0,
+          "I_q": 1,
+          "converged": false,
+          "n_steps_to_convergence": 50
+        },
+        "neva_beta1": {
+          "final_state": [
+            1.0,
+            1.0,
+            0.9708333333333331
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 9
+        },
+        "neva_beta2": {
+          "final_state": [
+            1.0,
+            1.0,
+            0.9708333333333331
+          ],
+          "max_delta_off_initiator": 0.9,
+          "I_cl": 1,
+          "I_q": 1,
+          "converged": true,
+          "n_steps_to_convergence": 5
+        }
+      }
+    }
+  }
+}

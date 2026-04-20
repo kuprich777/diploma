@@ -1,4 +1,58 @@
-# changes.md — Реестр изменений: переход на ветку newresearch
+# changes.md — Реестр изменений
+
+## [unreleased — v4 alignment, 2026-04-20]
+
+### Documentation
+- Aligned top-level methodology documents with
+  [`docs/methodology/METHODOLOGY_FINAL.md`](docs/methodology/METHODOLOGY_FINAL.md)
+  as single source of truth.
+- `docs/ARCHITECTURE.md`: added «Методологический базис» section (synthesis of
+  three lines); added operators subgraph to Mermaid data-flow diagram with
+  K_cl / K_DR / K_q; added planned endpoints for extended Series 4/5
+  (`/compute_K_DR`, `/compute_K_q_recovery`, `/benchmark_centralities`);
+  replaced `resolve` / `newresearch` branch references with `newmain`.
+- `docs/MATH_MODEL.md`: added §2.0 with canonical form of main operator
+  (METHODOLOGY_FINAL.md formula 5); added §4a «Extended operator with recovery»
+  (formula 23, Bruneau resilience 24, recovery time 25); added §4b «Canonical
+  DebtRank K^(DR)» (§10.1); added §5a with two-step ARIMA + Newey—West σ
+  calibration, dimensionless normalization (formula 16), SNR check (18) and
+  raw/dim table with TODO-marked values; added pre-registered θ_node formula
+  (9) with explicit demotion of NERC EOP-011 to historical reference.
+- `docs/DATA_SOURCES.md`: added source-of-truth banner and explicit
+  no-fabrication protocol cross-reference (§5.1, §12).
+- `docs/EXPERIMENT_CATALOG.md`: added source-of-truth banner; marked
+  REAL_christchurch_2011 as extended-validation (Table 6 of final methodology
+  contains four events); flagged numerical mismatch between catalog matrix
+  (0.304, 0.006, 0.001) and METHODOLOGY_FINAL.md Table 2 (0.087, 0.082, 0.020)
+  with TODO.
+- `docs/RESULTS.md`: added banner — main series results preserved; Series 4
+  (K^(DR)) and Series 5 (Recovery) in development.
+- `readme.md`: reframed project as «synthesis of three lines»; updated branch
+  from `resolve` to `newmain`; added METHODOLOGY_FINAL.md to documentation
+  index.
+
+### Config
+- `config.env` / `config.env.example`: added commented §-references for
+  THETA_NODE, DELTA, N_RUNS, B_BOOTSTRAP, RHO_TARGET, T, DT (all pre-existing);
+  added backward-compatible placeholders KAPPA_ENERGY / KAPPA_WATER /
+  KAPPA_TRANSPORT / EPSILON_REC (Recovery Dynamics, defaults 0.0 —
+  no behavior change), K_DR_ENABLED=false (Series 4 gate), SNR_THRESHOLD=1.0
+  (acceptance check per §5.2).
+
+### Code
+- **Not in this entry.** Code changes (placeholder implementations of K_DR,
+  recovery operator, centrality benchmark, two-step σ calibration and
+  corresponding tests) are deferred to a separate commit: at the time of this
+  documentation alignment the `services/risk_engine/operators/` directory and
+  adjacent scripts contained uncommitted work, and overwriting was declined
+  per protocol 0.2. See v4 alignment report for details.
+
+### Branch
+- Working branch is now `newmain` (replaces historical `resolve`).
+
+---
+
+# Историческая часть: переход на ветку newresearch
 
 > Дата аудита: 2026-04-13  
 > Ветка: newresearch  

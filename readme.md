@@ -1,8 +1,15 @@
 # DIPLOMA — Стенд стохастического моделирования рисков критической инфраструктуры
 
-Микросервисный вычислительный стенд для анализа каскадных отказов в системах критической инфраструктуры (энергетика, водоснабжение, транспорт) на основе стохастических дифференциальных уравнений.
+Микросервисный вычислительный стенд для анализа каскадных отказов в системах
+критической инфраструктуры (энергетика, водоснабжение, транспорт). Методология —
+**синтез трёх интеллектуальных линий**: анализ Леонтьева (1936, структура матрицы
+межотраслевых зависимостей), концепция взаимозависимости КИ (Rinaldi 2001,
+бинарный threshold cascade как baseline) и непрерывная мера дистресса
+(Battiston 2012; Bardoscia 2015, $x_i \in [0, 1]$) — в единый стохастический
+оператор на ограниченной области, применимый на стадии проектирования без
+истории аварий.
 
-**Ветка:** `newresearch` | **Модель:** СДУ Эйлера–Маруямы + стохастическая оптимизация
+**Ветка:** `newmain` | **Источник истины:** [`docs/methodology/METHODOLOGY_FINAL.md`](docs/methodology/METHODOLOGY_FINAL.md) | **Модель:** СДУ Эйлера–Маруямы с проекцией Скорохода + threshold-cascade baseline $K^{(\text{cl})}$ + канонический DebtRank $K^{(DR)}$ (TODO, Серия 4) + Recovery Dynamics $\kappa$ (TODO, Серия 5)
 
 ---
 
@@ -12,7 +19,7 @@
 # 1. Клонировать репозиторий
 git clone <repo-url> diploma
 cd diploma
-git checkout newresearch
+git checkout newmain
 
 # 2. Настроить пути к датасетам
 cp config.env.example config.env
@@ -53,7 +60,10 @@ diploma/
 │   ├── water_service/               # :8002 — доменная модель водоснабжения
 │   ├── transport_service/           # :8003 — доменная модель транспорта
 │   ├── risk_engine/                 # :8004 — СДУ-интегратор, matrix A, cascade
-│   │   └── sde_integrator.py        # SDEIntegrator (Euler-Maruyama)
+│   │   ├── sde_integrator.py        # SDEIntegrator (Euler-Maruyama)
+│   │   ├── cascade_operators.py     # Classical / IIM iterative / NEVA NLDR β=2
+│   │   ├── iim_canonical.py         # IIM canonical, q=(I-A*)^-1 c* (Haimes eq.11)
+│   │   └── mc_harness.py            # Унифицированный MC (SDE+IIM+NEVA на 1 шуме)
 │   ├── scenario_simulator/          # :8005 — Monte Carlo оркестрация
 │   └── optimizer/                   # :8006 — стохастическая оптимизация (TODO)
 │
@@ -61,9 +71,13 @@ diploma/
 │   ├── calibrate_sigma.py           # σ из HAI + Kelmarsh Farm SCADA
 │   ├── calibrate_capacity.py        # C из HAI + DfT Road Safety (HGV)
 │   ├── calibrate_A.py               # A по Леонтьеву (WIOD 2016)
-│   ├── run_monte_carlo.py           # MC с СДУ (TODO)
+│   ├── matrix_calibration/          # x_j (NIOT GO/TOT), A* (Haimes eq.11)
+│   ├── sigma_calibration/           # диагностика σ
+│   ├── diagnostics/                 # ρ-sweep, Этап 4-ter
+│   ├── validation/                  # mae_comparison (IIM canonical vs NLDR)
+│   ├── run_operator_comparison.py   # Этап 3: сравнение трёх операторов
+│   ├── run_stage4_mc.py             # Этап 4: 15 сценариев × 3 оператора
 │   ├── run_optimization.py          # оптимизация (TODO)
-│   ├── compare_methods.py           # сравнение: наш vs DebtRank vs ICM (TODO)
 │   ├── generate_plots.py            # графики для ВКР (TODO)
 │   └── validate_historical.py       # валидация Texas 2021 / India 2012 (TODO)
 │
@@ -71,7 +85,9 @@ diploma/
 │   ├── calibration/                 # результаты калибровки
 │   │   ├── sigma_calibrated.json    # σ_energy=6.54/0.79, σ_water=18.08 ч⁻¹/²
 │   │   ├── capacity_thresholds.json # C: 0.883/0.646/0.928
-│   │   └── A_leontief.json          # A 3×3 (Leontief, WIOD)
+│   │   ├── A_leontief.json          # A 3×3 (Leontief, WIOD)
+│   │   ├── wiod_sector_outputs.json # x_j (GO): 246777/12950/564730
+│   │   └── A_star_iim_canonical.json# A* = A·x_j/x_i, ρ=0.3955
 │   ├── scenarios/                   # JSON-конфиги сценариев
 │   └── wiod/                        # WIOD таблицы (вне git, symlink или copy)
 │
@@ -81,15 +97,18 @@ diploma/
 │   └── figures/                     # графики матрицы A
 │
 ├── docs/
-│   ├── ARCHITECTURE.md              # архитектура стенда v2.0
-│   ├── MATH_MODEL.md                # полная математическая модель
+│   ├── ARCHITECTURE.md              # архитектура стенда v2.1 (resolve)
+│   ├── MATH_MODEL.md                # СДУ + cascade операторы + IIM canonical
 │   ├── DATA_SOURCES.md              # датасеты и протокол калибровки
-│   ├── EXPERIMENT_CATALOG.md        # каталог экспериментов (TODO)
-│   ├── RESULTS.md                   # результаты (TODO)
-│   └── VISUALIZATION_GUIDE.md       # гайд по графикам (TODO)
+│   ├── EXPERIMENT_CATALOG.md        # каталог экспериментов (SDE + этапы 3/4/4-ter/4-quint)
+│   ├── RESULTS.md                   # результаты (SDE + MAE IIM vs NLDR)
+│   ├── VISUALIZATION_GUIDE.md       # гайд по графикам (TODO)
+│   ├── methodology/                 # calibration_rationale, stage4_quint_iim_vs_nldr
+│   └── _checklists/                 # аудиты этапов 00–04_ter + verification
 │
 ├── tests/
-│   └── test_sde_integrator.py       # 11 тестов SDEIntegrator (все PASS)
+│   ├── test_sde_integrator.py       # 11 тестов SDEIntegrator (все PASS)
+│   └── test_cascade_operators.py    # unit-тесты Classical/IIM/NEVA
 │
 ├── results/
 │   ├── mc_runs/                     # результаты MC-прогонов
@@ -118,9 +137,10 @@ $$dx_j = \left(\sum_i a_{ij} x_i - \rho_j x_j\right)dt + \sigma_j x_j\,dW_j$$
 
 | Файл | Содержание |
 |------|-----------|
+| [docs/methodology/METHODOLOGY_FINAL.md](docs/methodology/METHODOLOGY_FINAL.md) | **Источник истины.** Финальная редакция методологической части ВКР (v4) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Архитектура стенда, API, диаграммы |
 | [docs/MATH_MODEL.md](docs/MATH_MODEL.md) | Математическая модель (формулы, параметры) |
-| [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) | Датасеты, калибровка, протокол нехватки данных |
+| [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) | Датасеты, калибровка, no-fabrication protocol |
 | [changes.md](changes.md) | Полный реестр изменений (аудит) |
 
 ---
@@ -147,9 +167,16 @@ $$dx_j = \left(\sum_i a_{ij} x_i - \rho_j x_j\right)dt + \sigma_j x_j\,dW_j$$
 | Калибровка C (HAI + DfT HGV) | ✅ Готово |
 | Калибровка A (Leontief/WIOD) | ✅ Готово |
 | Байесовская калибровка A | ✅ Готово |
+| x_j (Gross Output, WIOD NIOT) | ✅ Готово |
+| A* Haimes eq.11 (A*_ij = A_ij·x_j/x_i) | ✅ Готово |
+| Cascade операторы (Classical/IIM/NEVA β=2) | ✅ Готово + тесты |
+| IIM canonical (closed-form q=(I-A*)⁻¹c*) | ✅ Готово |
+| Унифицированный MC harness | ✅ Готово |
 | MC-оркестрация (HTTP, переходный) | ✅ Работает |
+| Этап 3 (operator comparison) | ✅ Готово |
+| Этап 4 (MC 15×3) | ✅ Готово + LOO robustness |
+| Этап 4-ter (ρ recalibration) | ✅ Готово |
+| Этап 4-quint (MAE IIM canonical vs NLDR) | ✅ Готово (H₁ NOT_CONFIRMED, Δ=−50.2%) |
 | MC через multiprocessing.Pool | TODO |
-| Baselines (DebtRank, ICM) | TODO |
 | Оптимизатор (optimizer:8006) | TODO |
-| Валидация (Texas 2021, India 2012) | TODO |
 | Графики для ВКР | TODO |

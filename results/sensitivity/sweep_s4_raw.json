@@ -1,0 +1,3071 @@
+{
+  "scenario": {
+    "name": "S_4_water_partial_degradation",
+    "x0": [
+      0.3,
+      0.3,
+      0.3
+    ],
+    "u": [
+      0.0,
+      0.3,
+      0.0
+    ],
+    "T": 24,
+    "dt": 1.0,
+    "theta_node": 0.75,
+    "N_runs_stochastic": 1000
+  },
+  "sigma_used": [
+    0.415473,
+    0.109012,
+    0.0
+  ],
+  "C_used": [
+    0.883222,
+    0.646308,
+    0.927971
+  ],
+  "w_used": [
+    0.2642010310864566,
+    0.11737481203084643,
+    0.6184241568826969
+  ],
+  "grid": {
+    "rho_target_floor": [
+      "None",
+      0.3,
+      0.5,
+      0.7,
+      0.95
+    ],
+    "epsilon_cl": [
+      0.001,
+      0.01,
+      0.05
+    ],
+    "delta": [
+      0.05,
+      0.1,
+      0.2
+    ]
+  },
+  "n_configs": 45,
+  "results": [
+    {
+      "config": {
+        "rho_floor": null,
+        "epsilon_cl": 0.001,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.021975,
+        "scaled": false,
+        "max_abs_a": 0.036239
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 0,
+          "D": 0.349344,
+          "x_final": [
+            0.31255,
+            0.601376,
+            0.317227
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.7413867417270585,
+          "D_std": 0.14565936431795304
+        },
+        "K_q_abs": {
+          "K": 0.999,
+          "D": 0.5066012200770141,
+          "D_std": 0.06656012121989224
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 0,
+        "K_leontief_vs_K_DR": 0,
+        "K_leontief_vs_K_q_deg": 1.0,
+        "K_leontief_vs_K_q_abs": 0.999,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.999,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.999,
+        "K_q_deg_vs_K_q_abs": 0.001
+      },
+      "max_pairwise_dK": 1.0,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": null,
+        "epsilon_cl": 0.001,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.021975,
+        "scaled": false,
+        "max_abs_a": 0.036239
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 0,
+          "D": 0.349344,
+          "x_final": [
+            0.31255,
+            0.601376,
+            0.317227
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.7413867417270585,
+          "D_std": 0.14565936431795304
+        },
+        "K_q_abs": {
+          "K": 0.998,
+          "D": 0.5066012200770141,
+          "D_std": 0.06656012121989224
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 0,
+        "K_leontief_vs_K_DR": 0,
+        "K_leontief_vs_K_q_deg": 1.0,
+        "K_leontief_vs_K_q_abs": 0.998,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.998,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.998,
+        "K_q_deg_vs_K_q_abs": 0.002
+      },
+      "max_pairwise_dK": 1.0,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": null,
+        "epsilon_cl": 0.001,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.021975,
+        "scaled": false,
+        "max_abs_a": 0.036239
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 0,
+          "D": 0.349344,
+          "x_final": [
+            0.31255,
+            0.601376,
+            0.317227
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 0.999,
+          "D": 0.7413867417270585,
+          "D_std": 0.14565936431795304
+        },
+        "K_q_abs": {
+          "K": 0.993,
+          "D": 0.5066012200770141,
+          "D_std": 0.06656012121989224
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 0,
+        "K_leontief_vs_K_DR": 0,
+        "K_leontief_vs_K_q_deg": 0.999,
+        "K_leontief_vs_K_q_abs": 0.993,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 0.999,
+        "K_cl_vs_K_q_abs": 0.993,
+        "K_DR_vs_K_q_deg": 0.999,
+        "K_DR_vs_K_q_abs": 0.993,
+        "K_q_deg_vs_K_q_abs": 0.006
+      },
+      "max_pairwise_dK": 0.999,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": null,
+        "epsilon_cl": 0.01,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.021975,
+        "scaled": false,
+        "max_abs_a": 0.036239
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 0,
+          "D": 0.349344,
+          "x_final": [
+            0.31255,
+            0.601376,
+            0.317227
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.7413867417270585,
+          "D_std": 0.14565936431795304
+        },
+        "K_q_abs": {
+          "K": 0.999,
+          "D": 0.5066012200770141,
+          "D_std": 0.06656012121989224
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 0,
+        "K_leontief_vs_K_DR": 0,
+        "K_leontief_vs_K_q_deg": 1.0,
+        "K_leontief_vs_K_q_abs": 0.999,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.999,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.999,
+        "K_q_deg_vs_K_q_abs": 0.001
+      },
+      "max_pairwise_dK": 1.0,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": null,
+        "epsilon_cl": 0.01,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.021975,
+        "scaled": false,
+        "max_abs_a": 0.036239
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 0,
+          "D": 0.349344,
+          "x_final": [
+            0.31255,
+            0.601376,
+            0.317227
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.7413867417270585,
+          "D_std": 0.14565936431795304
+        },
+        "K_q_abs": {
+          "K": 0.998,
+          "D": 0.5066012200770141,
+          "D_std": 0.06656012121989224
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 0,
+        "K_leontief_vs_K_DR": 0,
+        "K_leontief_vs_K_q_deg": 1.0,
+        "K_leontief_vs_K_q_abs": 0.998,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.998,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.998,
+        "K_q_deg_vs_K_q_abs": 0.002
+      },
+      "max_pairwise_dK": 1.0,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": null,
+        "epsilon_cl": 0.01,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.021975,
+        "scaled": false,
+        "max_abs_a": 0.036239
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 0,
+          "D": 0.349344,
+          "x_final": [
+            0.31255,
+            0.601376,
+            0.317227
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 0.999,
+          "D": 0.7413867417270585,
+          "D_std": 0.14565936431795304
+        },
+        "K_q_abs": {
+          "K": 0.993,
+          "D": 0.5066012200770141,
+          "D_std": 0.06656012121989224
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 0,
+        "K_leontief_vs_K_DR": 0,
+        "K_leontief_vs_K_q_deg": 0.999,
+        "K_leontief_vs_K_q_abs": 0.993,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 0.999,
+        "K_cl_vs_K_q_abs": 0.993,
+        "K_DR_vs_K_q_deg": 0.999,
+        "K_DR_vs_K_q_abs": 0.993,
+        "K_q_deg_vs_K_q_abs": 0.006
+      },
+      "max_pairwise_dK": 0.999,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": null,
+        "epsilon_cl": 0.05,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.021975,
+        "scaled": false,
+        "max_abs_a": 0.036239
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 0,
+          "D": 0.349344,
+          "x_final": [
+            0.31255,
+            0.601376,
+            0.317227
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.7413867417270585,
+          "D_std": 0.14565936431795304
+        },
+        "K_q_abs": {
+          "K": 0.999,
+          "D": 0.5066012200770141,
+          "D_std": 0.06656012121989224
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 0,
+        "K_leontief_vs_K_DR": 0,
+        "K_leontief_vs_K_q_deg": 1.0,
+        "K_leontief_vs_K_q_abs": 0.999,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.999,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.999,
+        "K_q_deg_vs_K_q_abs": 0.001
+      },
+      "max_pairwise_dK": 1.0,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": null,
+        "epsilon_cl": 0.05,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.021975,
+        "scaled": false,
+        "max_abs_a": 0.036239
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 0,
+          "D": 0.349344,
+          "x_final": [
+            0.31255,
+            0.601376,
+            0.317227
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.7413867417270585,
+          "D_std": 0.14565936431795304
+        },
+        "K_q_abs": {
+          "K": 0.998,
+          "D": 0.5066012200770141,
+          "D_std": 0.06656012121989224
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 0,
+        "K_leontief_vs_K_DR": 0,
+        "K_leontief_vs_K_q_deg": 1.0,
+        "K_leontief_vs_K_q_abs": 0.998,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.998,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.998,
+        "K_q_deg_vs_K_q_abs": 0.002
+      },
+      "max_pairwise_dK": 1.0,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": null,
+        "epsilon_cl": 0.05,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.021975,
+        "scaled": false,
+        "max_abs_a": 0.036239
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 0,
+          "D": 0.349344,
+          "x_final": [
+            0.31255,
+            0.601376,
+            0.317227
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 0.999,
+          "D": 0.7413867417270585,
+          "D_std": 0.14565936431795304
+        },
+        "K_q_abs": {
+          "K": 0.993,
+          "D": 0.5066012200770141,
+          "D_std": 0.06656012121989224
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 0,
+        "K_leontief_vs_K_DR": 0,
+        "K_leontief_vs_K_q_deg": 0.999,
+        "K_leontief_vs_K_q_abs": 0.993,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 0.999,
+        "K_cl_vs_K_q_abs": 0.993,
+        "K_DR_vs_K_q_deg": 0.999,
+        "K_DR_vs_K_q_abs": 0.993,
+        "K_q_deg_vs_K_q_abs": 0.006
+      },
+      "max_pairwise_dK": 0.999,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.3,
+        "epsilon_cl": 0.001,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.3,
+        "scaled": true,
+        "max_abs_a": 0.494734
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.611434,
+          "x_final": [
+            0.524636,
+            0.633222,
+            0.644381
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9713188714406532,
+          "D_std": 0.05122622809755527
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.6327452741410661,
+          "D_std": 0.13529016164749175
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.3,
+        "epsilon_cl": 0.001,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.3,
+        "scaled": true,
+        "max_abs_a": 0.494734
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.611434,
+          "x_final": [
+            0.524636,
+            0.633222,
+            0.644381
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9713188714406532,
+          "D_std": 0.05122622809755527
+        },
+        "K_q_abs": {
+          "K": 0.998,
+          "D": 0.6327452741410661,
+          "D_std": 0.13529016164749175
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.002,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.998,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.998,
+        "K_q_deg_vs_K_q_abs": 0.002
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.3,
+        "epsilon_cl": 0.001,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.3,
+        "scaled": true,
+        "max_abs_a": 0.494734
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.611434,
+          "x_final": [
+            0.524636,
+            0.633222,
+            0.644381
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9713188714406532,
+          "D_std": 0.05122622809755527
+        },
+        "K_q_abs": {
+          "K": 0.994,
+          "D": 0.6327452741410661,
+          "D_std": 0.13529016164749175
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.006,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.994,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.994,
+        "K_q_deg_vs_K_q_abs": 0.006
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.3,
+        "epsilon_cl": 0.01,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.3,
+        "scaled": true,
+        "max_abs_a": 0.494734
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.611434,
+          "x_final": [
+            0.524636,
+            0.633222,
+            0.644381
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9713188714406532,
+          "D_std": 0.05122622809755527
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.6327452741410661,
+          "D_std": 0.13529016164749175
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.3,
+        "epsilon_cl": 0.01,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.3,
+        "scaled": true,
+        "max_abs_a": 0.494734
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.611434,
+          "x_final": [
+            0.524636,
+            0.633222,
+            0.644381
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9713188714406532,
+          "D_std": 0.05122622809755527
+        },
+        "K_q_abs": {
+          "K": 0.998,
+          "D": 0.6327452741410661,
+          "D_std": 0.13529016164749175
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.002,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.998,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.998,
+        "K_q_deg_vs_K_q_abs": 0.002
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.3,
+        "epsilon_cl": 0.01,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.3,
+        "scaled": true,
+        "max_abs_a": 0.494734
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.611434,
+          "x_final": [
+            0.524636,
+            0.633222,
+            0.644381
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9713188714406532,
+          "D_std": 0.05122622809755527
+        },
+        "K_q_abs": {
+          "K": 0.994,
+          "D": 0.6327452741410661,
+          "D_std": 0.13529016164749175
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.006,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.994,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.994,
+        "K_q_deg_vs_K_q_abs": 0.006
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.3,
+        "epsilon_cl": 0.05,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.3,
+        "scaled": true,
+        "max_abs_a": 0.494734
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.611434,
+          "x_final": [
+            0.524636,
+            0.633222,
+            0.644381
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9713188714406532,
+          "D_std": 0.05122622809755527
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.6327452741410661,
+          "D_std": 0.13529016164749175
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.3,
+        "epsilon_cl": 0.05,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.3,
+        "scaled": true,
+        "max_abs_a": 0.494734
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.611434,
+          "x_final": [
+            0.524636,
+            0.633222,
+            0.644381
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9713188714406532,
+          "D_std": 0.05122622809755527
+        },
+        "K_q_abs": {
+          "K": 0.998,
+          "D": 0.6327452741410661,
+          "D_std": 0.13529016164749175
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.002,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.998,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.998,
+        "K_q_deg_vs_K_q_abs": 0.002
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.3,
+        "epsilon_cl": 0.05,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.3,
+        "scaled": true,
+        "max_abs_a": 0.494734
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.611434,
+          "x_final": [
+            0.524636,
+            0.633222,
+            0.644381
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9713188714406532,
+          "D_std": 0.05122622809755527
+        },
+        "K_q_abs": {
+          "K": 0.994,
+          "D": 0.6327452741410661,
+          "D_std": 0.13529016164749175
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.006,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.994,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.994,
+        "K_q_deg_vs_K_q_abs": 0.006
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.5,
+        "epsilon_cl": 0.001,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.5,
+        "scaled": true,
+        "max_abs_a": 0.824557
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.912233,
+          "x_final": [
+            0.806262,
+            0.68834,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9929148717505238,
+          "D_std": 0.021700757502222678
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.6826938106333945,
+          "D_std": 0.16119520096952344
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.5,
+        "epsilon_cl": 0.001,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.5,
+        "scaled": true,
+        "max_abs_a": 0.824557
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.912233,
+          "x_final": [
+            0.806262,
+            0.68834,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9929148717505238,
+          "D_std": 0.021700757502222678
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.6826938106333945,
+          "D_std": 0.16119520096952344
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.5,
+        "epsilon_cl": 0.001,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.5,
+        "scaled": true,
+        "max_abs_a": 0.824557
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.912233,
+          "x_final": [
+            0.806262,
+            0.68834,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9929148717505238,
+          "D_std": 0.021700757502222678
+        },
+        "K_q_abs": {
+          "K": 0.994,
+          "D": 0.6826938106333945,
+          "D_std": 0.16119520096952344
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.006,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.994,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.994,
+        "K_q_deg_vs_K_q_abs": 0.006
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.5,
+        "epsilon_cl": 0.01,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.5,
+        "scaled": true,
+        "max_abs_a": 0.824557
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.912233,
+          "x_final": [
+            0.806262,
+            0.68834,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9929148717505238,
+          "D_std": 0.021700757502222678
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.6826938106333945,
+          "D_std": 0.16119520096952344
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.5,
+        "epsilon_cl": 0.01,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.5,
+        "scaled": true,
+        "max_abs_a": 0.824557
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.912233,
+          "x_final": [
+            0.806262,
+            0.68834,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9929148717505238,
+          "D_std": 0.021700757502222678
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.6826938106333945,
+          "D_std": 0.16119520096952344
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.5,
+        "epsilon_cl": 0.01,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.5,
+        "scaled": true,
+        "max_abs_a": 0.824557
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.912233,
+          "x_final": [
+            0.806262,
+            0.68834,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9929148717505238,
+          "D_std": 0.021700757502222678
+        },
+        "K_q_abs": {
+          "K": 0.994,
+          "D": 0.6826938106333945,
+          "D_std": 0.16119520096952344
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.006,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.994,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.994,
+        "K_q_deg_vs_K_q_abs": 0.006
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.5,
+        "epsilon_cl": 0.05,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.5,
+        "scaled": true,
+        "max_abs_a": 0.824557
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.912233,
+          "x_final": [
+            0.806262,
+            0.68834,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9929148717505238,
+          "D_std": 0.021700757502222678
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.6826938106333945,
+          "D_std": 0.16119520096952344
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.5,
+        "epsilon_cl": 0.05,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.5,
+        "scaled": true,
+        "max_abs_a": 0.824557
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.912233,
+          "x_final": [
+            0.806262,
+            0.68834,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9929148717505238,
+          "D_std": 0.021700757502222678
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.6826938106333945,
+          "D_std": 0.16119520096952344
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.5,
+        "epsilon_cl": 0.05,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.5,
+        "scaled": true,
+        "max_abs_a": 0.824557
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.912233,
+          "x_final": [
+            0.806262,
+            0.68834,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9929148717505238,
+          "D_std": 0.021700757502222678
+        },
+        "K_q_abs": {
+          "K": 0.994,
+          "D": 0.6826938106333945,
+          "D_std": 0.16119520096952344
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.006,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.994,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.994,
+        "K_q_deg_vs_K_q_abs": 0.006
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.7,
+        "epsilon_cl": 0.001,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.7,
+        "scaled": true,
+        "max_abs_a": 1.15438
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.980045,
+          "x_final": [
+            1.0,
+            0.82999,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9979762629183776,
+          "D_std": 0.009594596914027255
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7087096348208666,
+          "D_std": 0.15328829467819516
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.7,
+        "epsilon_cl": 0.001,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.7,
+        "scaled": true,
+        "max_abs_a": 1.15438
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.980045,
+          "x_final": [
+            1.0,
+            0.82999,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9979762629183776,
+          "D_std": 0.009594596914027255
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7087096348208666,
+          "D_std": 0.15328829467819516
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.7,
+        "epsilon_cl": 0.001,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.7,
+        "scaled": true,
+        "max_abs_a": 1.15438
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.980045,
+          "x_final": [
+            1.0,
+            0.82999,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9979762629183776,
+          "D_std": 0.009594596914027255
+        },
+        "K_q_abs": {
+          "K": 0.999,
+          "D": 0.7087096348208666,
+          "D_std": 0.15328829467819516
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.001,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.999,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.999,
+        "K_q_deg_vs_K_q_abs": 0.001
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.7,
+        "epsilon_cl": 0.01,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.7,
+        "scaled": true,
+        "max_abs_a": 1.15438
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.980045,
+          "x_final": [
+            1.0,
+            0.82999,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9979762629183776,
+          "D_std": 0.009594596914027255
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7087096348208666,
+          "D_std": 0.15328829467819516
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.7,
+        "epsilon_cl": 0.01,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.7,
+        "scaled": true,
+        "max_abs_a": 1.15438
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.980045,
+          "x_final": [
+            1.0,
+            0.82999,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9979762629183776,
+          "D_std": 0.009594596914027255
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7087096348208666,
+          "D_std": 0.15328829467819516
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.7,
+        "epsilon_cl": 0.01,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.7,
+        "scaled": true,
+        "max_abs_a": 1.15438
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.980045,
+          "x_final": [
+            1.0,
+            0.82999,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9979762629183776,
+          "D_std": 0.009594596914027255
+        },
+        "K_q_abs": {
+          "K": 0.999,
+          "D": 0.7087096348208666,
+          "D_std": 0.15328829467819516
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.001,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.999,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.999,
+        "K_q_deg_vs_K_q_abs": 0.001
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.7,
+        "epsilon_cl": 0.05,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.7,
+        "scaled": true,
+        "max_abs_a": 1.15438
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.980045,
+          "x_final": [
+            1.0,
+            0.82999,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9979762629183776,
+          "D_std": 0.009594596914027255
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7087096348208666,
+          "D_std": 0.15328829467819516
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.7,
+        "epsilon_cl": 0.05,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.7,
+        "scaled": true,
+        "max_abs_a": 1.15438
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.980045,
+          "x_final": [
+            1.0,
+            0.82999,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9979762629183776,
+          "D_std": 0.009594596914027255
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7087096348208666,
+          "D_std": 0.15328829467819516
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.7,
+        "epsilon_cl": 0.05,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.7,
+        "scaled": true,
+        "max_abs_a": 1.15438
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 0.980045,
+          "x_final": [
+            1.0,
+            0.82999,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.9979762629183776,
+          "D_std": 0.009594596914027255
+        },
+        "K_q_abs": {
+          "K": 0.999,
+          "D": 0.7087096348208666,
+          "D_std": 0.15328829467819516
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.001,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.999,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.999,
+        "K_q_deg_vs_K_q_abs": 0.001
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.95,
+        "epsilon_cl": 0.001,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.95,
+        "scaled": true,
+        "max_abs_a": 1.566659
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 1.0,
+          "x_final": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.999577655314673,
+          "D_std": 0.0028506695242870644
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7351246018220257,
+          "D_std": 0.14280894940088645
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.95,
+        "epsilon_cl": 0.001,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.95,
+        "scaled": true,
+        "max_abs_a": 1.566659
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 1.0,
+          "x_final": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.999577655314673,
+          "D_std": 0.0028506695242870644
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7351246018220257,
+          "D_std": 0.14280894940088645
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.95,
+        "epsilon_cl": 0.001,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.95,
+        "scaled": true,
+        "max_abs_a": 1.566659
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 1.0,
+          "x_final": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.999577655314673,
+          "D_std": 0.0028506695242870644
+        },
+        "K_q_abs": {
+          "K": 0.999,
+          "D": 0.7351246018220257,
+          "D_std": 0.14280894940088645
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.001,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.999,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.999,
+        "K_q_deg_vs_K_q_abs": 0.001
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.95,
+        "epsilon_cl": 0.01,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.95,
+        "scaled": true,
+        "max_abs_a": 1.566659
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 1.0,
+          "x_final": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.999577655314673,
+          "D_std": 0.0028506695242870644
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7351246018220257,
+          "D_std": 0.14280894940088645
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.95,
+        "epsilon_cl": 0.01,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.95,
+        "scaled": true,
+        "max_abs_a": 1.566659
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 1.0,
+          "x_final": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.999577655314673,
+          "D_std": 0.0028506695242870644
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7351246018220257,
+          "D_std": 0.14280894940088645
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.95,
+        "epsilon_cl": 0.01,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.95,
+        "scaled": true,
+        "max_abs_a": 1.566659
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 1.0,
+          "x_final": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.999577655314673,
+          "D_std": 0.0028506695242870644
+        },
+        "K_q_abs": {
+          "K": 0.999,
+          "D": 0.7351246018220257,
+          "D_std": 0.14280894940088645
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.001,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.999,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.999,
+        "K_q_deg_vs_K_q_abs": 0.001
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.95,
+        "epsilon_cl": 0.05,
+        "delta": 0.05
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.95,
+        "scaled": true,
+        "max_abs_a": 1.566659
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 1.0,
+          "x_final": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.999577655314673,
+          "D_std": 0.0028506695242870644
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7351246018220257,
+          "D_std": 0.14280894940088645
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.95,
+        "epsilon_cl": 0.05,
+        "delta": 0.1
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.95,
+        "scaled": true,
+        "max_abs_a": 1.566659
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 1.0,
+          "x_final": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.999577655314673,
+          "D_std": 0.0028506695242870644
+        },
+        "K_q_abs": {
+          "K": 1.0,
+          "D": 0.7351246018220257,
+          "D_std": 0.14280894940088645
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.0,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 1.0,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 1.0,
+        "K_q_deg_vs_K_q_abs": 0.0
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    },
+    {
+      "config": {
+        "rho_floor": 0.95,
+        "epsilon_cl": 0.05,
+        "delta": 0.2
+      },
+      "A_info": {
+        "rho_original": 0.021975,
+        "rho_effective": 0.95,
+        "scaled": true,
+        "max_abs_a": 1.566659
+      },
+      "operators": {
+        "K_leontief": {
+          "K": 1,
+          "D": 1.0,
+          "x_final": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "K_cl": {
+          "K": 0,
+          "D": 0.0,
+          "x_final": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "K_DR": {
+          "K": 0,
+          "D": 0.335212,
+          "x_final": [
+            0.3,
+            0.6,
+            0.3
+          ]
+        },
+        "K_q_deg": {
+          "K": 1.0,
+          "D": 0.999577655314673,
+          "D_std": 0.0028506695242870644
+        },
+        "K_q_abs": {
+          "K": 0.999,
+          "D": 0.7351246018220257,
+          "D_std": 0.14280894940088645
+        }
+      },
+      "pairwise_dK": {
+        "K_leontief_vs_K_cl": 1,
+        "K_leontief_vs_K_DR": 1,
+        "K_leontief_vs_K_q_deg": 0.0,
+        "K_leontief_vs_K_q_abs": 0.001,
+        "K_cl_vs_K_DR": 0,
+        "K_cl_vs_K_q_deg": 1.0,
+        "K_cl_vs_K_q_abs": 0.999,
+        "K_DR_vs_K_q_deg": 1.0,
+        "K_DR_vs_K_q_abs": 0.999,
+        "K_q_deg_vs_K_q_abs": 0.001
+      },
+      "max_pairwise_dK": 1,
+      "is_marginal": false,
+      "is_working_region": false
+    }
+  ]
+}

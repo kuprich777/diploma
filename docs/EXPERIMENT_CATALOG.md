@@ -1,8 +1,25 @@
 # Каталог экспериментов
 
-> Описывает все сценарии, прогнанные через `SDEIntegrator` (ветка `newresearch`).  
-> Параметры: A_wiod_v3, C=[0.8832, 0.6463, 0.9280], σ=[0.259, 0.232, 0.259], N=1000.  
-> Фактические результаты: `results/experiment_summary.json`, `results/mc_runs/`.
+> Источник истины по каталогу сценариев —
+> [`docs/methodology/METHODOLOGY_FINAL.md`](methodology/METHODOLOGY_FINAL.md) §6
+> (Таблица 5 — синтетические, Таблица 6 — исторические).
+>
+> Описывает все сценарии, прогнанные через `SDEIntegrator` + cascade-операторы (ветка `newmain`).
+> Параметры: A_wiod_v3, C=[0.8832, 0.6463, 0.9280], σ=[0.259, 0.232, 0.259], N=1000.
+> Фактические результаты: `results/experiment_summary.json`, `results/mc_runs/`,
+> `results/stage3_operator_comparison.json`, `results/stage4_mc_15x3.json`,
+> `results/stage4_loo_robustness.json`, `results/mae_comparison.json`.
+>
+> Разделы 1–2: SDE-сценарии (K_cl vs K_q). Раздел 10+: многооператорные этапы 3/4/4-ter/4-quint.
+>
+> **⚠ Расхождение значений матрицы.** Ниже приводится матрица `A_wiod_v3` в том виде,
+> в котором она применялась для экспериментов данного каталога
+> (`[[0, 0.350, 0.304], [0.006, 0, 0.001], [0.500, 0.332, 0]]`). Таблица 2 в
+> METHODOLOGY_FINAL.md фиксирует финальную редакцию с иными off-diagonal значениями
+> в строках energy/water (`[0.087]` и `[0.082, 0.020]`). Численные результаты в таблицах
+> ниже сохраняются для воспроизводимости; <!-- TODO: пересчёт на финальной матрице
+> из METHODOLOGY_FINAL.md §2.2, либо обновление Таблицы 2 по фактическому пути
+> калибровки. Решение оставлено автору. -->
 
 ---
 
@@ -13,7 +30,7 @@
 | A_wiod_v3 | [[0,0.350,0.304],[0.006,0,0.001],[0.500,0.332,0]] | WIOD 2016 NIOT, RUS+DEU+USA, 2014, rescale max=0.5 |
 | C (energy, water, transport) | 0.8832, 0.6463, 0.9280 | HAI 21.03 + DfT Road Safety |
 | σ (energy, water, transport) | 0.259, 0.232, 0.259 | P4_ST_PO, P3_LIT01, Kelmarsh proxy |
-| ρ | [0, 0, 0] | Не калиброван (TODO) |
+| ρ_A, ρ_rec, T_steps | 0.5, 0.3, 50 | Этап 4-ter рекалибровка, `results/diagnostics/rho_sweep.md` |
 | dt | 0.1 | Dimensionless |
 | δ | 0.10 | Порог количественного детектора |
 | α | 0.0 | Статическая A (основной эксперимент) |
@@ -201,7 +218,12 @@
 
 ---
 
-### REAL_christchurch_2011 — Землетрясение M6.3
+### REAL_christchurch_2011 — Землетрясение M6.3 (расширенная валидация)
+
+**Статус:** включается только в расширенную валидацию. Таблица 6
+METHODOLOGY_FINAL.md §6.2 содержит четыре основных исторических события
+(Балтимор 2024, Техас 2021, UCTE 2006, Индия 2012); Крайстчёрч сохраняется здесь
+как пятый опциональный сценарий-референс для класса multi-sector натуральных катастроф.
 
 **ID:** `REAL_christchurch_2011`  
 **Источник:** Canterbury Earthquakes Royal Commission (2012) «Volume 1: The Canterb​ury Earthquakes».  
@@ -259,3 +281,75 @@ S5_combined: Δ%=20.2% (предсатурированный режим, K_cl=0.
 **Структурный случай:**
 - REAL_europe_2006: K_cl≈0 (классический слеп), K_q=1.0 — количественный обнаруживает каскад, который классический пропускает полностью
 - Причина: C_transport=0.928 слишком высок для прямого срабатывания, но нарастание через A[transport,energy]=0.500 даёт Δx=0.25 >> δ=0.10
+
+---
+
+## Этап 3 — Сравнение трёх каскадных операторов (operator comparison)
+
+**Драйвер:** `scripts/run_operator_comparison.py`
+**Артефакт:** `results/stage3_operator_comparison.json`
+**Операторы:** Classical (бинарный), IIM iterative (линейный), NEVA/NLDR β=2 (нелинейный).
+Реализация: `services/risk_engine/cascade_operators.py`.
+
+**Постановка:** один унифицированный MC-прогон через `mc_harness.run_sde_once / run_iim_once /
+run_neva_once` на тех же самых σ-шумах (seed-reproducible), сравнение финальных состояний.
+
+**Цель:** выяснить, в каком спектральном режиме ($\rho$) операторы дают разные прогнозы —
+базовый скрининг для выбора оператора в дальнейших этапах.
+
+---
+
+## Этап 4 — MC 15×3 (15 сценариев × 3 оператора)
+
+**Драйвер:** `scripts/run_stage4_mc.py`
+**Артефакты:** `results/stage4_mc_15x3.json`, `results/stage4_loo_robustness.json`
+**Матрица:** `A_empirical_bayesian_v1` (байесовская калибровка поверх WIOD).
+**Сценарии:** 15 синтетических (S_energy_sev_*, S_water_sev_*, S_transport_sev_* с градациями
+амплитуд), каждый прогоняется тремя операторами при N=10³ MC.
+
+**Метрики на сценарий:**
+- $K_\text{cl}, K_q$ — как в SDE-модели
+- `median_final_delta` по секторам — для сравнения интенсивности
+- LOO-робастность: результаты при поочерёдном исключении каждого оператора/сектора
+  (`stage4_loo_robustness.json`) — проверка чувствительности выводов к отдельным кейсам
+
+---
+
+## Этап 4-ter — Рекалибровка ρ (rho recalibration)
+
+**Диагностика:** `results/diagnostics/rho_sweep.md`
+**Обоснование:** `docs/methodology/calibration_rationale.md`
+**Задача:** выбрать значения $\rho_A$ (коэффициент масштабирования A при построении A*)
+и $\rho_\text{rec}$ (естественного восстановления) + горизонт $T_\text{steps}$, чтобы
+итеративные операторы корректно сходились в окне наблюдения.
+
+**Итоговые значения:**
+
+| Параметр | Значение | Обоснование |
+|----------|:--------:|-------------|
+| $\rho_A$ | 0.5 | Спектральный радиус A после rescale (off-diag max=0.5) |
+| $\rho_\text{rec}$ | 0.3 | Скорость естественного восстановления (эмпирический выбор) |
+| $T_\text{steps}$ | 50 | Достаточно для сходимости IIM/NEVA при данном $\rho$ |
+
+---
+
+## Этап 4-quint — IIM canonical vs NLDR: MAE на 4 событиях
+
+**Драйвер:** `scripts/validation/mae_comparison.py`
+**Артефакт:** `results/mae_comparison.json`
+**Методология:** `docs/methodology/stage4_quint_iim_vs_nldr.md`
+
+**Операторы:**
+- IIM canonical: $q = (I - A^\star)^{-1}\,c^\star$ (закрытая форма, Haimes 2005 eq.11)
+- NLDR β=2: итеративный $x_i(t+1) = \mathrm{clip}(x_i(0) + \sum A_{ij}(1 - (1-x_j)^2))$
+
+**Матрица A*:** `data/calibration/A_star_iim_canonical.json`, $\rho(A^\star)=0.3955$
+(диагональное подобие $A^\star = D^{-1} A D$, $D = \mathrm{diag}(x_j)$ из WIOD NIOT).
+
+**События:** EUROPE_2006, TEXAS_2021, INDIA_2012, BALTIMORE_2024.
+Ground truth — иерархия: primary (`cascade_events.yaml`) > secondary (`validation_real_events.json`).
+
+**Результат:** MAE_IIM=0.1777, MAE_NLDR=0.2668, $\Delta=-50.2\%$ → H₁ **NOT_CONFIRMED**
+(IIM точнее NLDR при $\rho<0.4$). На 3 из 4 событий IIM лучше; на BALTIMORE_2024 NLDR лучше.
+
+Подробная таблица — `docs/RESULTS.md` § 7.

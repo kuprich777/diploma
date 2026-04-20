@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "sectors": [
+    "energy",
+    "water",
+    "transport"
+  ],
+  "prior": {
+    "type": "Beta(alpha, beta) per cell, conjugate Beta-Binomial",
+    "alpha_0": 1.0,
+    "beta_0": 1.0,
+    "justification": "Level 1 (Pescaroli & Alexander 2016 / Luiijf 2009) provides only initiator marginals and average fan-out, not cell-level conditional probabilities. Therefore cell-level prior is uninformative Beta(1,1)."
+  },
+  "likelihood": "Observed intensity x_k in [0,1] treated as fractional success; Beta(alpha_0+sum x, beta_0+n-sum x).",
+  "spectral_normalisation": {
+    "spectral_radius_before": 1.0000000000000002,
+    "cap": 0.95,
+    "rescale_factor": 0.9499999999999997,
+    "spectral_radius_after": 0.95,
+    "applied": true
+  },
+  "matrix_posterior_mean_raw": [
+    [
+      0.0,
+      0.5,
+      0.5
+    ],
+    [
+      0.5833333333333334,
+      0.0,
+      0.5
+    ],
+    [
+      0.4166666666666667,
+      0.5,
+      0.0
+    ]
+  ],
+  "matrix_posterior_mean_spectral_capped": [
+    [
+      0.0,
+      0.47499999999999987,
+      0.47499999999999987
+    ],
+    [
+      0.5541666666666666,
+      0.0,
+      0.47499999999999987
+    ],
+    [
+      0.39583333333333326,
+      0.47499999999999987,
+      0.0
+    ]
+  ],
+  "cell_details": {
+    "energy": {
+      "energy": {
+        "diagonal": true,
+        "value": 0.0
+      },
+      "water": {
+        "n_observations": 0,
+        "sum_intensities": 0.0,
+        "posterior_alpha": 1.0,
+        "posterior_beta": 1.0,
+        "posterior_mean": 0.5,
+        "posterior_std": 0.28867513459481287,
+        "ci_95_lo": 0.025,
+        "ci_95_hi": 0.975
+      },
+      "transport": {
+        "n_observations": 0,
+        "sum_intensities": 0.0,
+        "posterior_alpha": 1.0,
+        "posterior_beta": 1.0,
+        "posterior_mean": 0.5,
+        "posterior_std": 0.28867513459481287,
+        "ci_95_lo": 0.025,
+        "ci_95_hi": 0.975
+      }
+    },
+    "water": {
+      "energy": {
+        "n_observations": 1,
+        "sum_intensities": 0.75,
+        "posterior_alpha": 1.75,
+        "posterior_beta": 1.25,
+        "posterior_mean": 0.5833333333333334,
+        "posterior_std": 0.24650332429581734,
+        "ci_95_lo": 0.10239119817333829,
+        "ci_95_hi": 0.9686549412975178
+      },
+      "water": {
+        "diagonal": true,
+        "value": 0.0
+      },
+      "transport": {
+        "n_observations": 0,
+        "sum_intensities": 0.0,
+        "posterior_alpha": 1.0,
+        "posterior_beta": 1.0,
+        "posterior_mean": 0.5,
+        "posterior_std": 0.28867513459481287,
+        "ci_95_lo": 0.025,
+        "ci_95_hi": 0.975
+      }
+    },
+    "transport": {
+      "energy": {
+        "n_observations": 1,
+        "sum_intensities": 0.25,
+        "posterior_alpha": 1.25,
+        "posterior_beta": 1.75,
+        "posterior_mean": 0.4166666666666667,
+        "posterior_std": 0.24650332429581734,
+        "ci_95_lo": 0.03134505870248218,
+        "ci_95_hi": 0.8976088018266617
+      },
+      "water": {
+        "n_observations": 0,
+        "sum_intensities": 0.0,
+        "posterior_alpha": 1.0,
+        "posterior_beta": 1.0,
+        "posterior_mean": 0.5,
+        "posterior_std": 0.28867513459481287,
+        "ci_95_lo": 0.025,
+        "ci_95_hi": 0.975
+      },
+      "transport": {
+        "diagonal": true,
+        "value": 0.0
+      }
+    }
+  },
+  "level1_row_marginal_check": {
+    "energy": {
+      "posterior_col_sum": 0.9499999999999998,
+      "luiijf_avg_secondaries": 2.06,
+      "note": "Col sum ≈ expected impact count if each cell is interpreted as P(disrupt). Luiijf averages are counts over up to 2 other sectors (max 2 in 3-sector model)."
+    },
+    "water": {
+      "posterior_col_sum": 0.9499999999999997,
+      "luiijf_avg_secondaries": "NOT_DOCUMENTED_IN_SOURCE",
+      "note": "Col sum ≈ expected impact count if each cell is interpreted as P(disrupt). Luiijf averages are counts over up to 2 other sectors (max 2 in 3-sector model)."
+    },
+    "transport": {
+      "posterior_col_sum": 0.9499999999999997,
+      "luiijf_avg_secondaries": "NOT_DOCUMENTED_IN_SOURCE",
+      "note": "Col sum ≈ expected impact count if each cell is interpreted as P(disrupt). Luiijf averages are counts over up to 2 other sectors (max 2 in 3-sector model)."
+    }
+  },
+  "notes": [
+    "Cells with n=0 have posterior = prior = 0.5 (Beta(1,1) mean).",
+    "This is the honest representation of absence-of-evidence in our 4-event dataset.",
+    "Coverage: 2/6 off-diagonal cells have informative (n>=1) data."
+  ]
+}

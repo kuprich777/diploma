@@ -1,0 +1,1045 @@
+{
+  "version": "v2.3.e (scope-refined)",
+  "methodology_ref": "METHODOLOGY.md v2.4 §2.4.3 (scope) + §2.4.2 (dual-family)",
+  "scope_criterion": "|A[recv, init]| >= 0.10",
+  "scope_artifact": "results/scope_refinement_v23e.json",
+  "source_artifact": "results/baselines_comparison_v23c.json",
+  "metric_form": "K_q^CVaR centered (paired difference, METHODOLOGY §3.4)",
+  "params": {
+    "n_pairs": 29,
+    "n_sectors": 5,
+    "N_MC": 5000,
+    "B_BOOTSTRAP": 10000,
+    "T_STEPS": 60,
+    "DT": 1.0,
+    "ALPHA_TAIL": 0.05,
+    "FWER_alpha": 0.05,
+    "fwer_correction": "Holm-Bonferroni",
+    "n_tests": 87,
+    "SIGMA_VKR_5": [
+      0.152,
+      0.118,
+      0.023216726828014626,
+      0.000267,
+      0.002348
+    ],
+    "C_5": [
+      0.883,
+      0.646,
+      0.928,
+      0.9,
+      0.75
+    ],
+    "SECTOR_KEYS_5": [
+      "e",
+      "w",
+      "tau",
+      "ict",
+      "Q"
+    ],
+    "A_5sector_path": "data/calibration/A_5sector.json",
+    "spectral_radius_A": 0.451115,
+    "MU_X0": 0.3,
+    "n_tests_in_holm": 24,
+    "acceptance_threshold": 0.9,
+    "primary_baselines": [
+      "K_DIIM",
+      "K_DebtRank"
+    ],
+    "context_baseline": "K_cl_IIM",
+    "scope_threshold": 0.1,
+    "n_included": 12,
+    "n_excluded": 17
+  },
+  "data_included": [
+    {
+      "sid": "S4_water_degradation",
+      "zone": "M*",
+      "initiator": "w",
+      "i_recv": "e",
+      "alpha": 0.7,
+      "theta_node": 0.7,
+      "i_recv_index": 0,
+      "A_value": 0.350078,
+      "K_cl_IIM": 0.4000987533534834,
+      "K_DIIM": 0.24505459999999998,
+      "K_DebtRank": 0.24505459999999998,
+      "K_q_centered": 0.2757656898578519,
+      "diff_a_point": -0.12433306349563195,
+      "ci95_a": [
+        -0.13308343277234347,
+        -0.1146456739454906
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": false,
+      "diff_b_point": 0.030711089857851454,
+      "ci95_b": [
+        0.021960720581139934,
+        0.04039847940799279
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.030711089857851454,
+      "ci95_c": [
+        0.021960720581139934,
+        0.04039847940799279
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "S4_water_degradation",
+      "zone": "M*",
+      "initiator": "w",
+      "i_recv": "tau",
+      "alpha": 0.7,
+      "theta_node": 0.7,
+      "i_recv_index": 2,
+      "A_value": 0.331331,
+      "K_cl_IIM": 0.4490701909633835,
+      "K_DIIM": 0.23193169999999996,
+      "K_DebtRank": 0.23193169999999996,
+      "K_q_centered": 0.21926131349561104,
+      "diff_a_point": -0.22980887746777126,
+      "ci95_a": [
+        -0.234377032067144,
+        -0.22596330712678886
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": false,
+      "diff_b_point": -0.012670386504387704,
+      "ci95_b": [
+        -0.017238541103760434,
+        -0.008824816163405311
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": false,
+      "diff_c_point": -0.012670386504387704,
+      "ci95_c": [
+        -0.017238541103760434,
+        -0.008824816163405311
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": false
+    },
+    {
+      "sid": "S1b_energy_partial",
+      "zone": "M*",
+      "initiator": "e",
+      "i_recv": "tau",
+      "alpha": 0.01,
+      "theta_node": 0.7,
+      "i_recv_index": 2,
+      "A_value": 0.5,
+      "K_cl_IIM": 0.006279424010509914,
+      "K_DIIM": 0.005,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.0054537156701740044,
+      "diff_a_point": -0.0008257083403359093,
+      "ci95_a": [
+        -0.0009949261239220707,
+        -0.0006286601015676498
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": false,
+      "diff_b_point": 0.00045371567017400433,
+      "ci95_b": [
+        0.00028449788658784295,
+        0.0006507639089422639
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.0054537156701740044,
+      "ci95_c": [
+        0.005284497886587843,
+        0.005650763908942264
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "S3_transport_load",
+      "zone": "out_M*",
+      "initiator": "tau",
+      "i_recv": "e",
+      "alpha": 0.4,
+      "theta_node": 0.7,
+      "i_recv_index": 0,
+      "A_value": 0.304667,
+      "K_cl_IIM": 0.15862098479459336,
+      "K_DIIM": 0.12186680000000001,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.15867976191433183,
+      "diff_a_point": 5.8777119738562256e-05,
+      "ci95_a": [
+        -0.0068167598902206875,
+        0.007400739753180508
+      ],
+      "p_a_raw": 0.9996,
+      "p_a_holm_context": 0.9996,
+      "ci_a_lo_positive_context": false,
+      "diff_b_point": 0.03681296191433191,
+      "ci95_b": [
+        0.029937424904372657,
+        0.04415492454777385
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.15867976191433192,
+      "ci95_c": [
+        0.15180422490437268,
+        0.16602172454777386
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "HIST_baltimore_2024",
+      "zone": "hist",
+      "initiator": "tau",
+      "i_recv": "e",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "i_recv_index": 0,
+      "A_value": 0.304667,
+      "K_cl_IIM": 0.11896573859594499,
+      "K_DIIM": 0.0914001,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.13215481847533211,
+      "diff_a_point": 0.013189079879387208,
+      "ci95_a": [
+        0.006547273295888446,
+        0.02020214831615452
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": true,
+      "diff_b_point": 0.0407547184753322,
+      "ci95_b": [
+        0.034112911891833436,
+        0.04776778691209951
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.1321548184753322,
+      "ci95_c": [
+        0.12551301189183345,
+        0.1391678869120995
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "HIST_ucte_2006",
+      "zone": "hist",
+      "initiator": "e",
+      "i_recv": "tau",
+      "alpha": 0.05,
+      "theta_node": 0.75,
+      "i_recv_index": 2,
+      "A_value": 0.5,
+      "K_cl_IIM": 0.03139712005254957,
+      "K_DIIM": 0.025,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.026413162194555882,
+      "diff_a_point": -0.004983957857993809,
+      "ci95_a": [
+        -0.005657427141992116,
+        -0.004224994823551195
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": false,
+      "diff_b_point": 0.0014131621945557594,
+      "ci95_b": [
+        0.0007396929105574526,
+        0.0021721252289983732
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.02641316219455576,
+      "ci95_c": [
+        0.025739692910557454,
+        0.027172125228998374
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "HIST_texas_2021_tau",
+      "zone": "hist",
+      "initiator": "e",
+      "i_recv": "tau",
+      "alpha": 0.37,
+      "theta_node": 0.7,
+      "i_recv_index": 2,
+      "A_value": 0.5,
+      "K_cl_IIM": 0.2323386883888668,
+      "K_DIIM": 0.185,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.18574241138684455,
+      "diff_a_point": -0.046596277002022485,
+      "ci95_a": [
+        -0.04733868838886676,
+        -0.04549445153489712
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": false,
+      "diff_b_point": 0.000742411386844305,
+      "ci95_b": [
+        2.7755575615628914e-17,
+        0.0018442368539696719
+      ],
+      "p_b_raw": 0.0004,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.1857424113868443,
+      "ci95_c": [
+        0.18500000000000003,
+        0.18684423685396967
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "HIST_india_2012",
+      "zone": "hist",
+      "initiator": "e",
+      "i_recv": "tau",
+      "alpha": 0.59,
+      "theta_node": 0.7,
+      "i_recv_index": 2,
+      "A_value": 0.5,
+      "K_cl_IIM": 0.3704860166200849,
+      "K_DIIM": 0.295,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.2612154455228242,
+      "diff_a_point": -0.10927057109726102,
+      "ci95_a": [
+        -0.11684705308557516,
+        -0.1021023725176961
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": false,
+      "diff_b_point": -0.0337845544771761,
+      "ci95_b": [
+        -0.04136103646549025,
+        -0.026616355897611185
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": false,
+      "diff_c_point": 0.2612154455228239,
+      "ci95_c": [
+        0.2536389635345097,
+        0.2683836441023888
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "S5_ict_partial",
+      "zone": "M*",
+      "initiator": "ict",
+      "i_recv": "e",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "i_recv_index": 0,
+      "A_value": 0.189473,
+      "K_cl_IIM": 0.09102817040664579,
+      "K_DIIM": 0.0568419,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.1062262782318638,
+      "diff_a_point": 0.015198107825218007,
+      "ci95_a": [
+        0.008088104946608806,
+        0.022463792729017877
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": true,
+      "diff_b_point": 0.0493843782318638,
+      "ci95_b": [
+        0.042274375353254595,
+        0.05665006313566367
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.1062262782318638,
+      "ci95_c": [
+        0.0991162753532546,
+        0.11349196313566366
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "S5_ict_partial",
+      "zone": "M*",
+      "initiator": "ict",
+      "i_recv": "tau",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "i_recv_index": 2,
+      "A_value": 0.180941,
+      "K_cl_IIM": 0.1025173475138698,
+      "K_DIIM": 0.0542823,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.05852387141713724,
+      "diff_a_point": -0.04399347609673286,
+      "ci95_a": [
+        -0.04606137183614858,
+        -0.041643786341383646
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": false,
+      "diff_b_point": 0.004241571417136943,
+      "ci95_b": [
+        0.002173675677721226,
+        0.006591261172486158
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.05852387141713694,
+      "ci95_c": [
+        0.056455975677721225,
+        0.06087356117248616
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "S6_healthcare_partial",
+      "zone": "M*",
+      "initiator": "Q",
+      "i_recv": "e",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "i_recv_index": 0,
+      "A_value": 0.185945,
+      "K_cl_IIM": 0.08807706714978011,
+      "K_DIIM": 0.0557835,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.10223279226373008,
+      "diff_a_point": 0.01415572511394983,
+      "ci95_a": [
+        0.007366857913716753,
+        0.021201667887256578
+      ],
+      "p_a_raw": 0.0002,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": true,
+      "diff_b_point": 0.046449292263729944,
+      "ci95_b": [
+        0.03966042506349687,
+        0.053495235037036695
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.10223279226372994,
+      "ci95_c": [
+        0.09544392506349687,
+        0.1092787350370367
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    },
+    {
+      "sid": "HIST_century_link_2018",
+      "zone": "hist",
+      "initiator": "ict",
+      "i_recv": "tau",
+      "alpha": 0.55,
+      "theta_node": 0.7,
+      "i_recv_index": 2,
+      "A_value": 0.180941,
+      "K_cl_IIM": 0.18794847044209467,
+      "K_DIIM": 0.09951755,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.10387656031291809,
+      "diff_a_point": -0.08407191012917689,
+      "ci95_a": [
+        -0.08652628037676789,
+        -0.08113160539267279
+      ],
+      "p_a_raw": 0.0001,
+      "p_a_holm_context": 0.0012000000000000001,
+      "ci_a_lo_positive_context": false,
+      "diff_b_point": 0.004359010312917785,
+      "ci95_b": [
+        0.0019046400653267817,
+        0.007299315049421891
+      ],
+      "p_b_raw": 0.0001,
+      "p_b_holm_dual": 0.0024000000000000002,
+      "ci_b_lo_positive_holm": true,
+      "diff_c_point": 0.10387656031291778,
+      "ci95_c": [
+        0.10142219006532678,
+        0.10681686504942188
+      ],
+      "p_c_raw": 0.0001,
+      "p_c_holm_dual": 0.0024000000000000002,
+      "ci_c_lo_positive_holm": true
+    }
+  ],
+  "data_excluded_diagnostic": [
+    {
+      "sid": "S1b_energy_partial",
+      "zone": "M*",
+      "initiator": "e",
+      "i_recv": "w",
+      "alpha": 0.01,
+      "theta_node": 0.7,
+      "A_value": 0.006017,
+      "K_cl_IIM": 8.585163532879385e-05,
+      "K_DIIM": 6.017e-05,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.00020043592674047578,
+      "diff_a_point": 0.00011458429141168193,
+      "ci95_a": [
+        0.00010721698424391979,
+        0.00012191615325718871
+      ],
+      "diff_b_point": 0.0001402659267404758,
+      "ci95_b": [
+        0.00013289861957271364,
+        0.00014759778858598258
+      ],
+      "diff_c_point": 0.00020043592674047578,
+      "ci95_c": [
+        0.00019306861957271362,
+        0.00020776778858598257
+      ],
+      "out_of_scope_reason": "|A| = 0.0060 < 0.10"
+    },
+    {
+      "sid": "S3_transport_load",
+      "zone": "out_M*",
+      "initiator": "tau",
+      "i_recv": "w",
+      "alpha": 0.4,
+      "theta_node": 0.7,
+      "A_value": 0.001742,
+      "K_cl_IIM": 0.0018935459774430427,
+      "K_DIIM": 0.0007952679116,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.0028870006351568705,
+      "diff_a_point": 0.00099345465771383,
+      "ci95_a": [
+        0.0008859941964100644,
+        0.0011004050486221528
+      ],
+      "diff_b_point": 0.0020917327235568726,
+      "ci95_b": [
+        0.001984272262253107,
+        0.0021986831144651955
+      ],
+      "diff_c_point": 0.0028870006351568727,
+      "ci95_c": [
+        0.002779540173853107,
+        0.0029939510260651955
+      ],
+      "out_of_scope_reason": "|A| = 0.0017 < 0.10"
+    },
+    {
+      "sid": "HIST_texas_2021_w",
+      "zone": "hist",
+      "initiator": "e",
+      "i_recv": "w",
+      "alpha": 0.37,
+      "theta_node": 0.7,
+      "A_value": 0.006017,
+      "K_cl_IIM": 0.0031765105071653718,
+      "K_DIIM": 0.0022262899999999997,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.005684000057528862,
+      "diff_a_point": 0.002507489550363488,
+      "ci95_a": [
+        0.0023757684594931778,
+        0.002645009649830145
+      ],
+      "diff_b_point": 0.0034577100575288603,
+      "ci95_b": [
+        0.00332598896665855,
+        0.003595230156995517
+      ],
+      "diff_c_point": 0.00568400005752886,
+      "ci95_c": [
+        0.00555227896665855,
+        0.005821520156995517
+      ],
+      "out_of_scope_reason": "|A| = 0.0060 < 0.10"
+    },
+    {
+      "sid": "S5_ict_partial",
+      "zone": "M*",
+      "initiator": "ict",
+      "i_recv": "w",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "A_value": 0.001774,
+      "K_cl_IIM": 0.0012838940077237507,
+      "K_DIIM": 0.0005321999999999999,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.0034296848557627824,
+      "diff_a_point": 0.002145790848039031,
+      "ci95_a": [
+        0.0020646315049243436,
+        0.0022290874665389913
+      ],
+      "diff_b_point": 0.002897484855762782,
+      "ci95_b": [
+        0.0028163255126480943,
+        0.002980781474262742
+      ],
+      "diff_c_point": 0.003429684855762782,
+      "ci95_c": [
+        0.0033485255126480943,
+        0.003512981474262742
+      ],
+      "out_of_scope_reason": "|A| = 0.0018 < 0.10"
+    },
+    {
+      "sid": "S5_ict_partial",
+      "zone": "M*",
+      "initiator": "ict",
+      "i_recv": "Q",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "A_value": 0.002352,
+      "K_cl_IIM": 0.0011357057825523058,
+      "K_DIIM": 0.0007055999999999999,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.0036202681426782007,
+      "diff_a_point": 0.002484562360125895,
+      "ci95_a": [
+        0.002442226576769368,
+        0.0025267561947169173
+      ],
+      "diff_b_point": 0.002914668142678201,
+      "ci95_b": [
+        0.002872332359321674,
+        0.0029568619772692233
+      ],
+      "diff_c_point": 0.0036202681426782007,
+      "ci95_c": [
+        0.003577932359321674,
+        0.003662461977269223
+      ],
+      "out_of_scope_reason": "|A| = 0.0024 < 0.10"
+    },
+    {
+      "sid": "S6_healthcare_partial",
+      "zone": "M*",
+      "initiator": "Q",
+      "i_recv": "w",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "A_value": 0.003463,
+      "K_cl_IIM": 0.0017774893811401743,
+      "K_DIIM": 0.0010389,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.05975405914042364,
+      "diff_a_point": 0.05797656975928348,
+      "ci95_a": [
+        0.05726368483572355,
+        0.05858826729503914
+      ],
+      "diff_b_point": 0.058715159140423655,
+      "ci95_b": [
+        0.05800227421686372,
+        0.05932685667617931
+      ],
+      "diff_c_point": 0.05975405914042366,
+      "ci95_c": [
+        0.05904117421686372,
+        0.060365756676179314
+      ],
+      "out_of_scope_reason": "|A| = 0.0035 < 0.10"
+    },
+    {
+      "sid": "S6_healthcare_partial",
+      "zone": "M*",
+      "initiator": "Q",
+      "i_recv": "tau",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "A_value": 0.094039,
+      "K_cl_IIM": 0.07982367501109479,
+      "K_DIIM": 0.0333580476039,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.03181043621531997,
+      "diff_a_point": -0.04801323879577473,
+      "ci95_a": [
+        -0.04960063402525767,
+        -0.04621221558526842
+      ],
+      "diff_b_point": -0.0015476113885799433,
+      "ci95_b": [
+        -0.0031350066180628805,
+        0.0002534118219263678
+      ],
+      "diff_c_point": 0.03181043621532006,
+      "ci95_c": [
+        0.03022304098583712,
+        0.03361145942582637
+      ],
+      "out_of_scope_reason": "|A| = 0.0940 < 0.10"
+    },
+    {
+      "sid": "S6_healthcare_partial",
+      "zone": "M*",
+      "initiator": "Q",
+      "i_recv": "ict",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "A_value": 0.09436,
+      "K_cl_IIM": 0.03837629323714596,
+      "K_DIIM": 0.028308,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.11752192714348636,
+      "diff_a_point": 0.0791456339063405,
+      "ci95_a": [
+        0.07697497622153159,
+        0.0809258304425658
+      ],
+      "diff_b_point": 0.08921392714348646,
+      "ci95_b": [
+        0.08704326945867755,
+        0.09099412367971176
+      ],
+      "diff_c_point": 0.11752192714348646,
+      "ci95_c": [
+        0.11535126945867755,
+        0.11930212367971176
+      ],
+      "out_of_scope_reason": "|A| = 0.0944 < 0.10"
+    },
+    {
+      "sid": "S7_ict_severe",
+      "zone": "out_M*",
+      "initiator": "ict",
+      "i_recv": "Q",
+      "alpha": 0.7,
+      "theta_node": 0.7,
+      "A_value": 0.002352,
+      "K_cl_IIM": 0.0026499801592887134,
+      "K_DIIM": 0.0016464,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.0056885587603595095,
+      "diff_a_point": 0.003038578601070797,
+      "ci95_a": [
+        0.0029632357949521564,
+        0.0031144593339110546
+      ],
+      "diff_b_point": 0.00404215876035951,
+      "ci95_b": [
+        0.00396681595424087,
+        0.004118039493199768
+      ],
+      "diff_c_point": 0.00568855876035951,
+      "ci95_c": [
+        0.00561321595424087,
+        0.005764439493199768
+      ],
+      "out_of_scope_reason": "|A| = 0.0024 < 0.10"
+    },
+    {
+      "sid": "S8_healthcare_severe",
+      "zone": "out_M*",
+      "initiator": "Q",
+      "i_recv": "ict",
+      "alpha": 0.7,
+      "theta_node": 0.7,
+      "A_value": 0.09436,
+      "K_cl_IIM": 0.08954468422000725,
+      "K_DIIM": 0.066052,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.21402650235037465,
+      "diff_a_point": 0.12448181813036757,
+      "ci95_a": [
+        0.1234759219358295,
+        0.1255124603784066
+      ],
+      "diff_b_point": 0.14797450235037482,
+      "ci95_b": [
+        0.14696860615583676,
+        0.14900514459841385
+      ],
+      "diff_c_point": 0.21402650235037482,
+      "ci95_c": [
+        0.21302060615583676,
+        0.21505714459841385
+      ],
+      "out_of_scope_reason": "|A| = 0.0944 < 0.10"
+    },
+    {
+      "sid": "HIST_t_mobile_2020",
+      "zone": "hist",
+      "initiator": "ict",
+      "i_recv": "Q",
+      "alpha": 0.1,
+      "theta_node": 0.7,
+      "A_value": 0.002352,
+      "K_cl_IIM": 0.00037856859418410196,
+      "K_DIIM": 0.0002352,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.0014111179679349051,
+      "diff_a_point": 0.001032549373750803,
+      "ci95_a": [
+        0.0010166074889734387,
+        0.0010487400433689205
+      ],
+      "diff_b_point": 0.001175917967934905,
+      "ci95_b": [
+        0.0011599760831575406,
+        0.0011921086375530224
+      ],
+      "diff_c_point": 0.0014111179679349051,
+      "ci95_c": [
+        0.0013951760831575407,
+        0.0014273086375530225
+      ],
+      "out_of_scope_reason": "|A| = 0.0024 < 0.10"
+    },
+    {
+      "sid": "HIST_century_link_2018",
+      "zone": "hist",
+      "initiator": "ict",
+      "i_recv": "Q",
+      "alpha": 0.55,
+      "theta_node": 0.7,
+      "A_value": 0.002352,
+      "K_cl_IIM": 0.0020821272680125605,
+      "K_DIIM": 0.0012936,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.0054590091921094715,
+      "diff_a_point": 0.0033768819240969092,
+      "ci95_a": [
+        0.0033054345360008742,
+        0.0034489928073596285
+      ],
+      "diff_b_point": 0.00416540919210947,
+      "ci95_b": [
+        0.004093961804013435,
+        0.004237520075372189
+      ],
+      "diff_c_point": 0.00545900919210947,
+      "ci95_c": [
+        0.005387561804013435,
+        0.005531120075372189
+      ],
+      "out_of_scope_reason": "|A| = 0.0024 < 0.10"
+    },
+    {
+      "sid": "HIST_change_healthcare_2024",
+      "zone": "hist",
+      "initiator": "ict",
+      "i_recv": "Q",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "A_value": 0.002352,
+      "K_cl_IIM": 0.0011357057825523058,
+      "K_DIIM": 0.0007055999999999999,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.0036597376480717388,
+      "diff_a_point": 0.002524031865519433,
+      "ci95_a": [
+        0.0024779922663418275,
+        0.0025720043309551575
+      ],
+      "diff_b_point": 0.002954137648071739,
+      "ci95_b": [
+        0.0029080980488941336,
+        0.0030021101135074635
+      ],
+      "diff_c_point": 0.0036597376480717388,
+      "ci95_c": [
+        0.0036136980488941334,
+        0.0037077101135074633
+      ],
+      "out_of_scope_reason": "|A| = 0.0024 < 0.10"
+    },
+    {
+      "sid": "HIST_texas_2021_ict",
+      "zone": "hist",
+      "initiator": "e",
+      "i_recv": "ict",
+      "alpha": 0.37,
+      "theta_node": 0.7,
+      "A_value": 0.038071,
+      "K_cl_IIM": 0.03655841885138604,
+      "K_DIIM": 0.015433343824789999,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.05164488543665708,
+      "diff_a_point": 0.015086466585271067,
+      "ci95_a": [
+        0.01361998591141865,
+        0.01653743893507404
+      ],
+      "diff_b_point": 0.03621154161186711,
+      "ci95_b": [
+        0.03474506093801469,
+        0.037662513961670085
+      ],
+      "diff_c_point": 0.05164488543665711,
+      "ci95_c": [
+        0.05017840476280469,
+        0.05309585778646008
+      ],
+      "out_of_scope_reason": "|A| = 0.0381 < 0.10"
+    },
+    {
+      "sid": "HIST_texas_2021_Q",
+      "zone": "hist",
+      "initiator": "e",
+      "i_recv": "Q",
+      "alpha": 0.37,
+      "theta_node": 0.7,
+      "A_value": 0.001596,
+      "K_cl_IIM": 0.0013844050380059615,
+      "K_DIIM": 0.00059052,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.002503458311418543,
+      "diff_a_point": 0.0011190532734125815,
+      "ci95_a": [
+        0.0010605360085188039,
+        0.0011769607905911088
+      ],
+      "diff_b_point": 0.001912938311418543,
+      "ci95_b": [
+        0.0018544210465247654,
+        0.0019708458285970704
+      ],
+      "diff_c_point": 0.002503458311418543,
+      "ci95_c": [
+        0.0024449410465247653,
+        0.00256136582859707
+      ],
+      "out_of_scope_reason": "|A| = 0.0016 < 0.10"
+    },
+    {
+      "sid": "HIST_india_2012_ict",
+      "zone": "hist",
+      "initiator": "e",
+      "i_recv": "ict",
+      "alpha": 0.59,
+      "theta_node": 0.7,
+      "A_value": 0.038071,
+      "K_cl_IIM": 0.05829585708734532,
+      "K_DIIM": 0.02460992663953,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.07004944604386804,
+      "diff_a_point": 0.011753588956522731,
+      "ci95_a": [
+        0.009211916982743729,
+        0.014359408991862731
+      ],
+      "diff_b_point": 0.04543951940433805,
+      "ci95_b": [
+        0.04289784743055904,
+        0.04804533943967805
+      ],
+      "diff_c_point": 0.07004944604386805,
+      "ci95_c": [
+        0.06750777407008905,
+        0.07265526607920805
+      ],
+      "out_of_scope_reason": "|A| = 0.0381 < 0.10"
+    },
+    {
+      "sid": "HIST_india_2012_Q",
+      "zone": "hist",
+      "initiator": "e",
+      "i_recv": "Q",
+      "alpha": 0.59,
+      "theta_node": 0.7,
+      "A_value": 0.001596,
+      "K_cl_IIM": 0.002207564790333831,
+      "K_DIIM": 0.00094164,
+      "K_DebtRank": 0.0,
+      "K_q_centered": 0.003455204741795341,
+      "diff_a_point": 0.0012476399514615103,
+      "ci95_a": [
+        0.0011400550996583058,
+        0.0013564056403833488
+      ],
+      "diff_b_point": 0.002513564741795341,
+      "ci95_b": [
+        0.0024059798899921363,
+        0.0026223304307171793
+      ],
+      "diff_c_point": 0.003455204741795341,
+      "ci95_c": [
+        0.0033476198899921364,
+        0.0035639704307171794
+      ],
+      "out_of_scope_reason": "|A| = 0.0016 < 0.10"
+    }
+  ],
+  "summary": {
+    "n_pairs_total": 29,
+    "n_included": 12,
+    "n_excluded": 17,
+    "n_tests_in_holm": 24,
+    "primary_baselines": [
+      "K_DIIM",
+      "K_DebtRank"
+    ],
+    "context_baseline": "K_cl_IIM",
+    "acceptance_threshold": 0.9,
+    "threshold_pass_count": 11,
+    "h1_b_acceptance": "10/12",
+    "h1_c_acceptance": "11/12",
+    "verdict_h1_b": "ОТВЕРГНУТА",
+    "verdict_h1_c": "ПРИНЯТА",
+    "h1_family_verdict": "ОТВЕРГНУТА",
+    "context_h1_a_vs_iim": "3/12",
+    "context_note": "K_cl_IIM (Хаймса–Сантос 2001) — equilibrium-метод; не входит в семейную гипотезу H₁ (см. METHODOLOGY §2.4.4).",
+    "min_ci_lo_a_context": -0.234377032067144,
+    "min_ci_lo_b": -0.04136103646549025,
+    "min_ci_lo_c": -0.017238541103760434,
+    "weakest_pairs": {
+      "b": "HIST_india_2012 → tau",
+      "c": "S4_water_degradation → tau"
+    }
+  },
+  "elapsed_sec": 0.0,
+  "generated_at": "2026-05-04T13:20:25Z",
+  "execution_environment": {
+    "platform": "linux",
+    "platform_full": "Linux-6.11.11-linuxkit-aarch64-with-glibc2.41",
+    "python_executable": "/usr/local/bin/python",
+    "python_version": "3.11.15",
+    "hostname": "e281915c5142",
+    "image_digest": "local-dev",
+    "container_id": "e281915c5142"
+  }
+}

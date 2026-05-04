@@ -1,0 +1,310 @@
+{
+  "version": "v2.3.e (scope-refined)",
+  "methodology_ref": "METHODOLOGY.md v2.4 §2.4.3",
+  "criterion": "|A[recv, init]| >= 0.10",
+  "threshold": 0.1,
+  "matrix_source": "data/calibration/A_5sector.json (A_scaled, 5×5)",
+  "sector_keys": [
+    "e",
+    "w",
+    "tau",
+    "ict",
+    "Q"
+  ],
+  "n_total": 29,
+  "n_included": 12,
+  "n_excluded": 17,
+  "n_tests_in_holm_dual": 24,
+  "included_pairs": [
+    {
+      "sid": "S4_water_degradation",
+      "init": "w",
+      "recv": "e",
+      "alpha": 0.7,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.350078
+    },
+    {
+      "sid": "S4_water_degradation",
+      "init": "w",
+      "recv": "tau",
+      "alpha": 0.7,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.331331
+    },
+    {
+      "sid": "S1b_energy_partial",
+      "init": "e",
+      "recv": "tau",
+      "alpha": 0.01,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.5
+    },
+    {
+      "sid": "S3_transport_load",
+      "init": "tau",
+      "recv": "e",
+      "alpha": 0.4,
+      "theta_node": 0.7,
+      "zone": "out_M*",
+      "A_value": 0.304667
+    },
+    {
+      "sid": "HIST_baltimore_2024",
+      "init": "tau",
+      "recv": "e",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.304667
+    },
+    {
+      "sid": "HIST_ucte_2006",
+      "init": "e",
+      "recv": "tau",
+      "alpha": 0.05,
+      "theta_node": 0.75,
+      "zone": "hist",
+      "A_value": 0.5
+    },
+    {
+      "sid": "HIST_texas_2021_tau",
+      "init": "e",
+      "recv": "tau",
+      "alpha": 0.37,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.5
+    },
+    {
+      "sid": "HIST_india_2012",
+      "init": "e",
+      "recv": "tau",
+      "alpha": 0.59,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.5
+    },
+    {
+      "sid": "S5_ict_partial",
+      "init": "ict",
+      "recv": "e",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.189473
+    },
+    {
+      "sid": "S5_ict_partial",
+      "init": "ict",
+      "recv": "tau",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.180941
+    },
+    {
+      "sid": "S6_healthcare_partial",
+      "init": "Q",
+      "recv": "e",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.185945
+    },
+    {
+      "sid": "HIST_century_link_2018",
+      "init": "ict",
+      "recv": "tau",
+      "alpha": 0.55,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.180941
+    }
+  ],
+  "excluded_pairs": [
+    {
+      "sid": "S1b_energy_partial",
+      "init": "e",
+      "recv": "w",
+      "alpha": 0.01,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.006017,
+      "reason": "|A| = 0.0060 < 0.1"
+    },
+    {
+      "sid": "S3_transport_load",
+      "init": "tau",
+      "recv": "w",
+      "alpha": 0.4,
+      "theta_node": 0.7,
+      "zone": "out_M*",
+      "A_value": 0.001742,
+      "reason": "|A| = 0.0017 < 0.1"
+    },
+    {
+      "sid": "HIST_texas_2021_w",
+      "init": "e",
+      "recv": "w",
+      "alpha": 0.37,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.006017,
+      "reason": "|A| = 0.0060 < 0.1"
+    },
+    {
+      "sid": "S5_ict_partial",
+      "init": "ict",
+      "recv": "w",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.001774,
+      "reason": "|A| = 0.0018 < 0.1"
+    },
+    {
+      "sid": "S5_ict_partial",
+      "init": "ict",
+      "recv": "Q",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.002352,
+      "reason": "|A| = 0.0024 < 0.1"
+    },
+    {
+      "sid": "S6_healthcare_partial",
+      "init": "Q",
+      "recv": "w",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.003463,
+      "reason": "|A| = 0.0035 < 0.1"
+    },
+    {
+      "sid": "S6_healthcare_partial",
+      "init": "Q",
+      "recv": "tau",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.094039,
+      "reason": "|A| = 0.0940 < 0.1"
+    },
+    {
+      "sid": "S6_healthcare_partial",
+      "init": "Q",
+      "recv": "ict",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "M*",
+      "A_value": 0.09436,
+      "reason": "|A| = 0.0944 < 0.1"
+    },
+    {
+      "sid": "S7_ict_severe",
+      "init": "ict",
+      "recv": "Q",
+      "alpha": 0.7,
+      "theta_node": 0.7,
+      "zone": "out_M*",
+      "A_value": 0.002352,
+      "reason": "|A| = 0.0024 < 0.1"
+    },
+    {
+      "sid": "S8_healthcare_severe",
+      "init": "Q",
+      "recv": "ict",
+      "alpha": 0.7,
+      "theta_node": 0.7,
+      "zone": "out_M*",
+      "A_value": 0.09436,
+      "reason": "|A| = 0.0944 < 0.1"
+    },
+    {
+      "sid": "HIST_t_mobile_2020",
+      "init": "ict",
+      "recv": "Q",
+      "alpha": 0.1,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.002352,
+      "reason": "|A| = 0.0024 < 0.1"
+    },
+    {
+      "sid": "HIST_century_link_2018",
+      "init": "ict",
+      "recv": "Q",
+      "alpha": 0.55,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.002352,
+      "reason": "|A| = 0.0024 < 0.1"
+    },
+    {
+      "sid": "HIST_change_healthcare_2024",
+      "init": "ict",
+      "recv": "Q",
+      "alpha": 0.3,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.002352,
+      "reason": "|A| = 0.0024 < 0.1"
+    },
+    {
+      "sid": "HIST_texas_2021_ict",
+      "init": "e",
+      "recv": "ict",
+      "alpha": 0.37,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.038071,
+      "reason": "|A| = 0.0381 < 0.1"
+    },
+    {
+      "sid": "HIST_texas_2021_Q",
+      "init": "e",
+      "recv": "Q",
+      "alpha": 0.37,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.001596,
+      "reason": "|A| = 0.0016 < 0.1"
+    },
+    {
+      "sid": "HIST_india_2012_ict",
+      "init": "e",
+      "recv": "ict",
+      "alpha": 0.59,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.038071,
+      "reason": "|A| = 0.0381 < 0.1"
+    },
+    {
+      "sid": "HIST_india_2012_Q",
+      "init": "e",
+      "recv": "Q",
+      "alpha": 0.59,
+      "theta_node": 0.7,
+      "zone": "hist",
+      "A_value": 0.001596,
+      "reason": "|A| = 0.0016 < 0.1"
+    }
+  ],
+  "generated_at": "2026-05-04T13:20:22Z",
+  "execution_environment": {
+    "platform": "linux",
+    "platform_full": "Linux-6.11.11-linuxkit-aarch64-with-glibc2.41",
+    "python_executable": "/usr/local/bin/python",
+    "python_version": "3.11.15",
+    "hostname": "e281915c5142",
+    "image_digest": "local-dev",
+    "container_id": "e281915c5142"
+  }
+}
